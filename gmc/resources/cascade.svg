@@ -1,0 +1,12 @@
+<svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<linearGradient id="shade">
+<stop stop-opacity=".12549" offset="0"/>
+<stop stop-opacity="0" offset="1"/>
+</linearGradient>
+<linearGradient id="linearGradient4771" x1="6.9153" x2="6.9153" y1="10.576" y2="-.81356" gradientTransform="matrix(1.88259 0 0 1.88259 72.8426 1.57906)" gradientUnits="userSpaceOnUse" xlink:href="#shade"/>
+<linearGradient id="linearGradient4775" x1="6.9153" x2="6.9153" y1="10.576" y2="-.81356" gradientTransform="matrix(1.88259 0 0 1.88259 41.4487 7.97296)" gradientUnits="userSpaceOnUse" xlink:href="#shade"/>
+</defs>
+<rect x="2.7881" y="2.991" width="19.6241" height="19.6241" fill="url(#linearGradient4771)" stroke="#000" stroke-width="1.5"/>
+<rect x="9.04591" y="9.3849" width="19.6241" height="19.6241" fill="url(#linearGradient4775)" stroke="#000" stroke-width="1.5"/>
+</svg>

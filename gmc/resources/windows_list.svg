@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<defs>
+<linearGradient id="shade">
+<stop stop-opacity=".12549" offset="0"/>
+<stop stop-opacity="0" offset="1"/>
+</linearGradient>
+<linearGradient id="linearGradient8103" x1="6.9153" x2="6.9153" y1="10.576" y2="-.81356" gradientTransform="matrix(2.4828 0 0 .30184 -3.8631 2.2004)" gradientUnits="userSpaceOnUse" xlink:href="#shade"/>
+<linearGradient id="linearGradient21604" x1="6.9153" x2="6.9153" y1="10.576" y2="-.81356" gradientTransform="matrix(2.4828 0 0 .30184 -3.8631 8.2004)" gradientUnits="userSpaceOnUse" xlink:href="#shade"/>
+<linearGradient id="linearGradient21612" x1="6.9153" x2="6.9153" y1="10.576" y2="-.81356" gradientTransform="matrix(2.4828 0 0 .30184 -3.8631 20.2)" gradientUnits="userSpaceOnUse" xlink:href="#shade"/>
+<linearGradient id="linearGradient21616" x1="6.9153" x2="6.9153" y1="10.576" y2="-.81356" gradientTransform="matrix(2.4828 0 0 .30184 -3.8631 26.2)" gradientUnits="userSpaceOnUse" xlink:href="#shade"/>
+</defs>
+<g stroke="#000">
+<rect x="3.0595" y="1.3421" width="25.881" height="3.1464" fill="url(#linearGradient8103)"/>
+<rect x="3.0595" y="9.3421" width="25.881" height="3.1464" fill="url(#linearGradient21604)"/>
+<rect x="3.0595" y="17.342" width="25.881" height="3.1464" fill="url(#linearGradient21612)"/>
+<rect x="3.0595" y="25.274" width="25.881" height="3.1464" fill="url(#linearGradient21616)"/>
+</g>
+</svg>

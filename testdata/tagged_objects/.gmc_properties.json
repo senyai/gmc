@@ -1,0 +1,143 @@
+{
+  "properties": [
+    {
+      "name": "test_integer",
+      "type": "int",
+      "value": 42,
+      "minimum": 40,
+      "maximum": 60
+    },
+    {
+      "name": "test_float",
+      "type": "float",
+      "value": 0.4,
+      "minimum": -10,
+      "maximum": 10
+    },
+    {
+      "type": "separator"
+    },
+    {
+      "name": "a",
+      "type": "bool"
+    },
+    {
+      "name": "b",
+      "type": "bool"
+    },
+    {
+      "name": "c",
+      "type": "bool"
+    },
+    {
+      "name": "test_text",
+      "type": "str",
+      "value": "any test"
+    },
+    {
+      "name": "daytime",
+      "display": "Время суток",
+      "type": "item",
+      "items": [
+        {"name": "day", "display": "День"},
+        {"name": "night", "display": "Ночь"},
+        {"name": "unknown", "display": "Непонятно"}
+      ],
+      "value": "unknown"
+    },
+    {
+      "name": "place",
+      "display": "Место",
+      "type": "item",
+      "items": [
+        {"name": "outdoor", "display": "Улица"},
+        {"name": "indoor", "display": "Помещение"},
+        {"name": "unknown", "display": "Непонятно"}
+      ],
+      "value": "unknown"
+    },
+    {
+      "name": "light_objects",
+      "display": "Наличие источника освещения в кадре",
+      "type": "set",
+      "items": [
+        {"name": "sun", "display": "Солнце"},
+        {"name": "sky", "display": "Небо"},
+        {"name": "lamp", "display": "Лампа"},
+        {"name": "flash", "display": "Вспышка"},
+        {"name": "none", "display": "Нет источника света"}
+      ],
+      "value": ["none"]
+    },
+    {
+      "name": "gdpr_objects",
+      "display": "Наличие идентифицируемых объектов в кадре",
+      "type": "item",
+      "items": [
+        {"name": "faces", "display": "Лица"},
+        {"name": "platenum", "display": "Автономера"},
+        {"name": "none", "display": "Нет идентифицируемых объектов"}
+      ],
+      "value": "none"
+    },
+    {
+      "name": "has_standard_objects",
+      "display": "Наличие объектов известной окраски",
+      "type": "item",
+      "items": [
+        {"name": true, "display": "Есть объекты известной окраски"},
+        {"name": false, "display": "Нет объектов известной окраски"}
+      ]
+    },
+    {
+      "name": "shadows",
+      "display": "Наличие теней",
+      "type": "item",
+      "items": [
+        {"name": "yes", "display": "Есть тени"},
+        {"name": "no", "display": "Нет теней"},
+        {"name": "unknown", "display": "Непонятно"}
+      ]
+    },
+    {
+      "name": "richness",
+      "display": "Богатство сцены",
+      "type": "item",
+      "items": [
+        {"name": "simple", "display": "Одноцветная"},
+        {"name": "rich", "display": "Богатая сцена"},
+        {"name": "unknown", "display": "Непонятно"}
+      ]
+    },
+    {
+      "name": "is_sharp",
+      "display": "Чёткость",
+      "type": "item",
+      "items": [
+        {"name": true, "display": "Изображение чёткое"},
+        {"name": false, "display": "Изображение нечёткое"}
+      ]
+    },
+    {
+      "name": "illumination",
+      "display": "Освещение",
+      "type": "item",
+      "items": [
+        {"name": "natural", "display": "Естественное"},
+        {"name": "artificial", "display": "Искусственное"},
+        {"name": "mixed", "display": "Смешанное"},
+        {"name": "unknown", "display": "Непонятно"}
+      ],
+      "value": "unknown"
+    },
+    {
+      "name": "has_cube_plus",
+      "display": "Наличие CubePlus",
+      "type": "item",
+      "items": [
+        {"name": true, "display": "Есть CubePlus"},
+        {"name": false, "display": "Нет CubePlus"}
+      ]
+    }
+  ]
+}

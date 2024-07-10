@@ -1,0 +1,8 @@
+tr("Tagged Objects")
+tr("Ballfish")
+tr("Feature Matching")
+tr("Fields")
+tr("Index Map")
+tr("Map Markup")
+tr("Number Plates")
+tr("Number Plates Video")

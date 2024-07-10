@@ -1,0 +1,15 @@
+body {
+  max-width: 1000px;
+  line-height: 1.5em;
+}
+
+span>kbd, p>kbd {
+  border: 1px solid gray;
+  box-shadow: 1px 0 1px 0 #eee, 0 2px 0 2px #ccc, 0 2px 0 3px #444;
+  -webkit-border-radius: 3px;
+  -moz-border-radius: 3px;
+  border-radius: 3px;
+  margin: 2px 3px;
+  padding: 1px 5px;
+  background-color: white;
+}

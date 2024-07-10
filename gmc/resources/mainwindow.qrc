@@ -1,0 +1,56 @@
+<!DOCTYPE RCC><RCC version="1.0">
+<qresource>
+  <file>broken_line.svg</file><!-- By Senyai -->
+  <file>cascade.svg</file><!-- By Senyai -->
+  <file>cat.svg</file><!-- By Senyai -->
+  <file>copy.svg</file><!-- By Senyai -->
+  <file>delete.svg</file><!-- By Senyai -->
+  <file>eye_close.svg</file><!-- By Senyai -->
+  <file>eye_open.svg</file><!-- By Senyai -->
+  <file>folder.svg</file><!-- By Senyai -->
+  <file>fullscreen.svg</file><!-- By Senyai -->
+  <file>gmc_ru.qm</file><!-- By Senyai -->
+  <file>gmc.svg</file><!-- By Senyai -->
+  <file>join_nodes.svg</file><!-- By Senyai -->
+  <file>line.svg</file><!-- By Senyai -->
+  <file>menu.svg</file><!-- By Senyai -->
+  <file>new.svg</file><!-- By Senyai -->
+  <file>next_event.svg</file><!-- By Senyai -->
+  <file>next_frame.svg</file><!-- By Senyai -->
+  <file>next_second.svg</file><!-- By Senyai -->
+  <file>next.svg</file><!-- By Senyai -->
+  <file>paste.svg</file><!-- By Senyai -->
+  <file>play.svg</file><!-- By Senyai -->
+  <file>point.svg</file><!-- By Senyai -->
+  <file>pointer.svg</file><!-- By Senyai -->
+  <file>prev_event.svg</file><!-- By Senyai -->
+  <file>prev_frame.svg</file><!-- By Senyai -->
+  <file>prev_second.svg</file><!-- By Senyai -->
+  <file>prev.svg</file><!-- By Senyai -->
+  <file>quadrangle.svg</file><!-- By Senyai -->
+  <file>quit.svg</file><!-- By Senyai -->
+  <file>rect.svg</file><!-- By Senyai -->
+  <file>redo.svg</file><!-- By Senyai -->
+  <file>region.svg</file><!-- By Senyai -->
+  <file>remove_and_join.svg</file><!-- By Senyai -->
+  <file>save.svg</file><!-- By Senyai -->
+  <file>segment.svg</file><!-- By Senyai -->
+  <file>select_all.svg</file><!-- By Senyai -->
+  <file>tag_blue.svg</file><!-- By Senyai -->
+  <file>tag_eye_close.svg</file><!-- By Senyai -->
+  <file>tag_eye_open.svg</file><!-- By Senyai -->
+  <file>tag_green.svg</file><!-- By Senyai -->
+  <file>tag_red.svg</file><!-- By Senyai -->
+  <file>tag_txt.svg</file><!-- By Senyai -->
+  <file>tag_yellow.svg</file><!-- By Senyai -->
+  <file>tile_h.svg</file><!-- By Senyai -->
+  <file>tile_v.svg</file><!-- By Senyai -->
+  <file>tile.svg</file><!-- By Senyai -->
+  <file>undo.svg</file><!-- By Senyai -->
+  <file>windows_list.svg</file><!-- By Senyai -->
+  <file>zoom_1_1.svg</file><!-- By Senyai -->
+  <file>zoom_auto.svg</file><!-- By Senyai -->
+  <file>zoom_in.svg</file><!-- By Senyai -->
+  <file>zoom_out.svg</file><!-- By Senyai -->
+</qresource>
+</RCC>

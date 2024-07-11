@@ -1,11 +1,12 @@
 # encoding: utf-8
 from typing import Any, Dict, Optional, Type
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets, QtGui
 from .mdi_area import MdiArea
 from .schemas import MarkupSchema, load_schema_cls, iter_schemas
 from .utils import get_icon, new_action
 from .help_label import HelpLabel
 from .settings import settings
+from .application import GMCArguments
 MB = QtWidgets.QMessageBox
 Qt = QtCore.Qt
 tr = lambda text: QtCore.QCoreApplication.translate("@default", text)
@@ -13,19 +14,18 @@ tr = lambda text: QtCore.QCoreApplication.translate("@default", text)
 
 class MainWindow(QtWidgets.QMainWindow):
     _schema_cls: Optional[Type[MarkupSchema]] = None
-    _extra_args: Dict[str, Any] = {}
+    _extra_args: GMCArguments
 
     def __init__(self,
                  version: str,
                  app: QtWidgets.QApplication,
-                 extra_args: Dict[str, Any]):
+                 extra_args: GMCArguments):
         # enable `get_icon`
         QtCore.QDir.addSearchPath(
             'gmc', QtCore.QFileInfo(f'{__file__}/../resources').absoluteFilePath())
 
-        super(MainWindow, self).__init__(
-            windowIcon=get_icon("gmc")
-        )  # type: ignore
+        super().__init__(windowIcon=get_icon("gmc"))  # type: ignore
+        self._extra_args = extra_args
         lang = settings.settings.value(
             "lang", QtCore.QLocale.system().name().partition('_')[0])
         if lang == "ru":
@@ -40,7 +40,7 @@ class MainWindow(QtWidgets.QMainWindow):
             tr("GMC {} - General Markup Creator".format(version)))
 
         self._setup_ui()
-        self._load_settings(lang, extra_args)
+        self._load_settings(lang)
         self.startTimer(200)  # this runs py code, to Ctrl+C is caught
 
     def timerEvent(self, _):
@@ -93,7 +93,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._left_layout.setContentsMargins(5, 0, 5, 5)
         self._left_layout.addWidget(top_widget)
 
-    def _set_left_widget(self, widget):
+    def _set_left_widget(self, widget: QtWidgets.QWidget):
         if self._left_layout.count() == 2:
             self._left_layout.takeAt(1).widget().setParent(None)
         self._left_layout.addWidget(widget)
@@ -116,10 +116,11 @@ class MainWindow(QtWidgets.QMainWindow):
         schema_menu = main_menu.addMenu(get_icon('windows_list'), tr("&Schema"))
         self._schema_act_grp = QtWidgets.QActionGroup(
             schema_menu, triggered=self._schema_triggered)
-        for schema_name, caption in iter_schemas():
+        for schema_name, caption, path in iter_schemas(
+                self._extra_args["external_schemas"]):
             action = QtWidgets.QAction( tr(caption), self, checkable=True)
             self._schema_act_grp.addAction(action)
-            action.setData(schema_name)
+            action.setData((schema_name, path))
             schema_menu.addAction(action)
         language_menu = main_menu.addMenu(get_icon('cat'), tr("&Language / Язык"))
         self._language_act_grp = QtWidgets.QActionGroup(language_menu)
@@ -176,7 +177,7 @@ class MainWindow(QtWidgets.QMainWindow):
         if self._schema_cls is not None:
             self._schema_cls.save_settings(settings.settings)
         try:
-            self._schema_cls = load_schema_cls(action.data())
+            self._schema_cls = load_schema_cls(*action.data())
         except Exception as e:
             msg = "Schema `{}` loading error:<br>{}".format(action.data(), e)
             MB.warning(self, self.windowTitle(), msg)
@@ -192,7 +193,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self._set_left_widget(data_widget)
         focus_widget and focus_widget.setFocus()
 
-    def _load_settings(self, lang: str, extra_args: Dict[str, Any]):
+    def _load_settings(self, lang: str) -> None:
         settings.load_state_and_geometry(self, "main_window")
         settings.load_state(self._main_splitter, "main_splitter")
 
@@ -200,22 +201,20 @@ class MainWindow(QtWidgets.QMainWindow):
             if action.data() == lang:
                 action.setChecked(True)
 
-        cur_schema = extra_args["schema"]
+        cur_schema = self._extra_args["schema"]
         if cur_schema is None:
             cur_schema = settings.value("schema")
 
-        self._extra_args = extra_args
         actions = self._schema_act_grp.actions()
         for action in actions:
-            if action.data() == cur_schema:
+            if action.data()[0] == cur_schema:
                 action.trigger()
                 break
         else:
             self._set_left_widget(
                 HelpLabel(tr("Start by selecting a schema")))
-        del self._extra_args
 
-    def closeEvent(self, event):
+    def closeEvent(self, event: QtGui.QCloseEvent):
         """User closes GMC. By default, the event is accepted."""
         self._mdi_area.closeAllSubWindows()
         if self._mdi_area.subWindowList():
@@ -233,7 +232,7 @@ class MainWindow(QtWidgets.QMainWindow):
             'lang', self._language_act_grp.checkedAction().data())
         checked_schema_act = self._schema_act_grp.checkedAction()
         if checked_schema_act is not None:
-            schema_name = checked_schema_act.data()
+            schema_name = checked_schema_act.data()[0]
             settings.set_value('schema', schema_name)
         settings.sync()
         if self._schema_cls is not None:

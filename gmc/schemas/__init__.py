@@ -1,7 +1,10 @@
+from __future__ import annotations
+import sys
 import abc
 import importlib
-from typing import Any, Dict, Type, Iterable, Tuple
+from typing import Type, Iterable, Sequence
 from PyQt5 import QtWidgets, QtCore
+from ..application import GMCArguments
 
 
 class MarkupSchema(metaclass=abc.ABCMeta):
@@ -31,12 +34,16 @@ class MarkupSchema(metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def create_data_widget(cls, mdi_area: QtWidgets.QMdiArea, extra_args: Dict[str, Any]) -> QtWidgets.QWidget:
+    def create_data_widget(cls, mdi_area: QtWidgets.QMdiArea, extra_args: GMCArguments) -> QtWidgets.QWidget:
         raise NotImplementedError(cls)
 
 
-def load_schema_cls(mod_name: str) -> Type[MarkupSchema]:
-    mod_path = 'gmc.schemas.' + mod_name
+def load_schema_cls(mod_name: str, path: str | None) -> Type[MarkupSchema]:
+    if path is None:
+        mod_path = 'gmc.schemas.' + mod_name
+    else:
+        sys.path.insert(1, path)
+        mod_path = mod_name
     mod = importlib.import_module(mod_path)
     for obj in vars(mod).values():
         if (isinstance(obj, type) and
@@ -46,8 +53,16 @@ def load_schema_cls(mod_name: str) -> Type[MarkupSchema]:
     raise Exception("Could not find schema class in {}".format(mod_path))
 
 
-def iter_schemas() -> Iterable[Tuple[str, str]]:
-    from PyQt5.QtCore import QDir
+def iter_schemas(external_schemas: Sequence[str]) -> Iterable[tuple[str, str, str | None]]:
+    """
+    :param external_schemas: - paths to .py file importable directory
+    """
+    for path in external_schemas:
+        fi = QtCore.QFileInfo(path)
+        name = fi.baseName()
+        yield name, name.replace('_', ' ').title(), fi.absolutePath()
+
+    QDir = QtCore.QDir
     qdir = QDir(__file__)
     qdir.cdUp()
     dir_filter = qdir.Dirs | qdir.Files | qdir.NoDotAndDotDot
@@ -57,4 +72,4 @@ def iter_schemas() -> Iterable[Tuple[str, str]]:
         if fi.suffix() in ('py', 'pyc') or fi.isDir():
             name = fi.baseName()
             if name:  # case for `.mypy_cache` folder
-                yield name, name.replace('_', ' ').title()
+                yield name, name.replace('_', ' ').title(), None

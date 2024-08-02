@@ -42,7 +42,7 @@ def load_schema_cls(mod_name: str, path: str | None) -> Type[MarkupSchema]:
     if path is None:
         mod_path = 'gmc.schemas.' + mod_name
     else:
-        sys.path.insert(1, path)
+        sys.path.insert(0, path)
         mod_path = mod_name
     mod = importlib.import_module(mod_path)
     for obj in vars(mod).values():
@@ -50,7 +50,7 @@ def load_schema_cls(mod_name: str, path: str | None) -> Type[MarkupSchema]:
                 issubclass(obj, MarkupSchema) and
                 obj is not MarkupSchema):
             return obj
-    raise Exception("Could not find schema class in {}".format(mod_path))
+    raise Exception("There are no schemas in `{}` module".format(mod_path))
 
 
 def iter_schemas(external_schemas: Sequence[str]) -> Iterable[tuple[str, str, str | None]]:

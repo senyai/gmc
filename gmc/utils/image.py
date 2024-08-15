@@ -27,7 +27,9 @@ def numpy_to_qimage(arr_like: npt.ArrayLike | Image) -> tuple[QImage, object]:
     arr = np.ascontiguousarray(arr_like)
     if arr.dtype != np.uint8:
         max_val = np.max(arr)
-        arr = (arr / (max_val / 255)).astype(np.uint8)
+        if max_val:
+            arr = (arr / (max_val / 255))
+        arr = arr.astype(np.uint8)
     num_channels = 1 if arr.ndim <= 2 else arr.shape[2]
     qformat = CONVERT[num_channels]
     pointer, read_only_flag = arr.__array_interface__['data']

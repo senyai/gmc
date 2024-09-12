@@ -92,7 +92,9 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
                 scene.undo_stack.push(UndoPolygonUndoEdit(
                     self, self._start_edit_polygon
                 ))
-        del self._start_edit_polygon
+        # is not deleted in UndoPolygonUndoEdit
+        if hasattr(self, '._start_edit_polygon'):
+            del self._start_edit_polygon
 
     def on_change_polygon(self, _: QtGui.QPolygonF) -> None:
         pass  # for overriding
@@ -147,7 +149,7 @@ class EditableMarkupPolygon(MarkupPolygon):
                     min_dist = dist
             self._polygon.insert(min_idx, the_point)
             self.on_stop_edit()
-            self.on_start_edit()
+            self.start_edit_nodes()
             self.update()
         else:
             MarkupObjectMeta.mouseDoubleClickEvent(self, event)
@@ -302,12 +304,14 @@ class UndoPolygonUndoEdit(QtWidgets.QUndoCommand):
 
     def redo(self) -> None:
         mp = self._markup_polygon
-        mp.stop_edit_nodes()
+        if mp.in_edit_mode():
+            mp.stop_edit_nodes()
         mp._polygon = self._polygon[:]
         mp.update()
 
     def undo(self) -> None:
         mp = self._markup_polygon
-        mp.stop_edit_nodes()
+        if mp.in_edit_mode():
+            mp.stop_edit_nodes()
         mp._polygon = self._prev_polygon[:]
         mp.update()

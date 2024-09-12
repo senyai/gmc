@@ -89,7 +89,7 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
             for diamond in self.childItems():
                 scene.removeItem(diamond)
             if self._start_edit_polygon != self._polygon:
-                scene.undo_stack.push(UndoPolygonUndoEdit(
+                scene.undo_stack.push(UndoPolygonEdit(
                     self, self._start_edit_polygon
                 ))
         # is not deleted in UndoPolygonUndoEdit
@@ -293,7 +293,7 @@ class UndoPolygonDelPoints(QtWidgets.QUndoCommand):
         mp.update()
 
 
-class UndoPolygonUndoEdit(QtWidgets.QUndoCommand):
+class UndoPolygonEdit(QtWidgets.QUndoCommand):
     def __init__(self,
                  markup_polygon: MarkupPolygon,
                  prev_polygon: QtGui.QPolygonF) -> None:

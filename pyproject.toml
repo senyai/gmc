@@ -1,0 +1,32 @@
+[project]
+name = "run-gmc"
+version = "1.5.3"
+authors = [
+  { name="Arseniy Terekhin", email="senyai@gmail.com" },
+]
+description = "General Markup Creator"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+readme = "readme.rst"
+dependencies = [
+  "opencv-python",
+  "PyQt5",
+  "Pillow",
+]
+[build-system]
+requires = [
+  "setuptools",
+  "setuptools-scm",
+  "wheel",
+]
+build-backend = "setuptools.build_meta"
+[tool.setuptools.packages.find]
+exclude = ["testdata", "doc"]
+[tool.black]
+line-length = 79
+[project.scripts]
+run-gmc = "gmc.application:main"

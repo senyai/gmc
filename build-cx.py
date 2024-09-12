@@ -11,10 +11,12 @@ os.environ['TCL_LIBRARY'] = os.path.join(sys.exec_prefix, 'tcl', 'tcl8.6')
 os.environ['TK_LIBRARY'] = os.path.join(sys.exec_prefix, 'tcl', 'tk8.6')
 
 # "import" __version__
-for line in open("run_gmc.py"):
+for line in open("gmc/__init__.py"):
     if line.startswith("__version__"):
         exec(line)
         break
+else:
+    raise ValueError('no version')
 
 shortcut_table = [
     ("DesktopShortcut",        # Shortcut
@@ -115,11 +117,11 @@ options = {
 
             'gmc.schemas',
             'gmc.schemas.tagged_objects',
-            'gmc.schemas.map_markup',
-            'gmc.schemas.number_plates_video',
-            'gmc.schemas.feature_matching',
+            # 'gmc.schemas.map_markup',
+            # 'gmc.schemas.number_plates_video',
+            # 'gmc.schemas.feature_matching',
             'gmc.schemas.fields',
-            'gmc.schemas.ballfish',
+            # 'gmc.schemas.ballfish',
 
         ],
         'include_files': [
@@ -129,21 +131,21 @@ options = {
             ('gmc/schemas/tagged_objects/markup_interpolation.py',
              'lib/gmc/schemas/tagged_objects/markup_interpolation.py'
             ),
-            ('api_for_python.dll',
-             'lib/gmc/schemas/number_plates/api_for_python.dll'
-            ),
-            ('../../data/logos',
-             'lib/gmc/schemas/number_plates/data/logos'
-            ),
-            ('../../data/alphabets.json',
-             'lib/gmc/schemas/number_plates/data/alphabets.json'
-            ),
-            ('../../data/symbol_recognizers.json',
-             'lib/gmc/schemas/number_plates/data/symbol_recognizers.json'
-            ),
-            ('../../data/templates',
-             'lib/gmc/schemas/number_plates/data/templates'
-            ),
+            # ('api_for_python.dll',
+            #  'lib/gmc/schemas/number_plates/api_for_python.dll'
+            # ),
+            # ('../../data/logos',
+            #  'lib/gmc/schemas/number_plates/data/logos'
+            # ),
+            # ('../../data/alphabets.json',
+            #  'lib/gmc/schemas/number_plates/data/alphabets.json'
+            # ),
+            # ('../../data/symbol_recognizers.json',
+            #  'lib/gmc/schemas/number_plates/data/symbol_recognizers.json'
+            # ),
+            # ('../../data/templates',
+            #  'lib/gmc/schemas/number_plates/data/templates'
+            # ),
         ],
     },
     'bdist_msi': {

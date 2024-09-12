@@ -110,7 +110,7 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         """
         if self._current_object is markup_object:
             return
-        if self._current_object is not None:
+        if self._current_object is not None and self._current_object.in_edit_mode():
             self._current_object.stop_edit_nodes()
         self._current_object = markup_object
 

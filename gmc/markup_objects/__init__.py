@@ -34,10 +34,10 @@ class MarkupObjectMeta:
         self.scene().set_current_markup_object(self)
 
     def stop_edit_nodes(self) -> None:
-        if self._edit_mode:
-            self._edit_mode = False
-            self.on_stop_edit()
-            self.scene().set_current_markup_object(None)
+        assert self._edit_mode, 'programming error (ensure object is edit_mode)'
+        self._edit_mode = False
+        self.on_stop_edit()
+        self.scene().set_current_markup_object(None)
 
     def on_start_edit(self) -> None:
         pass

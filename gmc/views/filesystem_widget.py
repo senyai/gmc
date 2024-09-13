@@ -3,20 +3,27 @@ from PyQt5 import QtCore, QtWidgets
 from .filesystem_view import FilesystemView
 from ..help_label import HelpLabel
 from ..utils import get_icon
+
 Qt = QtCore.Qt
 
 
-FilesystemTitle = NamedTuple('FilesystemTitle', (
-    ('action', str),  # &Source dir … (without …)
-    ('select', str),  # Select Source Directory
-    ('help', str)  # Now select source dir
-))
+FilesystemTitle = NamedTuple(
+    "FilesystemTitle",
+    (
+        ("action", str),  # &Source dir … (without …)
+        ("select", str),  # Select Source Directory
+        ("help", str),  # Now select source dir
+    ),
+)
+
 
 class SingleFilesystemWidget(QtWidgets.QFrame):
-    def __init__(self,
-                 parent: QtWidgets.QWidget,
-                 title: FilesystemTitle,
-                 actions: List[QtWidgets.QAction]):
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget,
+        title: FilesystemTitle,
+        actions: List[QtWidgets.QAction],
+    ):
         assert isinstance(title, FilesystemTitle), title
         super().__init__(
             parent,
@@ -28,12 +35,13 @@ class SingleFilesystemWidget(QtWidgets.QFrame):
         button = QtWidgets.QPushButton(
             self,
             clicked=lambda: view.user_select_path(title.select),
-            text=title.action + ' …',
-            icon=get_icon('folder'))
+            text=title.action + " …",
+            icon=get_icon("folder"),
+        )
 
         self._layout = QtWidgets.QVBoxLayout(self, spacing=0, margin=2)
         self._layout.addWidget(button)
-        self._layout.addWidget(HelpLabel(title.help, align='center'))
+        self._layout.addWidget(HelpLabel(title.help, align="center"))
 
         view.model().rootPathChanged.connect(self._root_changed)
 
@@ -53,36 +61,49 @@ class SingleFilesystemWidget(QtWidgets.QFrame):
 
 
 class MultipleFilesystemWidget(QtWidgets.QFrame):
-    def __init__(self, parent: QtWidgets.QWidget, title: FilesystemTitle,
-                 captions: List[str],
-                 actions_list: Sequence[List[QtWidgets.QAction]],
-                 N: int) -> None:
+    def __init__(
+        self,
+        parent: QtWidgets.QWidget,
+        title: FilesystemTitle,
+        captions: List[str],
+        actions_list: Sequence[List[QtWidgets.QAction]],
+        N: int,
+    ) -> None:
         super().__init__(
             parent,
             frameShape=self.NoFrame,
             frameShadow=self.Plain,
         )
         assert len(actions_list) == len(captions) == N
-        assert all(isinstance(action, QtWidgets.QAction)
-                   for actions in actions_list for action in actions)
+        assert all(
+            isinstance(action, QtWidgets.QAction)
+            for actions in actions_list
+            for action in actions
+        )
 
         def callback(_view, path):
             for view in views:
                 view.set_path(path)
 
         self._views = views = [
-            FilesystemView(actions) for actions in actions_list]
+            FilesystemView(actions) for actions in actions_list
+        ]
         self._captions = captions
         button = QtWidgets.QPushButton(
-            self, flat=False,
+            self,
+            flat=False,
             clicked=(
-                lambda: views[0].user_select_path(title.select, callback=callback)),
-            text=title.action + ' …',
-            icon=get_icon('folder'))
+                lambda: views[0].user_select_path(
+                    title.select, callback=callback
+                )
+            ),
+            text=title.action + " …",
+            icon=get_icon("folder"),
+        )
 
         self._layout = QtWidgets.QVBoxLayout(self, spacing=0, margin=2)
         self._layout.addWidget(button)
-        self._layout.addWidget(HelpLabel(title.help, align='center'))
+        self._layout.addWidget(HelpLabel(title.help, align="center"))
 
         views[0].model().rootPathChanged.connect(self._root_changed)
 

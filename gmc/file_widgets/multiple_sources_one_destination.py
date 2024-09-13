@@ -2,15 +2,21 @@ from typing import Callable
 from PyQt5 import QtCore, QtWidgets
 from ..utils import separator, get_icon
 from ..views.filesystem_widget import (
-    MultipleFilesystemWidget, SingleFilesystemWidget, FilesystemTitle)
+    MultipleFilesystemWidget,
+    SingleFilesystemWidget,
+    FilesystemTitle,
+)
 from itertools import zip_longest
+
 Qt = QtCore.Qt
-tr: Callable[[str], str] = lambda text: QtCore.QCoreApplication.translate("@default", text)
+tr: Callable[[str], str] = lambda text: QtCore.QCoreApplication.translate(
+    "@default", text
+)
 
 
 class MultipleSourcesOneDestination:
     NSOURCES = 2
-    SOURCE_TITLES = ['First Image', 'Second Image']
+    SOURCE_TITLES = ["First Image", "Second Image"]
 
     @classmethod
     def create_data_widget(cls, mdi_area, settings, extra_args):
@@ -19,14 +25,17 @@ class MultipleSourcesOneDestination:
             dst_dir = cls._destination_widget.get_root_qdir()
             if dst_dir is None:
                 return QtWidgets.QMessageBox.warning(
-                    mdi_area, "Warning",
-                    "Destination directory must be specified")
+                    mdi_area,
+                    "Warning",
+                    "Destination directory must be specified",
+                )
 
             src_dir = cls._source_widget.get_root_qdir()
 
             for file_path in view.selected_files():
                 all_files = view.all_files_in(
-                    QtCore.QFileInfo(file_path).absoluteDir(), src_dir)
+                    QtCore.QFileInfo(file_path).absoluteDir(), src_dir
+                )
                 cur = mdi_area.currentSubWindow()
                 cur = cur and cur.widget()
                 if isinstance(cur, MultipleSourcesOneDestinationMarkupWindow):
@@ -35,14 +44,16 @@ class MultipleSourcesOneDestination:
                     window = MultipleSourcesOneDestinationMarkupWindow(cls)
                     mdi_area.add(window, new_tab)
                 window.open_current(
-                    view_idx, dst_dir, src_dir, file_path, all_files)
+                    view_idx, dst_dir, src_dir, file_path, all_files
+                )
                 new_tab = True
 
         def _on_open_dst(self, new=False):
             def selected_files(root_path):
                 for path in self._destination_view.selected_files_relative:
-                    path = path[:-len('.json')]
+                    path = path[: -len(".json")]
                     yield root_path.filePath(path)
+
             self._on_open(selected_files, new)
 
         def _on_view_dst_file():
@@ -53,44 +64,64 @@ class MultipleSourcesOneDestination:
                 text = f.readData(1024 * 1024 * 200)
                 f.close()
                 window = QtWidgets.QPlainTextEdit(
-                    text, windowTitle=path, readOnly=1)
+                    text, windowTitle=path, readOnly=1
+                )
                 mdi_area.add(window, True)
 
         cls._splitter = splitter = QtWidgets.QSplitter(orientation=Qt.Vertical)
         cls._source_widget = MultipleFilesystemWidget(
-            splitter,  FilesystemTitle(
+            splitter,
+            FilesystemTitle(
                 action=tr("&Source Directory"),
                 select=tr("Select Source Directory"),
                 help=tr("Now select source directory"),
-            ), cls.SOURCE_TITLES, [[
-                QtWidgets.QAction(
-                    tr("Open Image"), splitter,
-                    triggered=lambda _, idx=idx: _on_open_src(idx, False)),
-                QtWidgets.QAction(
-                    tr("Open Image in New Tab"), splitter,
-                    triggered=lambda _, idx=idx: _on_open_src(idx, True)),
-            ] for idx in range(cls.NSOURCES)],
-            cls.NSOURCES)
+            ),
+            cls.SOURCE_TITLES,
+            [
+                [
+                    QtWidgets.QAction(
+                        tr("Open Image"),
+                        splitter,
+                        triggered=lambda _, idx=idx: _on_open_src(idx, False),
+                    ),
+                    QtWidgets.QAction(
+                        tr("Open Image in New Tab"),
+                        splitter,
+                        triggered=lambda _, idx=idx: _on_open_src(idx, True),
+                    ),
+                ]
+                for idx in range(cls.NSOURCES)
+            ],
+            cls.NSOURCES,
+        )
         cls._destination_widget = SingleFilesystemWidget(
-            splitter,  FilesystemTitle(
+            splitter,
+            FilesystemTitle(
                 action=tr("&Destination Directory"),
                 select=tr("Select Destination Directory"),
                 help=tr("Then select destination directory"),
-            ), [
-                QtWidgets.QAction(tr("Open Image Corresponding to Markup"), splitter,
-                              triggered=_on_open_dst),
-                QtWidgets.QAction(tr("View File"), splitter,
-                              triggered=_on_view_dst_file),
-            ])
+            ),
+            [
+                QtWidgets.QAction(
+                    tr("Open Image Corresponding to Markup"),
+                    splitter,
+                    triggered=_on_open_dst,
+                ),
+                QtWidgets.QAction(
+                    tr("View File"), splitter, triggered=_on_view_dst_file
+                ),
+            ],
+        )
         splitter.restoreState(
-            settings.value(cls.__name__ + '_splitter', QtCore.QByteArray()))
+            settings.value(cls.__name__ + "_splitter", QtCore.QByteArray())
+        )
 
-        src_path = extra_args.get('src_dir')
+        src_path = extra_args.get("src_dir")
         if src_path is None:
-            src_path = settings.value(cls.__name__ + '_src_dir', str())
-        dst_path = extra_args.get('dst_dir')
+            src_path = settings.value(cls.__name__ + "_src_dir", str())
+        dst_path = extra_args.get("dst_dir")
         if dst_path is None:
-            dst_path = settings.value(cls.__name__ + '_dst_dir', str())
+            dst_path = settings.value(cls.__name__ + "_dst_dir", str())
 
         if src_path:
             for view in cls._source_widget.views():
@@ -107,12 +138,16 @@ class MultipleSourcesOneDestination:
 
     @classmethod
     def save_settings(cls, settings):
-        settings.setValue(cls.__name__ + '_src_dir',
-                          cls._source_widget.get_root_string())
-        settings.setValue(cls.__name__ + '_dst_dir',
-                          cls._destination_widget.get_root_string())
-        settings.setValue(cls.__name__ + '_splitter',
-                          cls._splitter.saveState())
+        settings.setValue(
+            cls.__name__ + "_src_dir", cls._source_widget.get_root_string()
+        )
+        settings.setValue(
+            cls.__name__ + "_dst_dir",
+            cls._destination_widget.get_root_string(),
+        )
+        settings.setValue(
+            cls.__name__ + "_splitter", cls._splitter.saveState()
+        )
 
     # @classmethod
     # def set_selected(cls, file_path, markup_path):
@@ -137,10 +172,15 @@ class MultipleSourcesOneDestinationMarkupWindow(QtWidgets.QWidget):
 
     def _create_go_actions(self, n, actions_name, actions, icon, where):
         for idx, (caption, shortcuts) in zip_longest(
-                range(n), actions, fillvalue=(actions_name, None)):
+            range(n), actions, fillvalue=(actions_name, None)
+        ):
             action = QtWidgets.QAction(
-                icon, caption, self, enabled=False,
-                triggered=lambda _, idx=idx: self._go(idx, where))
+                icon,
+                caption,
+                self,
+                enabled=False,
+                triggered=lambda _, idx=idx: self._go(idx, where),
+            )
             shortcuts and action.setShortcuts(shortcuts)
             yield action
 
@@ -150,33 +190,52 @@ class MultipleSourcesOneDestinationMarkupWindow(QtWidgets.QWidget):
             (
                 tr("Previous File") + "\tPage Up; P; Backspace",
                 [Qt.Key_P, Qt.Key_PageUp, Qt.Key_Backspace],
-            ), (
-                tr("Previous File") + "\tShift+Page Up; tShift+P; tShift+Backspace",
-                [Qt.SHIFT + Qt.Key_P, Qt.SHIFT + Qt.Key_PageUp,
-                 Qt.SHIFT + Qt.Key_Backspace],
-            ))
+            ),
+            (
+                tr("Previous File")
+                + "\tShift+Page Up; tShift+P; tShift+Backspace",
+                [
+                    Qt.SHIFT + Qt.Key_P,
+                    Qt.SHIFT + Qt.Key_PageUp,
+                    Qt.SHIFT + Qt.Key_Backspace,
+                ],
+            ),
+        )
         next_shortcuts = (
             (
                 tr("Next File") + "\tPage Down; N; Space",
                 [Qt.Key_N, Qt.Key_PageDown, Qt.Key_Space],
-            ), (
+            ),
+            (
                 tr("Next File") + "\tShift+Page Down; Shift+N; Shift+Space",
-                [Qt.SHIFT + Qt.Key_N, Qt.SHIFT + Qt.Key_PageDown,
-                 Qt.SHIFT + Qt.Key_Space],
-            ))
-        self._prev_actions = list(self._create_go_actions(
-            n, tr("Previous File"), prev_shortcuts, get_icon('prev'), -1
-        ))
-        self._next_actions = list(self._create_go_actions(
-            n, tr("Next File"), next_shortcuts, get_icon('next'), 1
-        ))
+                [
+                    Qt.SHIFT + Qt.Key_N,
+                    Qt.SHIFT + Qt.Key_PageDown,
+                    Qt.SHIFT + Qt.Key_Space,
+                ],
+            ),
+        )
+        self._prev_actions = list(
+            self._create_go_actions(
+                n, tr("Previous File"), prev_shortcuts, get_icon("prev"), -1
+            )
+        )
+        self._next_actions = list(
+            self._create_go_actions(
+                n, tr("Next File"), next_shortcuts, get_icon("next"), 1
+            )
+        )
         save_action = QtWidgets.QAction(
-            get_icon('save'), "Save\tCtrl+S", self,
+            get_icon("save"),
+            "Save\tCtrl+S",
+            self,
             triggered=lambda: self._schema.save_markup(),
-            shortcut=Qt.CTRL + Qt.Key_S)
+            shortcut=Qt.CTRL + Qt.Key_S,
+        )
 
         for prev_action, next_action in zip(
-                self._prev_actions, self._next_actions):
+            self._prev_actions, self._next_actions
+        ):
             yield prev_action, next_action, separator(self), save_action
 
     def open_current(self, view_idx, dst_dir, src_dir, file_path, all_files):
@@ -198,10 +257,10 @@ class MultipleSourcesOneDestinationMarkupWindow(QtWidgets.QWidget):
         self.setWindowTitle(title)
 
         dst_markup_path = self._dst_dir.filePath(
-            current_path + getattr(self._schema, 'MARKUP_EXT', '.json'))
+            current_path + getattr(self._schema, "MARKUP_EXT", ".json")
+        )
         src_data_path = self._src_dir[view_idx].filePath(current_path)
-        self._schema.open_markup(
-            src_data_path, dst_markup_path, view_idx)
+        self._schema.open_markup(src_data_path, dst_markup_path, view_idx)
 
         # self._schema.set_selected(src_data_path, dst_markup_path)
 

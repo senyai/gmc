@@ -8,8 +8,17 @@ from ..application import GMCArguments
 
 
 class MarkupSchema(metaclass=abc.ABCMeta):
-    DATA_FILTERS= ("*.png", "*.jpeg", "*.jpg", "*.tif", "*.tiff", "*.jp2",
-                   "*.tga", "*.webp", "*.wbmp")  # Qt supported formats
+    DATA_FILTERS = (
+        "*.png",
+        "*.jpeg",
+        "*.jpg",
+        "*.tif",
+        "*.tiff",
+        "*.jp2",
+        "*.tga",
+        "*.webp",
+        "*.wbmp",
+    )  # Qt supported formats
     MARKUP_FILTERS = ("*.json",)  # reasonable default
 
     @abc.abstractmethod
@@ -24,7 +33,7 @@ class MarkupSchema(metaclass=abc.ABCMeta):
         return False
 
     @abc.abstractmethod
-    def save_markup(self, force:bool = False) -> None:
+    def save_markup(self, force: bool = False) -> None:
         raise NotImplementedError()
 
     @classmethod
@@ -34,42 +43,48 @@ class MarkupSchema(metaclass=abc.ABCMeta):
 
     @classmethod
     @abc.abstractmethod
-    def create_data_widget(cls, mdi_area: QtWidgets.QMdiArea, extra_args: GMCArguments) -> QtWidgets.QWidget:
+    def create_data_widget(
+        cls, mdi_area: QtWidgets.QMdiArea, extra_args: GMCArguments
+    ) -> QtWidgets.QWidget:
         raise NotImplementedError(cls)
 
 
 def load_schema_cls(mod_name: str, path: str | None) -> Type[MarkupSchema]:
     if path is None:
-        mod_path = 'gmc.schemas.' + mod_name
+        mod_path = "gmc.schemas." + mod_name
     else:
         sys.path.insert(0, path)
         mod_path = mod_name
     mod = importlib.import_module(mod_path)
     for obj in vars(mod).values():
-        if (isinstance(obj, type) and
-                issubclass(obj, MarkupSchema) and
-                obj is not MarkupSchema):
+        if (
+            isinstance(obj, type)
+            and issubclass(obj, MarkupSchema)
+            and obj is not MarkupSchema
+        ):
             return obj
     raise Exception("There are no schemas in `{}` module".format(mod_path))
 
 
-def iter_schemas(external_schemas: Sequence[str]) -> Iterable[tuple[str, str, str | None]]:
+def iter_schemas(
+    external_schemas: Sequence[str],
+) -> Iterable[tuple[str, str, str | None]]:
     """
     :param external_schemas: - paths to .py file importable directory
     """
     for path in external_schemas:
         fi = QtCore.QFileInfo(path)
         name = fi.baseName()
-        yield name, name.replace('_', ' ').title(), fi.absolutePath()
+        yield name, name.replace("_", " ").title(), fi.absolutePath()
 
     QDir = QtCore.QDir
     qdir = QDir(__file__)
     qdir.cdUp()
     dir_filter = qdir.Dirs | qdir.Files | qdir.NoDotAndDotDot
     for fi in qdir.entryInfoList(dir_filter, qdir.Name):
-        if fi.baseName()[:2] == '__':
+        if fi.baseName()[:2] == "__":
             continue
-        if fi.suffix() in ('py', 'pyc') or fi.isDir():
+        if fi.suffix() in ("py", "pyc") or fi.isDir():
             name = fi.baseName()
             if name:  # case for `.mypy_cache` folder
-                yield name, name.replace('_', ' ').title(), None
+                yield name, name.replace("_", " ").title(), None

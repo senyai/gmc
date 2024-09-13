@@ -3,6 +3,7 @@ from ..markup_objects.moveable_diamond import MoveableDiamond
 from ..views.image_view import ImageView
 from .polygon import MarkupPolygon, UndoPolygonCreate
 from ..settings import settings
+
 Qt = QtCore.Qt
 
 
@@ -18,7 +19,9 @@ class Quadrangle(MarkupPolygon):
         Qt.Key.Key_2: (2, 3),
         Qt.Key.Key_3: (2,),
     }
-    CURSOR = QtGui.QCursor(QtGui.QPixmap('gmc:cursors/add_quadrangle.svg'), 6, 6)
+    CURSOR = QtGui.QCursor(
+        QtGui.QPixmap("gmc:cursors/add_quadrangle.svg"), 6, 6
+    )
 
     def shape(self) -> QtGui.QPainterPath:
         return super().shape(close=True)
@@ -27,7 +30,7 @@ class Quadrangle(MarkupPolygon):
         view.setCursor(self.CURSOR)
         view.set_mouse_press(self.mouse_press)
 
-    def mouse_press(self, event: QtGui.QMouseEvent , view: ImageView) -> bool:
+    def mouse_press(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         self._press_timer = QtCore.QElapsedTimer()
         self._press_timer.start()
 
@@ -44,7 +47,9 @@ class Quadrangle(MarkupPolygon):
         view.scene().addItem(self)
         return True
 
-    def mouse_release_sequential(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
+    def mouse_release_sequential(
+        self, event: QtGui.QMouseEvent, view: ImageView
+    ) -> bool:
         self.mouse_move_sequential(event, view)
         if self._polygon.count() == 4:
             self._finish(view)
@@ -52,10 +57,14 @@ class Quadrangle(MarkupPolygon):
             self._polygon.append(self._polygon[-1])
         return True
 
-    def mouse_press_sequential(self, event: QtGui.QMouseEvent , view: ImageView) -> bool:
+    def mouse_press_sequential(
+        self, event: QtGui.QMouseEvent, view: ImageView
+    ) -> bool:
         return True
 
-    def mouse_move_sequential(self, event: QtGui.QMouseEvent , view: ImageView) -> bool:
+    def mouse_move_sequential(
+        self, event: QtGui.QMouseEvent, view: ImageView
+    ) -> bool:
         self._polygon[-1] = view.mapToScene(event.pos())
         self.update()
         return True
@@ -63,28 +72,39 @@ class Quadrangle(MarkupPolygon):
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         p0 = self._polygon.at(0)
         p2 = view.mapToScene(event.pos())
-        polygon = QtGui.QPolygonF([
-            p0, QtCore.QPointF(p2.x(), p0.y()),
-            p2, QtCore.QPointF(p0.x(), p2.y()),
-        ])
+        polygon = QtGui.QPolygonF(
+            [
+                p0,
+                QtCore.QPointF(p2.x(), p0.y()),
+                p2,
+                QtCore.QPointF(p0.x(), p2.y()),
+            ]
+        )
         self._polygon = polygon
         self.update()
         self.on_change_polygon(polygon)
         return True
 
     def mouse_release(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        if self._polygon.boundingRect() and self._press_timer.hasExpired(settings.click_ms):
+        if self._polygon.boundingRect() and self._press_timer.hasExpired(
+            settings.click_ms
+        ):
             self._finish(view)
         else:
-            self._polygon = QtGui.QPolygonF([self._polygon[0], self._polygon[0]])
+            self._polygon = QtGui.QPolygonF(
+                [self._polygon[0], self._polygon[0]]
+            )
             view.set_mouse_press(self.mouse_press_sequential)
             view.set_mouse_move(self.mouse_move_sequential)
             view.set_mouse_release(self.mouse_release_sequential)
         return True
 
     def notify_delete(self) -> None:
-        if all(item.isSelected() for item in self.childItems()
-               if isinstance(item, MoveableDiamond)):
+        if all(
+            item.isSelected()
+            for item in self.childItems()
+            if isinstance(item, MoveableDiamond)
+        ):
             self.stop_edit_nodes()
             self.scene().removeItem(self)
 
@@ -94,7 +114,6 @@ class Quadrangle(MarkupPolygon):
         self.scene().undo_stack.push(UndoPolygonCreate(self.scene(), self))
         self.on_change_polygon(self._polygon)
         self.on_created()
-
 
     def _cancel(self, view: ImageView) -> None:
         view.unset_all_events()

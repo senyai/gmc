@@ -16,7 +16,10 @@ CONVERT: dict[int, QImage.Format] = {
 }
 
 one_image_cache: tuple[str | None, float | None, QPixmap | None] = (
-    None, None, None)
+    None,
+    None,
+    None,
+)
 
 
 def numpy_to_qimage(arr_like: npt.ArrayLike | Image) -> tuple[QImage, object]:
@@ -24,21 +27,23 @@ def numpy_to_qimage(arr_like: npt.ArrayLike | Image) -> tuple[QImage, object]:
     return QImage and an object that holds that image memory (np.NDarray)
     """
     import numpy as np
+
     arr = np.ascontiguousarray(arr_like)
     if arr.dtype != np.uint8:
         max_val = np.max(arr)
         if max_val:
-            arr = (arr / (max_val / 255))
+            arr = arr / (max_val / 255)
         arr = arr.astype(np.uint8)
     num_channels = 1 if arr.ndim <= 2 else arr.shape[2]
     qformat = CONVERT[num_channels]
-    pointer, read_only_flag = arr.__array_interface__['data']
-    image = QImage(pointer, arr.shape[1], arr.shape[0],
-                   arr.strides[0], qformat)
+    pointer, read_only_flag = arr.__array_interface__["data"]
+    image = QImage(
+        pointer, arr.shape[1], arr.shape[0], arr.strides[0], qformat
+    )
     if num_channels == 1:
         # it is better to set colors in Format_Indexed8 to not get
         # "color table index %d out of range.""
-        image.setColorTable([QColor(c,c,c).rgba() for c in range(256)])
+        image.setColorTable([QColor(c, c, c).rgba() for c in range(256)])
     return image, arr
 
 

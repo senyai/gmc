@@ -10,11 +10,13 @@ class MarkupObjectMeta:
     PEN = QtGui.QPen(Qt.GlobalColor.white, 0)
     PEN_DASHED = QtGui.QPen(Qt.GlobalColor.red, 0, Qt.PenStyle.DashLine)
     PEN_SELECTED = QtGui.QPen(Qt.GlobalColor.yellow, 0)
-    PEN_SELECTED_DASHED = QtGui.QPen(Qt.GlobalColor.blue, 0, Qt.PenStyle.DashLine)
+    PEN_SELECTED_DASHED = QtGui.QPen(
+        Qt.GlobalColor.blue, 0, Qt.PenStyle.DashLine
+    )
     ACTION_KEYS: ClassVar[Dict[Qt.Key, Tuple[int, ...]]] = {}
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
-        assert not hasattr(self, '_edit_mode')
+        assert not hasattr(self, "_edit_mode")
         self._edit_mode = False
         super().__init__(*args, *kwargs)
 
@@ -24,9 +26,12 @@ class MarkupObjectMeta:
         else:
             self.start_edit_nodes()
 
-    def attach(self, view: 'ImageView') -> None:
-        raise NotImplementedError("class `{}` must implement `attach` method"
-                                  .format(self.__class__.__name__))
+    def attach(self, view: "ImageView") -> None:
+        raise NotImplementedError(
+            "class `{}` must implement `attach` method".format(
+                self.__class__.__name__
+            )
+        )
 
     def start_edit_nodes(self) -> None:
         self._edit_mode = True
@@ -34,7 +39,9 @@ class MarkupObjectMeta:
         self.scene().set_current_markup_object(self)
 
     def stop_edit_nodes(self) -> None:
-        assert self._edit_mode, 'programming error (ensure object is edit_mode)'
+        assert (
+            self._edit_mode
+        ), "programming error (ensure object is edit_mode)"
         self._edit_mode = False
         self.on_stop_edit()
         self.scene().set_current_markup_object(None)
@@ -63,7 +70,9 @@ class MarkupObjectMeta:
             for idx, diamond in enumerate(self.childItems()):
                 diamond.setSelected(idx in act)
         else:
-            QtWidgets.QGraphicsItem.keyPressEvent(self, event)  # - not required ?
+            QtWidgets.QGraphicsItem.keyPressEvent(
+                self, event
+            )  # - not required ?
 
     def prevent_event(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         """
@@ -82,12 +91,12 @@ class MarkupObjectMeta:
 
 class MarkupSelect:
     @classmethod
-    def attach(cls, view: 'ImageView') -> None:
+    def attach(cls, view: "ImageView") -> None:
         view.setCursor(Qt.CursorShape.ArrowCursor)
         view.set_mouse_press(cls._mouse_press)
 
     @classmethod
-    def _mouse_press(cls, event: QtGui.QMouseEvent, view: 'ImageView') -> bool:
+    def _mouse_press(cls, event: QtGui.QMouseEvent, view: "ImageView") -> bool:
         assert event.button() == Qt.MouseButton.LeftButton
         view.setDragMode(view.RubberBandDrag)
         view.set_mouse_press(None)
@@ -95,7 +104,9 @@ class MarkupSelect:
         return False
 
     @classmethod
-    def _mouse_release(cls, event: QtGui.QMouseEvent, view: 'ImageView') -> bool:
+    def _mouse_release(
+        cls, event: QtGui.QMouseEvent, view: "ImageView"
+    ) -> bool:
         assert event.button() == Qt.MouseButton.LeftButton
 
         # weird trick to make sure that rubber band vanished

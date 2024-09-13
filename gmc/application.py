@@ -14,11 +14,12 @@ class GMCArguments(TypedDict):
 
 def _sigint(signum: int, _: None) -> None:
     from time import time
+
     now = time()
-    if now - getattr(_sigint, 'time', 0) < 3:
+    if now - getattr(_sigint, "time", 0) < 3:
         sys.exit(signum)
     print(" Ctrl+C now to force exit ")
-    setattr(_sigint, 'time', now)
+    setattr(_sigint, "time", now)
 
 
 def application(args: GMCArguments):
@@ -36,6 +37,7 @@ def application(args: GMCArguments):
     try:
         xrange
         from PyQt5.QtWidgets import QMessageBox
+
         QMessageBox.critical(None, "GMC", "Python 3 is required")
         return
     except NameError:
@@ -44,12 +46,14 @@ def application(args: GMCArguments):
     try:
         from .main_window import MainWindow
         from . import __version__
+
         main_window = MainWindow(__version__, app, args)
         signal.signal(signal.SIGINT, _sigint)
     except Exception:
         import traceback
+
         traceback.print_exc(file=sys.stdout)
-        print('press <Enter> to exit')
+        print("press <Enter> to exit")
         input()
         return
 
@@ -59,26 +63,29 @@ def application(args: GMCArguments):
 
 def parse_args(external: Sequence[str]) -> GMCArguments:
     from .schemas import iter_schemas
+
     parser = argparse.ArgumentParser("GMC runner")
 
     all_schemas = ", ".join([info[0] for info in iter_schemas(external)])
-    parser.add_argument('--schema',
+    parser.add_argument(
+        "--schema",
         help=f"schema, e.g. tagged_objects (default: previously used schema,\n"
-             f"Available: {all_schemas})")
-    parser.add_argument('-s', '--src_dir',
-        help="root of images dir")
-    parser.add_argument('-d', '--dst_dir',
-        help="root of markup dir")
-    parser.add_argument('--external-schemas',
+        f"Available: {all_schemas})",
+    )
+    parser.add_argument("-s", "--src_dir", help="root of images dir")
+    parser.add_argument("-d", "--dst_dir", help="root of markup dir")
+    parser.add_argument(
+        "--external-schemas",
         nargs="*",
         default=[],
-        help="list of files/directories to treat like a schema")
+        help="list of files/directories to treat like a schema",
+    )
     args = parser.parse_args()
     args.external_schemas.extend(external)
     return cast(GMCArguments, vars(args))
 
 
-def main(external: Sequence[str]=()):
+def main(external: Sequence[str] = ()):
     app = application(parse_args(external))
     if app:
         exit(app[0].exec_())

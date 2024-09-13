@@ -1,5 +1,6 @@
 from PyQt5 import QtCore, QtGui
 from PyQt5.QtWidgets import QSlider, QStyle, QStyleOptionSlider
+
 Qt = QtCore.Qt
 from .frame_tooltip import FrameTooltip
 
@@ -8,11 +9,15 @@ class SeekSlider(QSlider):
     _handle_width_val = None
 
     def __init__(self, limit_widget, *args, **kwargs):
-        super().__init__(*args,
-                         singleStep=1, maximum=0,
-                         tickPosition=QSlider.TicksAbove,
-                         mouseTracking=True,
-                         orientation=Qt.Horizontal, **kwargs)
+        super().__init__(
+            *args,
+            singleStep=1,
+            maximum=0,
+            tickPosition=QSlider.TicksAbove,
+            mouseTracking=True,
+            orientation=Qt.Horizontal,
+            **kwargs,
+        )
         self._limit_widget = limit_widget
         self._frame_tooltip = FrameTooltip(self)
 
@@ -24,7 +29,8 @@ class SeekSlider(QSlider):
         self._frame_tooltip.set_tip(
             str(self._position_to_value(event.x())),
             tip_pos,
-            min_x=min_x, max_x=min_x + self._limit_widget.width(),
+            min_x=min_x,
+            max_x=min_x + self._limit_widget.width(),
         )
 
     def leaveEvent(self, event):
@@ -45,8 +51,9 @@ class SeekSlider(QSlider):
     def _position_to_value(self, x):
         return QStyle.sliderValueFromPosition(
             0,
-            self.maximum(), x - self._handle_width() / 2,
-            self.width() - self._handle_width()
+            self.maximum(),
+            x - self._handle_width() / 2,
+            self.width() - self._handle_width(),
         )
 
     def _handle_width(self):
@@ -54,5 +61,6 @@ class SeekSlider(QSlider):
             option = QStyleOptionSlider()
             self.initStyleOption(option)
             self._handle_width_val = self.style().pixelMetric(
-                QStyle.PM_SliderLength, option)
+                QStyle.PM_SliderLength, option
+            )
         return self._handle_width_val

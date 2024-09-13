@@ -16,7 +16,7 @@ class ZeroDict(dict):
 
 def load(json_filename: str, widget: QWidget):
     try:
-        with open(json_filename, 'r', encoding='utf-8') as inp:
+        with open(json_filename, "r", encoding="utf-8") as inp:
             return json.load(inp)
     except ValueError as e:
         msg = "Failed parsing `{}`\n{}".format(json_filename, e)
@@ -31,8 +31,9 @@ def dump(json_filename: str, data: Dict[str, Any]) -> None:
     the_qdir.mkpath(the_qdir.absolutePath())
 
     # save first to raw_json, as `json.dump` will corrupt file in extreme cases
-    raw_json = json.dumps(data, allow_nan=False, indent=2,
-                          sort_keys=True, ensure_ascii=False)
+    raw_json = json.dumps(
+        data, allow_nan=False, indent=2, sort_keys=True, ensure_ascii=False
+    )
 
-    with open(json_filename, 'w', encoding='utf-8') as out:
+    with open(json_filename, "w", encoding="utf-8") as out:
         out.write(raw_json)

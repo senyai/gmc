@@ -13,10 +13,11 @@ def _paths(the_dir: QDir, filename: str, depth: int) -> Iterator[str]:
 
 
 def read_properties(
-        paths: Sequence[str],
-        widget: QWidget,
-        filename: str=".gmc_properties.json",
-        depth: int=6) -> Dict[str, Any]:
+    paths: Sequence[str],
+    widget: QWidget,
+    filename: str = ".gmc_properties.json",
+    depth: int = 6,
+) -> Dict[str, Any]:
     ret: Dict[str, Any] = {}
     for path in paths:
         the_dir = QFileInfo(path).dir()

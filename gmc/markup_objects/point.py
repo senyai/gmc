@@ -4,14 +4,17 @@ from ..views.image_view import ImageView
 from . import MarkupObjectMeta
 from typing import Callable, Optional
 from PyQt5.QtCore import Qt, QRectF, QPointF, QCoreApplication
-tr: Callable[[str], str] = lambda text: QCoreApplication.translate("@default", text)
+
+tr: Callable[[str], str] = lambda text: QCoreApplication.translate(
+    "@default", text
+)
 
 
 class MarkupPoint(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     _rect = QRectF(-4, -4, 8, 8)
     PEN = QtGui.QPen(Qt.GlobalColor.white, 4)
     PEN_SELECTED = QtGui.QPen(Qt.GlobalColor.yellow, 4)
-    CURSOR = QtGui.QCursor(QtGui.QPixmap('gmc:cursors/add_point.svg'), 6, 6)
+    CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_point.svg"), 6, 6)
 
     def __init__(self, pos: Optional[QPointF] = None):
         super(MarkupPoint, self).__init__()
@@ -20,9 +23,13 @@ class MarkupPoint(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         else:
             assert isinstance(pos, QPointF)
         self.setPos(pos)
-        self.setFlags(self.ItemIsMovable | self.ItemIgnoresTransformations |
-                      self.ItemIsSelectable | self.ItemIsFocusable |
-                      self.ItemSendsGeometryChanges)
+        self.setFlags(
+            self.ItemIsMovable
+            | self.ItemIgnoresTransformations
+            | self.ItemIsSelectable
+            | self.ItemIsFocusable
+            | self.ItemSendsGeometryChanges
+        )
 
     def attach(self, view: ImageView) -> None:
         view.setCursor(self.CURSOR)
@@ -92,25 +99,32 @@ class MarkupPoint(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         self.setPos(QPointF())
         view.set_mouse_press(self.mouse_press)  # start over
 
-    def mousePressEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
+    def mousePressEvent(
+        self, event: QtWidgets.QGraphicsSceneMouseEvent
+    ) -> None:
         if event.button() == Qt.MouseButton.LeftButton:
             self._last_pos = self.pos()
         super().mousePressEvent(event)
 
-    def mouseReleaseEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
+    def mouseReleaseEvent(
+        self, event: QtWidgets.QGraphicsSceneMouseEvent
+    ) -> None:
         # if point moved
-        if (event.button() == Qt.MouseButton.LeftButton and
-                event.buttonDownScenePos(Qt.MouseButton.LeftButton) != event.scenePos()):
+        if (
+            event.button() == Qt.MouseButton.LeftButton
+            and event.buttonDownScenePos(Qt.MouseButton.LeftButton)
+            != event.scenePos()
+        ):
             self.scene().undo_stack.push(
-                UndoPointMove(self, self._last_pos, self.pos()))
+                UndoPointMove(self, self._last_pos, self.pos())
+            )
         super().mouseReleaseEvent(event)
 
 
 class UndoPointCreate(QtWidgets.QUndoCommand):
-    def __init__(self,
-                 scene: QtWidgets.QGraphicsScene,
-                 point: MarkupPoint,
-                 pos: QPointF) -> None:
+    def __init__(
+        self, scene: QtWidgets.QGraphicsScene, point: MarkupPoint, pos: QPointF
+    ) -> None:
         self._scene = scene
         self._point = point
         self._pos = pos
@@ -125,10 +139,9 @@ class UndoPointCreate(QtWidgets.QUndoCommand):
 
 
 class UndoPointMove(QtWidgets.QUndoCommand):
-    def __init__(self,
-                 markup_point: MarkupPoint,
-                 old_pos: QPointF,
-                 new_pos: QPointF) -> None:
+    def __init__(
+        self, markup_point: MarkupPoint, old_pos: QPointF, new_pos: QPointF
+    ) -> None:
         self._markup_point = markup_point
         self._old_pos = old_pos
         self._new_pos = new_pos

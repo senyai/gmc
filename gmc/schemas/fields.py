@@ -10,6 +10,7 @@ from ..utils.svg import icon_from_data
 from ..utils.image import load_pixmap
 from ..utils import get_icon, separator
 from ..file_widgets.one_source_one_destination import OneSourceOneDestination
+
 Qt = QtCore.Qt
 
 
@@ -81,9 +82,9 @@ class CustomRegion(CustomPath):
             if color is not None:
                 painter.setBrush(color)
                 break
-            elif tag.startswith('color(') and tag.endswith(')'):
+            elif tag.startswith("color(") and tag.endswith(")"):
                 color = brushes[tag] = QtGui.QColor(tag[6:-1])
-                if tag[6] != '#':
+                if tag[6] != "#":
                     color.setAlpha(80)
                 painter.setBrush(color)
                 break
@@ -100,17 +101,22 @@ class CustomRegion(CustomPath):
             self._schema._add_region_action.trigger()
 
 
-BROKEN_LINE_ICON = icon_from_data(b'''\
+BROKEN_LINE_ICON = icon_from_data(
+    b"""\
 <svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
 <g transform="translate(0 -1020.4)">
 <path d="m4.8537 1024.7 22.27.7174-3.2287 7.3763-17.925 8.5381 19.116 6.83"
-fill="none" stroke="#09640d" stroke-width="3"/></g></svg>''')
-REGION_ICON = icon_from_data(b'''\
+fill="none" stroke="#09640d" stroke-width="3"/></g></svg>"""
+)
+REGION_ICON = icon_from_data(
+    b"""\
 <svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
 <g transform="rotate(90 526.19 526.23)"><path d="m27.124 1025.4-2.1586
 22.654-10.904-1.5724-.47259-12.847-10.531-.023-.42544-8.341z" fill="#999"
-stroke="#09640d" stroke-width="3"/></g></svg>''')
-SWAP_ICON = icon_from_data(b'''\
+stroke="#09640d" stroke-width="3"/></g></svg>"""
+)
+SWAP_ICON = icon_from_data(
+    b"""\
 <svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
 <g transform="matrix(.34 0 0 .33296 4.5092 -321.53)" stroke-width="2.9721">
 <path d="m4.8537 1024.7 22.27.7174-3.2287 7.3763-17.925 8.5381 19.116 6.83" fill="none" stroke="#09640d" stroke-width="8.9164"/>
@@ -119,7 +125,9 @@ SWAP_ICON = icon_from_data(b'''\
 <path d="m16.58 4.4023-10.73.039062 3.1504 1.7266c-1.0278.36595-1.9375.94202-2.6602 1.7695-1.3281 1.5209-2.0008 3.8127-1.8164 6.9297l1-.058594c-.17434-2.9465.45762-4.9429 1.5684-6.2148.54214-.62084 1.2085-1.0804 1.9785-1.3945l-1.6016 2.8711 9.1113-5.668z" fill-opacity=".75294" fill-rule="evenodd"/>
 <path d="m15.298 27.225 10.73-.03906-3.1504-1.7266c1.0278-.36596 1.9375-.94202 2.6602-1.7695 1.3281-1.5209 2.0008-3.8127 1.8164-6.9297l-1 .05859c.17434 2.9465-.45762 4.9429-1.5684 6.2148-.54214.62084-1.2085 1.0804-1.9785 1.3945l1.6016-2.8711z" fill-opacity=".75294" fill-rule="evenodd"/>
 </svg>
-''')
+"""
+)
+
 
 class FieldsSchema(MarkupSchema, OneSourceOneDestination):
     tags_hidden = False
@@ -131,41 +139,64 @@ class FieldsSchema(MarkupSchema, OneSourceOneDestination):
 
         self._select_action = iw.add_select_action()
         self._add_broken_line_action = iw.add_markup_action(
-            "Add Broken Line", "e", "broken_line",
-            lambda: CustomPath(self, False))
+            "Add Broken Line",
+            "e",
+            "broken_line",
+            lambda: CustomPath(self, False),
+        )
         self._add_region_action = iw.add_markup_action(
-            "Add Region", "d", "region",
-            lambda: CustomRegion(self, False))
+            "Add Region", "d", "region", lambda: CustomRegion(self, False)
+        )
 
         iw.add_action(separator(iw))
         self._add_m_broken_line_action = iw.add_markup_action(
-            "Add Broken Line", "w", BROKEN_LINE_ICON,
-            lambda: CustomPath(self, True))
+            "Add Broken Line",
+            "w",
+            BROKEN_LINE_ICON,
+            lambda: CustomPath(self, True),
+        )
         self._add_m_region_action = iw.add_markup_action(
-            "Add Region", "s", REGION_ICON,
-            lambda: CustomRegion(self, True))
+            "Add Region", "s", REGION_ICON, lambda: CustomRegion(self, True)
+        )
 
         iw.add_action(separator(iw))
         self._swap_action = iw.add_user_action(
-            "Change Object Type", "b", SWAP_ICON, enabled=False,
-            triggered=self._swap)
+            "Change Object Type",
+            "b",
+            SWAP_ICON,
+            enabled=False,
+            triggered=self._swap,
+        )
         self._tag_txt_action = iw.add_user_action(
-            "Tag &Text", "t,t", "tag_txt", enabled=False,
-            triggered=self._trigger_tag_edit)
+            "Tag &Text",
+            "t,t",
+            "tag_txt",
+            enabled=False,
+            triggered=self._trigger_tag_edit,
+        )
         self._image_widget.scene().selectionChanged.connect(
-            self._on_selection_changed)
+            self._on_selection_changed
+        )
 
-        show_tags_icon = get_icon('tag_eye_close')
-        show_tags_icon.addFile('gmc:tag_eye_open.svg', state=show_tags_icon.On)
+        show_tags_icon = get_icon("tag_eye_close")
+        show_tags_icon.addFile("gmc:tag_eye_open.svg", state=show_tags_icon.On)
         iw.add_user_action(
-            "Toggle Tags &Visibility", "t,v", show_tags_icon,
-            checkable=True, toggled=self._toggle_tag_visibility)
+            "Toggle Tags &Visibility",
+            "t,v",
+            show_tags_icon,
+            checkable=True,
+            toggled=self._toggle_tag_visibility,
+        )
 
-        show_items_icon = get_icon('eye_close')
-        show_items_icon.addFile('gmc:eye_open.svg', state=show_items_icon.On)
+        show_items_icon = get_icon("eye_close")
+        show_items_icon.addFile("gmc:eye_open.svg", state=show_items_icon.On)
         iw.add_user_action(
-            "Toggle Selected &Items Visibility", "h", show_items_icon,
-            checkable=True, toggled=self._toggle_visibility)
+            "Toggle Selected &Items Visibility",
+            "h",
+            show_items_icon,
+            checkable=True,
+            toggled=self._toggle_visibility,
+        )
 
         iw.add_default_actions()
         self._select_action.trigger()
@@ -182,13 +213,14 @@ class FieldsSchema(MarkupSchema, OneSourceOneDestination):
     def _toggle_visibility(self, state):
         scene = self._image_widget.scene()
         state = not state
-        for item in (scene.selectedItems() or scene.items()):
+        for item in scene.selectedItems() or scene.items():
             if isinstance(item, MarkupObjectMeta):
                 item.setVisible(state)
 
     def _trigger_tag_edit(self):
-        edit_tags(self._image_widget, self._get_selected_items(),
-                  self._user_tags)
+        edit_tags(
+            self._image_widget, self._get_selected_items(), self._user_tags
+        )
 
     def _swap(self):
         for item in self._get_selected_items():
@@ -212,8 +244,10 @@ class FieldsSchema(MarkupSchema, OneSourceOneDestination):
     def open_markup(self, src_data_path: str, dst_markup_path: str) -> None:
         src_dir = QtCore.QFileInfo(src_data_path).dir()
         try:
-            with open(src_dir.absoluteFilePath("tags.txt"), 'r') as f:
-                self._user_tags = set(filter(None, (line.strip() for line in f)))
+            with open(src_dir.absoluteFilePath("tags.txt"), "r") as f:
+                self._user_tags = set(
+                    filter(None, (line.strip() for line in f))
+                )
         except IOError:
             self._user_tags: set[str] = set()
 
@@ -223,35 +257,52 @@ class FieldsSchema(MarkupSchema, OneSourceOneDestination):
 
         self._dst_markup_path = dst_markup_path
         dst_dir = QtCore.QFileInfo(dst_markup_path).dir()
-        self._dst_main_path = dst_dir.absoluteFilePath('base.json')
+        self._dst_main_path = dst_dir.absoluteFilePath("base.json")
         self._original_markup = (
             load_json(self._dst_main_path, self._image_widget),
-            load_json(dst_markup_path, self._image_widget))
+            load_json(dst_markup_path, self._image_widget),
+        )
         scene = self._image_widget.scene()
         item = None
-        for obj in self._original_markup[0].get('objects', ()):
-            the_type = obj['type']
-            if the_type == 'path':
-                cls, args = CustomPath, (True, QtGui.QPolygonF(
-                    [QtCore.QPointF(x, y) for x, y in obj['data']]))
-            elif the_type == 'region':
-                cls, args = CustomRegion, (True, QtGui.QPolygonF(
-                    [QtCore.QPointF(x, y) for x, y in obj['data']]))
+        for obj in self._original_markup[0].get("objects", ()):
+            the_type = obj["type"]
+            if the_type == "path":
+                cls, args = CustomPath, (
+                    True,
+                    QtGui.QPolygonF(
+                        [QtCore.QPointF(x, y) for x, y in obj["data"]]
+                    ),
+                )
+            elif the_type == "region":
+                cls, args = CustomRegion, (
+                    True,
+                    QtGui.QPolygonF(
+                        [QtCore.QPointF(x, y) for x, y in obj["data"]]
+                    ),
+                )
             else:
                 print("invalid object type = `{}`".format(the_type))
-            item = cls(self, *args, tags=obj.get('tags', ()))
+            item = cls(self, *args, tags=obj.get("tags", ()))
             scene.addItem(item)
-        for obj in self._original_markup[1].get('objects', ()):
-            the_type = obj['type']
-            if the_type == 'path':
-                cls, args = CustomPath, (False, QtGui.QPolygonF(
-                    [QtCore.QPointF(x, y) for x, y in obj['data']]))
-            elif the_type == 'region':
-                cls, args = CustomRegion, (False, QtGui.QPolygonF(
-                    [QtCore.QPointF(x, y) for x, y in obj['data']]))
+        for obj in self._original_markup[1].get("objects", ()):
+            the_type = obj["type"]
+            if the_type == "path":
+                cls, args = CustomPath, (
+                    False,
+                    QtGui.QPolygonF(
+                        [QtCore.QPointF(x, y) for x, y in obj["data"]]
+                    ),
+                )
+            elif the_type == "region":
+                cls, args = CustomRegion, (
+                    False,
+                    QtGui.QPolygonF(
+                        [QtCore.QPointF(x, y) for x, y in obj["data"]]
+                    ),
+                )
             else:
                 print("invalid object type = `{}`".format(the_type))
-            item = cls(self, *args, tags=obj.get('tags', ()))
+            item = cls(self, *args, tags=obj.get("tags", ()))
             scene.addItem(item)
 
         self._image_widget.setFocus()
@@ -276,21 +327,21 @@ class FieldsSchema(MarkupSchema, OneSourceOneDestination):
 
     def _get_markup(self):
         markup_main = defaultdict(list, self._original_markup[0])
-        markup_main['objects'] = []
+        markup_main["objects"] = []
         markup = defaultdict(list, self._original_markup[1])
-        markup['objects'] = []
-        markup_main['size'] = self._size
+        markup["objects"] = []
+        markup_main["size"] = self._size
         for item in self._image_widget.scene().items():
             if isinstance(item, CustomRegion):
-                the_type = 'region'
+                the_type = "region"
                 where = markup_main if item.is_base() else markup
             elif isinstance(item, CustomPath):
-                the_type = 'path'
+                the_type = "path"
                 where = markup_main if item.is_base() else markup
             else:
                 continue
             data = item.data()
-            assert 'type' not in data
-            data['type'] = the_type
-            where['objects'].append(data)
+            assert "type" not in data
+            data["type"] = the_type
+            where["objects"].append(data)
         return markup_main, markup

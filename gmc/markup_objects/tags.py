@@ -5,7 +5,9 @@ from gmc.views.image_widget import ImageWidget
 from . import MarkupObjectMeta
 from PyQt5.QtCore import Qt, QPointF, QCoreApplication
 
-tr: Callable[[str], str] = lambda text: QCoreApplication.translate("@default", text)
+tr: Callable[[str], str] = lambda text: QCoreApplication.translate(
+    "@default", text
+)
 
 
 class TagText:
@@ -14,9 +16,13 @@ class TagText:
         self.width = width
         self.height = height
 
-    def __call__(self, painter: QtGui.QPainter,
-                 pen: QtGui.QPen=QtGui.QPen(Qt.GlobalColor.black),
-                 _align: Qt.AlignmentFlag = Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter):
+    def __call__(
+        self,
+        painter: QtGui.QPainter,
+        pen: QtGui.QPen = QtGui.QPen(Qt.GlobalColor.black),
+        _align: Qt.AlignmentFlag = Qt.AlignmentFlag.AlignLeft
+        | Qt.AlignmentFlag.AlignVCenter,
+    ):
         rc = QtCore.QRectF(0.0, 0.0, self.width, self.height)
         # painter.setPen(QtGui.QPen(Qt.magenta))
         # painter.drawRect(rc)
@@ -29,8 +35,11 @@ class TagSplit:
         self.width = height * 0.3
         self._line = QtCore.QLineF(self.width, 0.0, 0.0, height)
 
-    def __call__(self, painter: QtGui.QPainter,
-                 pen=QtGui.QPen(QtGui.QColor(0, 0, 0, 128))):
+    def __call__(
+        self,
+        painter: QtGui.QPainter,
+        pen=QtGui.QPen(QtGui.QColor(0, 0, 0, 128)),
+    ):
         painter.setPen(pen)
         painter.drawLine(self._line)
 
@@ -69,10 +78,10 @@ class TagYellow(TagColor):
 
 
 COLOR_TAG_DICT_GET = {
-    'red': TagRed,
-    'green': TagGreen,
-    'blue': TagBlue,
-    'yellow': TagYellow,
+    "red": TagRed,
+    "green": TagGreen,
+    "blue": TagBlue,
+    "yellow": TagYellow,
 }.get
 
 
@@ -87,7 +96,7 @@ class HasTags:
     tag_brush_sel = QtGui.QBrush(grad)
     del grad
 
-    def __init__(self, *args: Any, tags: Sequence[str]=(), **kwargs: Any):
+    def __init__(self, *args: Any, tags: Sequence[str] = (), **kwargs: Any):
         self._tags: Set[str] = set(tags)
         self._draws: List[Callable[[QtGui.QPainter], None]] = []
         self._tag_polygon = QtGui.QPolygonF()
@@ -120,18 +129,19 @@ class HasTags:
 
     def data(self) -> Dict[str, Any]:
         tags = sorted(self._tags)
-        ret = {'data': super().data()}
+        ret = {"data": super().data()}
         if tags:
-            ret['tags'] = tags
+            ret["tags"] = tags
         return ret
 
     def paint(self, painter: QtGui.QPainter, option, widget, **kwargs) -> None:
         super().paint(painter, option, widget, **kwargs)
         self.draw_tags(painter)
 
-    def _construct_draws(self, painter: QtGui.QPainter,
-                         color_tag_dict_get=COLOR_TAG_DICT_GET):
-        fm : QtGui.QFontMetrics = painter.fontMetrics()
+    def _construct_draws(
+        self, painter: QtGui.QPainter, color_tag_dict_get=COLOR_TAG_DICT_GET
+    ):
+        fm: QtGui.QFontMetrics = painter.fontMetrics()
         if self._last_fm == fm:
             return
 
@@ -153,18 +163,23 @@ class HasTags:
             append(draw)
             total_width += draw.width
         hh: float = self.height * 0.5
-        self._tag_polygon = QtGui.QPolygonF([
-            QPointF(),
-            QPointF(hh, -hh),
-            QPointF(total_width, -hh),
-            QPointF(total_width, hh),
-            QPointF(hh, hh),
-        ])
+        self._tag_polygon = QtGui.QPolygonF(
+            [
+                QPointF(),
+                QPointF(hh, -hh),
+                QPointF(total_width, -hh),
+                QPointF(total_width, hh),
+                QPointF(hh, hh),
+            ]
+        )
         self._tag_width = total_width
         self._last_fm = fm
 
-    def draw_tags(self, painter: QtGui.QPainter,
-                  brush: QtGui.QBrush=QtGui.QBrush(QtGui.QColor(178, 154, 50, 122))):
+    def draw_tags(
+        self,
+        painter: QtGui.QPainter,
+        brush: QtGui.QBrush = QtGui.QBrush(QtGui.QColor(178, 154, 50, 122)),
+    ):
         if not self._tags or self._schema.tags_hidden:
             return
         self._construct_draws(painter)
@@ -178,7 +193,8 @@ class HasTags:
         painter.drawPolygon(self._tag_polygon.translated(QPointF(1.5, 1.5)))
 
         painter.setBrush(
-            self.tag_brush_sel if self.isSelected() else self.tag_brush)
+            self.tag_brush_sel if self.isSelected() else self.tag_brush
+        )
         painter.drawPolygon(self._tag_polygon)
 
         painter.translate(self.height * 0.5, -self.height * 0.5)
@@ -199,7 +215,11 @@ class TagEdit(QtWidgets.QLineEdit):
         super().keyPressEvent(event)
 
 
-def edit_tags(parent: ImageWidget, items: List[MarkupObjectMeta], extra_tags: Sequence[str]=()) -> None:
+def edit_tags(
+    parent: ImageWidget,
+    items: List[MarkupObjectMeta],
+    extra_tags: Sequence[str] = (),
+) -> None:
     """
     :param parent: QDialog's parent QWidget
     :param tags: dict. tag name: number of objects with that tag
@@ -207,23 +227,27 @@ def edit_tags(parent: ImageWidget, items: List[MarkupObjectMeta], extra_tags: Se
     """
     if not items:
         return
-    tags: DefaultDict[str, int] = defaultdict(int, {tag: 0 for tag in extra_tags})
+    tags: DefaultDict[str, int] = defaultdict(
+        int, {tag: 0 for tag in extra_tags}
+    )
     for item in items:
         for tag in item.get_tags():
             tags[tag] += 1
 
     dialog = QtWidgets.QDialog(parent, windowTitle=tr("Edit Tags"))
+
     def item_changed(item: QtWidgets.QListWidgetItem) -> None:
-        if item.checkState() == Qt.Checked and int(
-                QtGui.QGuiApplication.keyboardModifiers()) == Qt.ALT:
+        if (
+            item.checkState() == Qt.Checked
+            and int(QtGui.QGuiApplication.keyboardModifiers()) == Qt.ALT
+        ):
             for i in range(tag_list_widget.count()):
                 it = tag_list_widget.item(i)
                 if it.checkState() == Qt.Checked and it != item:
                     it.setCheckState(Qt.Unchecked)
 
     tag_list_widget = QtWidgets.QListWidget(
-        itemChanged=item_changed,
-        toolTip="Alt+click to check single item"
+        itemChanged=item_changed, toolTip="Alt+click to check single item"
     )
     tags_label = QtWidgets.QLabel(tr("&Tags:"))
     tags_label.setBuddy(tag_list_widget)
@@ -255,7 +279,7 @@ def edit_tags(parent: ImageWidget, items: List[MarkupObjectMeta], extra_tags: Se
         tag = tag_line_edit.text().strip()
         if not tag:
             return
-        tag_line_edit.setText('')
+        tag_line_edit.setText("")
         existing_item = tag_list_widget.findItems(tag, Qt.MatchExactly)
         if existing_item:
             existing_item[0].setCheckState(Qt.Checked)
@@ -265,8 +289,11 @@ def edit_tags(parent: ImageWidget, items: List[MarkupObjectMeta], extra_tags: Se
             item.setCheckState(Qt.Checked)
 
     tag_line_edit.commit.connect(append_tag)
-    add_layout.addWidget(QtWidgets.QPushButton(
-        tr("A&ppend"), clicked=append_tag, toolTip="Ctrl+Enter, Ald+Enter"))
+    add_layout.addWidget(
+        QtWidgets.QPushButton(
+            tr("A&ppend"), clicked=append_tag, toolTip="Ctrl+Enter, Ald+Enter"
+        )
+    )
     layout.addWidget(add_tag_label)
     layout.addLayout(add_layout)
 
@@ -290,14 +317,14 @@ def edit_tags(parent: ImageWidget, items: List[MarkupObjectMeta], extra_tags: Se
                 remove.append(item.text())
         if remove or add:
             parent.scene().undo_stack.push(
-                UndoTagModification(items, add, remove))
+                UndoTagModification(items, add, remove)
+            )
 
 
 class UndoTagModification(QtWidgets.QUndoCommand):
-    def __init__(self,
-                 items: List[HasTags],
-                 add: List[str],
-                 remove: List[str]):
+    def __init__(
+        self, items: List[HasTags], add: List[str], remove: List[str]
+    ):
         self._items = items
         self._add = add
         self._remove = remove

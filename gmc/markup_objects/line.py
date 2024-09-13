@@ -3,6 +3,7 @@ from PyQt5 import QtGui, QtCore
 from ..views.image_view import ImageView
 from ..settings import settings
 from .polygon import MarkupPolygon, UndoPolygonCreate
+
 Qt = QtCore.Qt
 
 
@@ -12,16 +13,14 @@ class MarkupLine(MarkupPolygon):
         Qt.Key.Key_7: (0,),
         Qt.Key.Key_4: (0,),
         Qt.Key.Key_1: (0,),
-
         Qt.Key.Key_5: (0, 1),
         Qt.Key.Key_2: (0, 1),
         Qt.Key.Key_8: (0, 1),
-
         Qt.Key.Key_9: (1,),
         Qt.Key.Key_6: (1,),
         Qt.Key.Key_3: (1,),
     }
-    CURSOR = QtGui.QCursor(QtGui.QPixmap('gmc:cursors/add_segment.svg'), 6, 6)
+    CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_segment.svg"), 6, 6)
 
     def attach(self, view: ImageView):
         view.setCursor(self.CURSOR)
@@ -61,7 +60,9 @@ class MarkupLine(MarkupPolygon):
 
     def mouse_release(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         self.mouse_move(event, view)
-        if self._polygon.boundingRect() and self._press_timer.hasExpired(settings.click_ms):
+        if self._polygon.boundingRect() and self._press_timer.hasExpired(
+            settings.click_ms
+        ):
             del self._press_timer
             view.unset_all_events()
             self.setFlag(self.ItemIsSelectable, True)

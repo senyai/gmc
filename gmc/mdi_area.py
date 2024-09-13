@@ -1,17 +1,24 @@
 from typing import Optional
 from PyQt5 import QtGui, QtCore, QtWidgets
 from .utils import get_icon, separator, new_action, tr
+
 Qt = QtCore.Qt
 
 
 class TabRenamer(QtCore.QObject):
-    def eventFilter(self, tab_bar: QtWidgets.QTabBar, event: QtCore.QEvent) -> bool:
+    def eventFilter(
+        self, tab_bar: QtWidgets.QTabBar, event: QtCore.QEvent
+    ) -> bool:
         if event.type() == event.MouseButtonDblClick:
             tab_idx = tab_bar.tabAt(event.pos())
             if tab_idx >= 0:
                 text, ok = QtWidgets.QInputDialog.getText(
-                    tab_bar, tr("Tab Name"),
-                    "?", QtWidgets.QLineEdit.Normal, tab_bar.tabText(tab_idx))
+                    tab_bar,
+                    tr("Tab Name"),
+                    "?",
+                    QtWidgets.QLineEdit.Normal,
+                    tab_bar.tabText(tab_idx),
+                )
                 if ok and text:
                     tab_bar.setTabText(tab_idx, text)
             return True
@@ -23,7 +30,8 @@ class MdiArea(QtWidgets.QMdiArea):
         super().__init__(
             parent,
             objectName="mdi_area",
-            viewMode=QtWidgets.QMdiArea.TabbedView)
+            viewMode=QtWidgets.QMdiArea.TabbedView,
+        )
 
         # Setting elide mode
         tab_bar: QtWidgets.QTabBar = self.findChild(QtWidgets.QTabBar)
@@ -35,56 +43,105 @@ class MdiArea(QtWidgets.QMdiArea):
 
         # Actions
         close_all_act = new_action(
-            self, QtGui.QIcon(), tr("Close &All"), ('Ctrl+Alt+Shift+W',),
-            triggered=self.closeAllSubWindows)
+            self,
+            QtGui.QIcon(),
+            tr("Close &All"),
+            ("Ctrl+Alt+Shift+W",),
+            triggered=self.closeAllSubWindows,
+        )
 
         close_others_act = new_action(
-            self, QtGui.QIcon(), tr("Close &Others"), ('Ctrl+Alt+W',),
-            triggered=self.close_others)
+            self,
+            QtGui.QIcon(),
+            tr("Close &Others"),
+            ("Ctrl+Alt+W",),
+            triggered=self.close_others,
+        )
 
         self.fullscreen_act = new_action(
-            self, 'fullscreen', tr("&Fullscreen"), ("Ctrl+F11",),
-            checkable=True, toggled=self.fullscreen)
+            self,
+            "fullscreen",
+            tr("&Fullscreen"),
+            ("Ctrl+F11",),
+            checkable=True,
+            toggled=self.fullscreen,
+        )
 
         tile_act = new_action(
-            self, 'tile', tr("&Tile"), triggered=self.tileSubWindows)
+            self, "tile", tr("&Tile"), triggered=self.tileSubWindows
+        )
 
         tile_vert_act = new_action(
-            self, 'tile_v', tr("&Tile Vertical"), ("Ctrl+Alt+Left",),
-            triggered=self.tile_vertical)
+            self,
+            "tile_v",
+            tr("&Tile Vertical"),
+            ("Ctrl+Alt+Left",),
+            triggered=self.tile_vertical,
+        )
 
         tile_horz_act = new_action(
-            self, 'tile_h', tr("&Tile Horizontal"), ("Ctrl+Alt+Up",),
-            triggered=self.tile_horizontal,)
+            self,
+            "tile_h",
+            tr("&Tile Horizontal"),
+            ("Ctrl+Alt+Up",),
+            triggered=self.tile_horizontal,
+        )
 
         tile_vert_rev_act = new_action(
-            self, 'tile_v', tr("&Tile Vertical Reverse"), ("Ctrl+Alt+Right",),
-            triggered=self.tile_vertical_rev)
+            self,
+            "tile_v",
+            tr("&Tile Vertical Reverse"),
+            ("Ctrl+Alt+Right",),
+            triggered=self.tile_vertical_rev,
+        )
 
         tile_horz_rev_act = new_action(
-            self, 'tile_h', tr("&Tile Horizontal Reverse"), ("Ctrl+Alt+Down",),
-            triggered=self.tile_horizontal_rev)
+            self,
+            "tile_h",
+            tr("&Tile Horizontal Reverse"),
+            ("Ctrl+Alt+Down",),
+            triggered=self.tile_horizontal_rev,
+        )
 
         cascade_act = new_action(
-            self, 'cascade', tr("&Cascade"), ('Ctrl+Alt+C',),
-            triggered=self.cascadeSubWindows)
+            self,
+            "cascade",
+            tr("&Cascade"),
+            ("Ctrl+Alt+C",),
+            triggered=self.cascadeSubWindows,
+        )
 
         KS = QtGui.QKeySequence
         next_act = new_action(
-            self, 'next', tr("Ne&xt"), (KS.NextChild,),
-            triggered=self.activateNextSubWindow)
+            self,
+            "next",
+            tr("Ne&xt"),
+            (KS.NextChild,),
+            triggered=self.activateNextSubWindow,
+        )
 
         previous_act = new_action(
-            self, 'prev', tr("Pre&vious"), (KS.PreviousChild,),
-            triggered=self.activatePreviousSubWindow)
+            self,
+            "prev",
+            tr("Pre&vious"),
+            (KS.PreviousChild,),
+            triggered=self.activatePreviousSubWindow,
+        )
 
         self.menu_actions = [
-            close_all_act, close_others_act, self.fullscreen_act,
+            close_all_act,
+            close_others_act,
+            self.fullscreen_act,
             separator(self),
-            tile_act, tile_vert_act, tile_horz_act,
-            tile_vert_rev_act, tile_horz_rev_act, cascade_act,
+            tile_act,
+            tile_vert_act,
+            tile_horz_act,
+            tile_vert_rev_act,
+            tile_horz_rev_act,
+            cascade_act,
             separator(self),
-            next_act, previous_act
+            next_act,
+            previous_act,
         ]
         self.addActions(self.menu_actions)  # so shortcuts work
 
@@ -107,10 +164,17 @@ class MdiArea(QtWidgets.QMdiArea):
             self.splitter = None
             self.showNormal()
 
-    def add(self, window: QtWidgets.QWidget, new: bool=False, icon: Optional[str]=None) -> None:
-        if (not new and
-                QtWidgets.QApplication.keyboardModifiers() != Qt.AltModifier and
-                self.activeSubWindow() is not None):
+    def add(
+        self,
+        window: QtWidgets.QWidget,
+        new: bool = False,
+        icon: Optional[str] = None,
+    ) -> None:
+        if (
+            not new
+            and QtWidgets.QApplication.keyboardModifiers() != Qt.AltModifier
+            and self.activeSubWindow() is not None
+        ):
             self.closeActiveSubWindow()
         window.setAttribute(Qt.WA_DeleteOnClose)
         sub_window = self.addSubWindow(window)

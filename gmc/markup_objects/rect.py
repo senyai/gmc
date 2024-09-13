@@ -21,9 +21,9 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         Qt.Key.Key_2: (2, 3),
         Qt.Key.Key_3: (2,),
     }
-    CURSOR = QtGui.QCursor(QtGui.QPixmap('gmc:cursors/add_rect.svg'), 6, 6)
+    CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_rect.svg"), 6, 6)
 
-    def __init__(self, rect: Optional[QRectF]=None):
+    def __init__(self, rect: Optional[QRectF] = None):
         super().__init__()
         if rect is None:
             rect = QRectF()
@@ -78,12 +78,17 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         self.on_change_rect(self._rect)
 
     def notify_delete(self) -> None:
-        if all(item.isSelected() for item in self.childItems()
-               if isinstance(item, MoveableDiamond)):
+        if all(
+            item.isSelected()
+            for item in self.childItems()
+            if isinstance(item, MoveableDiamond)
+        ):
             self.stop_edit_nodes()
             self.scene().removeItem(self)
 
-    def itemChange(self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any) -> Any:
+    def itemChange(
+        self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
+    ) -> Any:
         if change == self.ItemSelectedChange:
             if value:
                 self.on_select()
@@ -116,7 +121,8 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
             if self._prev_rect != self._rect:
                 scene.undo_stack.push(
                     UndoRectModification(
-                        self, self._prev_rect, QRectF(self._rect))
+                        self, self._prev_rect, QRectF(self._rect)
+                    )
                 )
             self.prepareGeometryChange()
 
@@ -140,8 +146,7 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     def mouse_press(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         self._press_timer = QElapsedTimer()
         self._press_timer.start()
-        self._rect = QRectF(view.mapToScene(event.pos()),
-                                  QSizeF(0, 0))
+        self._rect = QRectF(view.mapToScene(event.pos()), QSizeF(0, 0))
         self.setFlag(self.ItemIsSelectable, False)
         self.setFlag(self.ItemIsMovable, False)
         view.set_mouse_press(None)
@@ -187,10 +192,12 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
 
 
 class UndoRectCreate(QtWidgets.QUndoCommand):
-    def __init__(self,
-                 scene: QtWidgets.QGraphicsScene,
-                 markup_rect: MarkupRect,
-                 rect: QRectF) -> None:
+    def __init__(
+        self,
+        scene: QtWidgets.QGraphicsScene,
+        markup_rect: MarkupRect,
+        rect: QRectF,
+    ) -> None:
         self._scene = scene
         self._markup_rect = markup_rect
         self._rect = rect
@@ -209,10 +216,9 @@ class UndoRectCreate(QtWidgets.QUndoCommand):
 
 
 class UndoRectModification(QtWidgets.QUndoCommand):
-    def __init__(self,
-                 markup_rect: MarkupRect,
-                 old_rect: QRectF,
-                 new_rect: QRectF) -> None:
+    def __init__(
+        self, markup_rect: MarkupRect, old_rect: QRectF, new_rect: QRectF
+    ) -> None:
         self._markup_rect = markup_rect
         self._old_rect = old_rect
         self._new_rect = new_rect

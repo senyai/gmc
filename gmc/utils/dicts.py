@@ -3,18 +3,26 @@ from typing import Any, Dict, Tuple, Type
 from .json import ZeroDict
 
 
-def dicts_are_equal(a: Any, b: Any, eps: float=1e-7, _basic_types: Tuple[Type[Any], ...]=(int, str, type(None))) -> bool:
+def dicts_are_equal(
+    a: Any,
+    b: Any,
+    eps: float = 1e-7,
+    _basic_types: Tuple[Type[Any], ...] = (int, str, type(None)),
+) -> bool:
     if isinstance(a, _basic_types) or isinstance(b, _basic_types):
         return a == b
     if isinstance(a, float) and isinstance(b, float):
         return abs(a - b) < eps
     if isinstance(a, Mapping) and isinstance(b, Mapping):
-        return (len(a) == len(b) and
-                all(key in b for key in a) and
-                all(dicts_are_equal(a[key], b[key]) for key in a))
+        return (
+            len(a) == len(b)
+            and all(key in b for key in a)
+            and all(dicts_are_equal(a[key], b[key]) for key in a)
+        )
     if isinstance(a, Sequence) and isinstance(b, Sequence):
-        return (len(a) == len(b) and
-                all(dicts_are_equal(v1, v2) for v1, v2 in zip(a, b)))
+        return len(a) == len(b) and all(
+            dicts_are_equal(v1, v2) for v1, v2 in zip(a, b)
+        )
     if isinstance(a, ZeroDict) or isinstance(b, ZeroDict):
         return False
     if type(a) is not type(b):
@@ -24,11 +32,10 @@ def dicts_are_equal(a: Any, b: Any, eps: float=1e-7, _basic_types: Tuple[Type[An
         #       .format(type(a), type(b)))
         # print("a = ", a, "b = ", b)
         return False
-    raise Exception(
-        "Invalid dict objects ({} vs {})".format(type(a), type(b)))
+    raise Exception("Invalid dict objects ({} vs {})".format(type(a), type(b)))
 
 
-assert dicts_are_equal([1,2,3], (1,2,3))
+assert dicts_are_equal([1, 2, 3], (1, 2, 3))
 
 
 def dicts_merge(d: Dict[str, Any], u: Dict[str, Any]):
@@ -40,4 +47,4 @@ def dicts_merge(d: Dict[str, Any], u: Dict[str, Any]):
     return d
 
 
-assert dicts_merge({'a': 1}, {'a': 2, 'c':3}) == {'a': 2, 'c':3}
+assert dicts_merge({"a": 1}, {"a": 2, "c": 3}) == {"a": 2, "c": 3}

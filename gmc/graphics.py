@@ -2,7 +2,9 @@ from PyQt5.QtGui import QPixmap, QPainter, QBrush
 from PyQt5.QtCore import Qt
 
 
-def chess(size: int=4, color1:int=Qt.red, color2:int=Qt.white) -> QBrush:
+def chess(
+    size: int = 4, color1: int = Qt.red, color2: int = Qt.white
+) -> QBrush:
     pixmap = QPixmap(size, size)
     painter = QPainter(pixmap)
     painter.fillRect(0, 0, size, size, color1)

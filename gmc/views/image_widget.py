@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action
 from .image_view import ImageView
 from ..markup_objects import MarkupSelect
+
 Qt = QtCore.Qt
 tr = lambda text: QtCore.QCoreApplication.translate("@default", text)
 
@@ -11,7 +12,9 @@ class ImageWidget(QtWidgets.QWidget):
     # on_paste is emmited when user pastes objects, copied from gmc
     on_paste = QtCore.pyqtSignal(list)
 
-    def __init__(self, default_actions: List[QtWidgets.QAction], view_cls=ImageView):
+    def __init__(
+        self, default_actions: List[QtWidgets.QAction], view_cls=ImageView
+    ):
         super().__init__()
         self._default_actions = default_actions
         self._markup_group = QtWidgets.QActionGroup(self)
@@ -21,9 +24,13 @@ class ImageWidget(QtWidgets.QWidget):
         layout.addWidget(self._toolbar, 0, Qt.AlignTop)
         layout.addWidget(self._view)
 
-    def add_user_action(self, name: str, shortcut: str,
-                        icon: Union[str, QtGui.QIcon], **kwargs: Any
-                       ) -> QtWidgets.QAction:
+    def add_user_action(
+        self,
+        name: str,
+        shortcut: str,
+        icon: Union[str, QtGui.QIcon],
+        **kwargs: Any,
+    ) -> QtWidgets.QAction:
         action = new_action(self, icon, name, (shortcut,), **kwargs)
         self.add_action(action)
         return action
@@ -33,17 +40,25 @@ class ImageWidget(QtWidgets.QWidget):
         self._toolbar.addAction(action)
         self._view.addAction(action)
 
-    def add_markup_action(self, name: str,
-                          shortcut: Union[str, Tuple[str, ...]],
-                          icon: str,
-                          markup_object,
-                          **kwargs: Any) -> QtWidgets.QAction:
+    def add_markup_action(
+        self,
+        name: str,
+        shortcut: Union[str, Tuple[str, ...]],
+        icon: str,
+        markup_object,
+        **kwargs: Any,
+    ) -> QtWidgets.QAction:
         if isinstance(shortcut, str):
             shortcut = (shortcut,)  # support str as shortcut for convenience
         action = new_action(
-            self, icon, name, shortcut,
+            self,
+            icon,
+            name,
+            shortcut,
             triggered=lambda: self._set_markup_object(markup_object),
-            checkable=True, **kwargs)
+            checkable=True,
+            **kwargs,
+        )
         self._markup_group.addAction(action)
         self.add_action(action)
         return action
@@ -51,7 +66,11 @@ class ImageWidget(QtWidgets.QWidget):
     def add_select_action(self) -> QtWidgets.QAction:
         """Adds default "Select and Transform Objects" action"""
         return self.add_markup_action(
-            tr("Select and Transform Objects"), ("m", "esc"), "pointer", MarkupSelect)
+            tr("Select and Transform Objects"),
+            ("m", "esc"),
+            "pointer",
+            MarkupSelect,
+        )
 
     def add_default_actions(self) -> None:
         selection = (
@@ -62,8 +81,11 @@ class ImageWidget(QtWidgets.QWidget):
             self._view.copy_action,
             self._view.paste_action,
         )
-        for actions in (self._view.get_zoom_actions(),
-                        selection, self._default_actions):
+        for actions in (
+            self._view.get_zoom_actions(),
+            selection,
+            self._default_actions,
+        ):
             self._view.addAction(separator(self))
             self._view.addActions(actions)
             if actions is not selection:
@@ -79,8 +101,9 @@ class ImageWidget(QtWidgets.QWidget):
     def _set_markup_object(self, cls):
         return self._view.set_markup_object(cls)
 
-    def set_pixmap(self,
-                   pixmap: QtGui.QPixmap) -> QtWidgets.QGraphicsPixmapItem:
+    def set_pixmap(
+        self, pixmap: QtGui.QPixmap
+    ) -> QtWidgets.QGraphicsPixmapItem:
         return self._view.set_pixmap(pixmap)
 
     def scene(self):

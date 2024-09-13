@@ -1,12 +1,13 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
 from gmc.markup_objects import MarkupObjectMeta
 from collections import namedtuple
+
 Qt = QtCore.Qt
 
 
 class MarkupNode(QtWidgets.QGraphicsItem, MarkupObjectMeta):
-    _bounding_rect = QtCore.QRectF(-8., -8., 16., 16.)
-    _rect = QtCore.QRectF(-4., -4., 8., 8.)
+    _bounding_rect = QtCore.QRectF(-8.0, -8.0, 16.0, 16.0)
+    _rect = QtCore.QRectF(-4.0, -4.0, 8.0, 8.0)
     _shape = QtGui.QPainterPath()
     _shape.addEllipse(_bounding_rect)
     BRUSH = QtGui.QBrush(QtGui.QColor(0, 0, 0, 127))
@@ -15,6 +16,7 @@ class MarkupNode(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     def __init__(self, node_id, pos, meta=None):
         if node_id is None:
             import uuid
+
             node_id = str(uuid.uuid1())
         assert isinstance(node_id, (str, int)), node_id
         self.node_id = node_id
@@ -23,9 +25,13 @@ class MarkupNode(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         super(MarkupNode, self).__init__()
         self.setZValue(1000)
         self.setPos(pos)
-        self.setFlags(self.ItemIgnoresTransformations | self.ItemIsMovable |
-                      self.ItemIsSelectable | self.ItemIsFocusable |
-                      self.ItemSendsGeometryChanges)
+        self.setFlags(
+            self.ItemIgnoresTransformations
+            | self.ItemIsMovable
+            | self.ItemIsSelectable
+            | self.ItemIsFocusable
+            | self.ItemSendsGeometryChanges
+        )
 
     def itemChange(self, change, value):
         if change == self.ItemPositionHasChanged:
@@ -152,8 +158,7 @@ class MarkupEdge(QtWidgets.QGraphicsItem):
         else:
             raise AssertionError("invalid node in `notify`", node)
         self.prepareGeometryChange()
-        self._rc = QtCore.QRectF(
-            self._line.p1(), self._line.p2()).normalized()
+        self._rc = QtCore.QRectF(self._line.p1(), self._line.p2()).normalized()
         self.update()
 
     def delete(self):

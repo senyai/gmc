@@ -4,14 +4,15 @@ from PyQt5.QtCore import QPointF
 
 from ..graphics import chess
 from ..utils import new_action, get_icon, tr, clipboard
+
 Qt = QtCore.Qt
 
 
-def no_action(event: QtGui.QMouseEvent, self: 'ImageView') -> bool:
+def no_action(event: QtGui.QMouseEvent, self: "ImageView") -> bool:
     return False
 
 
-def no_cancel(view: 'ImageView') -> None:
+def no_cancel(view: "ImageView") -> None:
     pass
 
 
@@ -26,14 +27,16 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         Qt.Key.Key_Left: QPointF(-1, 0),
         # Qt.Key_4: QPointF(-1, 0),
     }
-    _current_object: Optional['MarkupObjectMeta'] = None
+    _current_object: Optional["MarkupObjectMeta"] = None
 
     # False: don't try to show cursor
     # None: cursor not on window
     # QPointF: draw cursor
 
     _cross_pos: Optional[Union[QPointF, bool]] = False
-    _cross_pen = QtGui.QPen(QtGui.QColor(255, 32, 32, 224), 0.0, Qt.PenStyle.CustomDashLine)
+    _cross_pen = QtGui.QPen(
+        QtGui.QColor(255, 32, 32, 224), 0.0, Qt.PenStyle.CustomDashLine
+    )
     _cross_pen.setDashPattern([16, 8])
 
     def __init__(self, parent: QtCore.QObject) -> None:
@@ -42,29 +45,39 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         self.selectionChanged.connect(self._on_selection_changed)
         self.setItemIndexMethod(self.ItemIndexMethod.NoIndex)
 
-    def mouseDoubleClickEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
+    def mouseDoubleClickEvent(
+        self, event: QtWidgets.QGraphicsSceneMouseEvent
+    ) -> None:
         # This function exists to clear current object when nothing is clicked
         item = self.itemAt(event.scenePos(), QtGui.QTransform())
-        if item is None or getattr(item, 'no_doubleclick', False):
+        if item is None or getattr(item, "no_doubleclick", False):
             self.set_current_markup_object(None)
         super().mouseDoubleClickEvent(event)
 
-    def mouseMoveEvent(self, event: QtWidgets.QGraphicsSceneMouseEvent) -> None:
+    def mouseMoveEvent(
+        self, event: QtWidgets.QGraphicsSceneMouseEvent
+    ) -> None:
         if self._cross_pos is not False:
             self._cross_pos = event.scenePos()
             self.invalidate(QtCore.QRectF(), self.SceneLayer.ForegroundLayer)
         super().mouseMoveEvent(event)
 
-    def drawForeground(self, painter: QtGui.QPainter, rect: QtCore.QRectF) -> None:
+    def drawForeground(
+        self, painter: QtGui.QPainter, rect: QtCore.QRectF
+    ) -> None:
         coords = self._cross_pos
         if type(coords) is not QPointF:
             return
         painter.setClipRect(rect)
         painter.setPen(self._cross_pen)
-        painter.drawLine(QPointF(coords.x(), rect.top() - 24 + coords.y() % 24),
-                        QPointF(coords.x(), rect.bottom()))
-        painter.drawLine(QPointF(rect.left() + coords.x() % 24 - 24, coords.y()),
-                        QPointF(rect.right(), coords.y()))
+        painter.drawLine(
+            QPointF(coords.x(), rect.top() - 24 + coords.y() % 24),
+            QPointF(coords.x(), rect.bottom()),
+        )
+        painter.drawLine(
+            QPointF(rect.left() + coords.x() % 24 - 24, coords.y()),
+            QPointF(rect.right(), coords.y()),
+        )
 
     def event(self, event: QtCore.QEvent) -> bool:
         if event.type() == event.Type.Leave and self._cross_pos is not False:
@@ -102,7 +115,9 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         self.parent().delete_action.setEnabled(bool(items))
         self.parent().copy_action.setEnabled(bool(items))
 
-    def set_current_markup_object(self, markup_object: Optional['MarkupObjectMeta']) -> None:
+    def set_current_markup_object(
+        self, markup_object: Optional["MarkupObjectMeta"]
+    ) -> None:
         """
         :purpose: unknown
 
@@ -110,7 +125,10 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         """
         if self._current_object is markup_object:
             return
-        if self._current_object is not None and self._current_object.in_edit_mode():
+        if (
+            self._current_object is not None
+            and self._current_object.in_edit_mode()
+        ):
             self._current_object.stop_edit_nodes()
         self._current_object = markup_object
 
@@ -125,8 +143,8 @@ class MarkupScene(QtWidgets.QGraphicsScene):
 
 
 # should return `True` when the event is accepted
-MouseCallback = Callable[[QtGui.QMouseEvent, 'ImageView'], bool]
-CancelCallback = Callable[['ImageView'], None]
+MouseCallback = Callable[[QtGui.QMouseEvent, "ImageView"], bool]
+CancelCallback = Callable[["ImageView"], None]
 
 
 class ImageView(QtWidgets.QGraphicsView):
@@ -134,6 +152,7 @@ class ImageView(QtWidgets.QGraphicsView):
 
     def __init__(self):
         from ..settings import settings
+
         super().__init__(
             contextMenuPolicy=Qt.ActionsContextMenu,
             backgroundBrush=chess(16, settings.bg_1, settings.bg_2),
@@ -147,42 +166,62 @@ class ImageView(QtWidgets.QGraphicsView):
         self._scene = MarkupScene(self)
         self.setScene(self._scene)
         self.addAction(
-            QtWidgets.QAction(tr("Debug"), self, triggered=self._debug))
+            QtWidgets.QAction(tr("Debug"), self, triggered=self._debug)
+        )
         KS = QtGui.QKeySequence
 
         self.delete_action = new_action(
-            self, 'delete', tr("Delete Selection"), (Qt.Key_Delete,),
-            triggered=self._delete, enabled=False)
+            self,
+            "delete",
+            tr("Delete Selection"),
+            (Qt.Key_Delete,),
+            triggered=self._delete,
+            enabled=False,
+        )
         self.select_all_action = new_action(
-            self, 'select_all', tr("Select All"), (KS.StandardKey.SelectAll,),
-            triggered=self._select_all)
+            self,
+            "select_all",
+            tr("Select All"),
+            (KS.StandardKey.SelectAll,),
+            triggered=self._select_all,
+        )
 
         self.copy_action = new_action(
-            self, 'copy', tr("Copy"), (KS.StandardKey.Copy,),
-            triggered=self._copy)
+            self,
+            "copy",
+            tr("Copy"),
+            (KS.StandardKey.Copy,),
+            triggered=self._copy,
+        )
         self.paste_action = new_action(
-            self, 'paste', tr("Paste"), (KS.StandardKey.Paste,),
-            triggered=self._paste)
+            self,
+            "paste",
+            tr("Paste"),
+            (KS.StandardKey.Paste,),
+            triggered=self._paste,
+        )
 
         # undo
         self.undo_action = self._scene.undo_stack.createUndoAction(
-            self, tr("Undo"))
+            self, tr("Undo")
+        )
         ctrl_z = KS(Qt.CTRL + Qt.Key_Z)
         undo_shortcuts = KS.keyBindings(KS.StandardKey.Undo)
         if ctrl_z not in undo_shortcuts:
             undo_shortcuts.append(ctrl_z)
         self.undo_action.setShortcuts(undo_shortcuts)
-        self.undo_action.setIcon(get_icon('undo'))
+        self.undo_action.setIcon(get_icon("undo"))
 
         # redo
         self.redo_action = self._scene.undo_stack.createRedoAction(
-            self, tr("Redo"))
+            self, tr("Redo")
+        )
         ctrl_y = KS(Qt.CTRL + Qt.Key_Y)
         redo_shortcuts = KS.keyBindings(KS.StandardKey.Redo)
         if ctrl_y not in redo_shortcuts:
             redo_shortcuts.append(ctrl_y)
         self.redo_action.setShortcuts(redo_shortcuts)
-        self.redo_action.setIcon(get_icon('redo'))
+        self.redo_action.setIcon(get_icon("redo"))
 
         self.unset_all_events()
 
@@ -194,7 +233,7 @@ class ImageView(QtWidgets.QGraphicsView):
         self.set_mouse_doubleclick(None)
         self.set_cancel(None)
 
-    def set_markup_object(self, cls: Type['MarkupObjectMeta']) -> None:
+    def set_markup_object(self, cls: Type["MarkupObjectMeta"]) -> None:
         """
         :param cls: callable, that returns markup object.
         """
@@ -225,7 +264,7 @@ class ImageView(QtWidgets.QGraphicsView):
         deleted_items: List[MarkupObjectMeta] = []
         for item in self._scene.selectedItems():
             # we delete even `MoveableDiamond` because how otherwise delete it
-            if hasattr(item, 'delete'):
+            if hasattr(item, "delete"):
                 # we check that item's scene exists, because `delete` method
                 # can remove other selected items.
                 if item.delete() and item.scene():
@@ -235,7 +274,8 @@ class ImageView(QtWidgets.QGraphicsView):
                         deleted_items.append(item)
         if deleted_items:
             self._scene.undo_stack.push(
-                UndoObjectsDelete(self._scene, deleted_items))
+                UndoObjectsDelete(self._scene, deleted_items)
+            )
 
     def _copy(self) -> None:
         data_list: List[Any] = []
@@ -263,8 +303,9 @@ class ImageView(QtWidgets.QGraphicsView):
     def _debug(self) -> None:
         print("debug", self._scene.items())
 
-    def set_pixmap(self,
-                   pixmap: QtGui.QPixmap) -> QtWidgets.QGraphicsPixmapItem:
+    def set_pixmap(
+        self, pixmap: QtGui.QPixmap
+    ) -> QtWidgets.QGraphicsPixmapItem:
         self.unset_all_events()
         self._scene.set_current_markup_object(None)
         self._scene.clear()
@@ -273,23 +314,48 @@ class ImageView(QtWidgets.QGraphicsView):
         self._scene.addItem(item)
         p = self._scene_padding_px
         self._scene.setSceneRect(
-            -p, -p, pixmap.width() + p * 2, pixmap.height() + p * 2)
+            -p, -p, pixmap.width() + p * 2, pixmap.height() + p * 2
+        )
         self._auto_zoom(self._auto_zoom_act.isChecked())
         return item
 
-    def get_zoom_actions(self) -> Tuple[QtWidgets.QAction, QtWidgets.QAction, QtWidgets.QAction, QtWidgets.QAction]:
+    def get_zoom_actions(
+        self,
+    ) -> Tuple[
+        QtWidgets.QAction,
+        QtWidgets.QAction,
+        QtWidgets.QAction,
+        QtWidgets.QAction,
+    ]:
         zoom_in = new_action(
-            self, 'zoom_in', tr("Zoom In"), [Qt.Key_Plus, Qt.Key_Equal],
-            triggered=lambda: self._scale_view(1.2))
+            self,
+            "zoom_in",
+            tr("Zoom In"),
+            [Qt.Key_Plus, Qt.Key_Equal],
+            triggered=lambda: self._scale_view(1.2),
+        )
         zoom_out = new_action(
-            self, 'zoom_out', tr("Zoom Out"), (Qt.Key_Minus, Qt.Key_Underscore),
-            triggered=lambda: self._scale_view(1 / 1.2))
+            self,
+            "zoom_out",
+            tr("Zoom Out"),
+            (Qt.Key_Minus, Qt.Key_Underscore),
+            triggered=lambda: self._scale_view(1 / 1.2),
+        )
         zoom_1_1 = new_action(
-            self, 'zoom_1_1', tr("Zoom 1:1"), (Qt.Key_0, Qt.Key_Insert),
-            triggered=lambda: self._set_scale(1.0))
+            self,
+            "zoom_1_1",
+            tr("Zoom 1:1"),
+            (Qt.Key_0, Qt.Key_Insert),
+            triggered=lambda: self._set_scale(1.0),
+        )
         self._auto_zoom_act = new_action(
-            self, 'zoom_auto', tr("Auto Zoom"), (Qt.Key_ParenRight,),
-            checkable=True, triggered=self._auto_zoom)
+            self,
+            "zoom_auto",
+            tr("Auto Zoom"),
+            (Qt.Key_ParenRight,),
+            checkable=True,
+            triggered=self._auto_zoom,
+        )
         return (zoom_in, zoom_out, zoom_1_1, self._auto_zoom_act)
 
     def _auto_zoom(self, yes: bool) -> None:
@@ -305,7 +371,8 @@ class ImageView(QtWidgets.QGraphicsView):
         elif event.button() == Qt.MouseButton.MiddleButton:  # dragging
             LB = Qt.MouseButton.LeftButton
             lmbe = lambda: QtGui.QMouseEvent(
-                event.type(), event.pos(), LB, LB, event.modifiers())
+                event.type(), event.pos(), LB, LB, event.modifiers()
+            )
             self._prev_drag_mode = self.dragMode()
             self.setDragMode(self.ScrollHandDrag)
             event = lmbe()
@@ -343,12 +410,20 @@ class ImageView(QtWidgets.QGraphicsView):
             super().wheelEvent(event)
 
     def _scale_view(self, factor: float) -> None:
-        new_factor = self.transform().scale(factor, factor).mapRect(
-            QtCore.QRectF(0, 0, 1, 1)).width()
-        current_factor = self.transform().map(1., 1.)[0]
-        if (0.01 <= new_factor <= 256. or
-                current_factor < 0.01 and new_factor > current_factor or
-                new_factor > 256. and new_factor < current_factor):
+        new_factor = (
+            self.transform()
+            .scale(factor, factor)
+            .mapRect(QtCore.QRectF(0, 0, 1, 1))
+            .width()
+        )
+        current_factor = self.transform().map(1.0, 1.0)[0]
+        if (
+            0.01 <= new_factor <= 256.0
+            or current_factor < 0.01
+            and new_factor > current_factor
+            or new_factor > 256.0
+            and new_factor < current_factor
+        ):
             self.scale(factor, factor)
 
     def _set_scale(self, scale: float) -> None:
@@ -358,7 +433,9 @@ class ImageView(QtWidgets.QGraphicsView):
         self.scale(scale, scale)
 
     @staticmethod
-    def _dummy_mouse_move(event: QtGui.QMouseEvent, self: 'ImageView', *args: Any) -> None:
+    def _dummy_mouse_move(
+        event: QtGui.QMouseEvent, self: "ImageView", *args: Any
+    ) -> None:
         # Mouse is just moving
         # pos = self.mapToScene(event.pos())
         size = self.viewport().size()
@@ -366,37 +443,44 @@ class ImageView(QtWidgets.QGraphicsView):
         event_x, event_y = event.x(), event.y()
         # mouse wrap implementation from
         # https://overthere.co.uk/2012/11/29/qgraphicsview-with-mouse-wrapping/
-        if event.buttons() == Qt.MiddleButton and (event_y < 0 or
-                event_y > height or event_x < 0 or event_x > width):
+        if event.buttons() == Qt.MiddleButton and (
+            event_y < 0 or event_y > height or event_x < 0 or event_x > width
+        ):
             # Mouse cursor has left the widget. Wrap the mouse.
             global_pos = self.mapToGlobal(event.pos())
             if event_y < 0 or event_y > height:
                 # Cursor left on the y axis. Move cursor to the
                 # opposite side.
-                global_pos.setY(global_pos.y() +
-                                (height if event_y < 0 else -height))
+                global_pos.setY(
+                    global_pos.y() + (height if event_y < 0 else -height)
+                )
             else:
                 # Cursor left on the x axis. Move cursor to the
                 # opposite side.
-                global_pos.setX(global_pos.x() +
-                                (width if event_x < 0 else -width))
+                global_pos.setX(
+                    global_pos.x() + (width if event_x < 0 else -width)
+                )
 
             # For the scroll hand dragging to work with mouse wrapping
             # we have to emulate a mouse release, move the cursor and
             # then emulate a mouse press. Not doing this causes the
             # scroll hand drag to stop after the cursor has moved.
-            r_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonRelease,
-                                    self.mapFromGlobal(QtGui.QCursor.pos()),
-                                    Qt.MiddleButton,
-                                    Qt.NoButton,
-                                    Qt.NoModifier)
+            r_event = QtGui.QMouseEvent(
+                QtCore.QEvent.MouseButtonRelease,
+                self.mapFromGlobal(QtGui.QCursor.pos()),
+                Qt.MiddleButton,
+                Qt.NoButton,
+                Qt.NoModifier,
+            )
             self.mouseReleaseEvent(r_event)
             QtGui.QCursor.setPos(global_pos)
-            p_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonPress,
-                                  self.mapFromGlobal(QtGui.QCursor.pos()),
-                                  Qt.MiddleButton,
-                                  Qt.MiddleButton,
-                                  Qt.NoModifier)
+            p_event = QtGui.QMouseEvent(
+                QtCore.QEvent.MouseButtonPress,
+                self.mapFromGlobal(QtGui.QCursor.pos()),
+                Qt.MiddleButton,
+                Qt.MiddleButton,
+                Qt.NoModifier,
+            )
             QtCore.QTimer.singleShot(0, lambda: self.mousePressEvent(p_event))
 
     def show_cross_cursor(self):
@@ -412,9 +496,9 @@ class ImageView(QtWidgets.QGraphicsView):
 
 
 class UndoObjectsMovement(QtWidgets.QUndoCommand):
-    def __init__(self,
-                 items: List[QtWidgets.QGraphicsItem],
-                 vec: QPointF) -> None:
+    def __init__(
+        self, items: List[QtWidgets.QGraphicsItem], vec: QPointF
+    ) -> None:
         self._items = items
         self._prev_poses = [item.pos() for item in items]
         self._vec = vec
@@ -430,9 +514,11 @@ class UndoObjectsMovement(QtWidgets.QUndoCommand):
 
 
 class UndoObjectsDelete(QtWidgets.QUndoCommand):
-    def __init__(self,
-                 scene: QtWidgets.QGraphicsScene,
-                 items: List[QtWidgets.QGraphicsItem]) -> None:
+    def __init__(
+        self,
+        scene: QtWidgets.QGraphicsScene,
+        items: List[QtWidgets.QGraphicsItem],
+    ) -> None:
         self._scene = scene
         self._items = items
         super().__init__(tr("Deletion"))

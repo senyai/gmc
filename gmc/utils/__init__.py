@@ -16,7 +16,7 @@ def separator(parent: QObject) -> QAction:
 
 
 def _create_icon(name: str) -> QIcon:
-    icon = QIcon('gmc:%s.svg' % name)
+    icon = QIcon("gmc:%s.svg" % name)
     get_icon.__dict__[name] = icon
     return icon
 
@@ -25,20 +25,26 @@ def get_icon(name: str) -> QIcon:
     return get_icon.__dict__.get(name) or _create_icon(name)
 
 
-def new_action(parent: QObject,
-               icon: Union[str, QIcon],
-               text: str,
-               shortcuts: Tuple[Union[str, QKeySequence.StandardKey],...]=(),
-               **kwargs: Any) -> QAction:
+def new_action(
+    parent: QObject,
+    icon: Union[str, QIcon],
+    text: str,
+    shortcuts: Tuple[Union[str, QKeySequence.StandardKey], ...] = (),
+    **kwargs: Any,
+) -> QAction:
     sequences = [QKeySequence(s) for s in shortcuts]
     shrtctext = "; ".join(
-        s.toString(format=QKeySequence.NativeText) for s in sequences)
-    kwargs.setdefault('shortcutContext', Qt.ShortcutContext.WidgetShortcut)
+        s.toString(format=QKeySequence.NativeText) for s in sequences
+    )
+    kwargs.setdefault("shortcutContext", Qt.ShortcutContext.WidgetShortcut)
     if not isinstance(icon, QIcon):
         icon = get_icon(icon)
     action = QAction(
-        icon, f"{text}\t{shrtctext}", parent,
-        toolTip=f"{text.replace('&', '')} ({shrtctext})", **kwargs  # type: ignore[call-overload]
+        icon,
+        f"{text}\t{shrtctext}",
+        parent,
+        toolTip=f"{text.replace('&', '')} ({shrtctext})",
+        **kwargs,  # type: ignore[call-overload]
     )  # type: QAction
     action.setShortcuts(sequences)
     return action

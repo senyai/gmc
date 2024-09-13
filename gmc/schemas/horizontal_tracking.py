@@ -273,8 +273,13 @@ class QuarrySchema(OneSourceOneDestination, MarkupSchema):
                 )
         except IOError:
             self._user_tags: set[str] = {
-                "background", "cab", "front_edge",
-                "body_empty", "body_full", "back_edge"}
+                "background",
+                "cab",
+                "front_edge",
+                "body_empty",
+                "body_full",
+                "back_edge",
+            }
 
         pixmap = load_pixmap(src_data_path)
         self._size = (pixmap.width(), pixmap.height())

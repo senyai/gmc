@@ -18,6 +18,7 @@ from ...utils.image import load_pixmap
 from ...utils.read_properties import read_properties
 from ...utils import get_icon, separator, new_action, tr, clipboard
 from ...file_widgets.one_source_one_destination import OneSourceOneDestination
+
 Qt = QtCore.Qt
 MB = QtWidgets.QMessageBox
 
@@ -27,32 +28,35 @@ class with_brush:
     """
     Mixin to assign a brush to a markup_object based on tags
     """
+
     _colors = {
-        'forest': QtGui.QColor(173, 209, 158, 128),
-        'buildings': QtGui.QColor(224, 223, 223, 128),
-        'grass': QtGui.QColor(182, 227, 182, 128),
-        'road': QtGui.QColor(182, 227, 182, 128),
-        'concrete': QtGui.QColor(255, 0, 255, 128),
+        "forest": QtGui.QColor(173, 209, 158, 128),
+        "buildings": QtGui.QColor(224, 223, 223, 128),
+        "grass": QtGui.QColor(182, 227, 182, 128),
+        "road": QtGui.QColor(182, 227, 182, 128),
+        "concrete": QtGui.QColor(255, 0, 255, 128),
     }
 
     def __new__(cls, markup_object: Type[HasTags]):
-        assert not hasattr(markup_object, '_current_color')
+        assert not hasattr(markup_object, "_current_color")
         assert issubclass(markup_object, HasTags), markup_object
         markup_object._current_color = Qt.NoBrush
-        if '_on_tags_changed' not in markup_object.__dict__:
+        if "_on_tags_changed" not in markup_object.__dict__:
             markup_object._on_tags_changed = cls.on_tags_changed
         return markup_object
 
     @staticmethod
-    def on_tags_changed(self: HasTags, brushes: Dict[str, QtGui.QColor]=_colors) -> None:
+    def on_tags_changed(
+        self: HasTags, brushes: Dict[str, QtGui.QColor] = _colors
+    ) -> None:
         for tag in self._tags:
             color = brushes.get(tag)
             if color is not None:
                 self._current_color = color
                 break
-            elif tag.startswith('color(') and tag.endswith(')'):
+            elif tag.startswith("color(") and tag.endswith(")"):
                 color = brushes[tag] = QtGui.QColor(tag[6:-1])
-                if tag[6] != '#':
+                if tag[6] != "#":
                     color.setAlpha(80)
                 self._current_color = color
                 break
@@ -62,26 +66,30 @@ class with_brush:
         HasTags._on_tags_changed(self)
 
 
-def from_json_polygon(cls, schema: 'TaggedObjects', data: Dict[str, Any]):
-    polygon = QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in data['data']])
-    return cls(schema, polygon, tags=data.get('tags', ()))
+def from_json_polygon(cls, schema: "TaggedObjects", data: Dict[str, Any]):
+    polygon = QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in data["data"]])
+    return cls(schema, polygon, tags=data.get("tags", ()))
 
 
-def from_json_point(cls, schema: 'TaggedObjects', data: Dict[str, Any]):
-    point = QtCore.QPointF(*data['data'])
-    return cls(schema, point, tags=data.get('tags', ()))
+def from_json_point(cls, schema: "TaggedObjects", data: Dict[str, Any]):
+    point = QtCore.QPointF(*data["data"])
+    return cls(schema, point, tags=data.get("tags", ()))
 
 
-def from_json_rect(cls: type['CustomRectangle'], schema: 'TaggedObjects', data: Dict[str, Any]):
-    rect = QtCore.QRectF(*data['data'])
-    return cls(schema, rect, tags=data.get('tags', ()))
+def from_json_rect(
+    cls: type["CustomRectangle"], schema: "TaggedObjects", data: Dict[str, Any]
+):
+    rect = QtCore.QRectF(*data["data"])
+    return cls(schema, rect, tags=data.get("tags", ()))
 
 
 @with_brush
 class CustomQuadrangle(HasTags, Quadrangle):
     from_json = classmethod(from_json_polygon)
 
-    def __init__(self, schema: 'TaggedObjects', frame=QtGui.QPolygonF(), **kwargs: Any):
+    def __init__(
+        self, schema: "TaggedObjects", frame=QtGui.QPolygonF(), **kwargs: Any
+    ):
         super().__init__(frame, **kwargs)
         self._schema = schema
 
@@ -113,7 +121,7 @@ class CustomSegment(HasTags, MarkupLine):
 
 
 class CustomLine(CustomSegment):
-    CURSOR = QtGui.QCursor(QtGui.QPixmap('gmc:cursors/add_line.svg'), 6, 6)
+    CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_line.svg"), 6, 6)
 
     def paint(self, painter: QtGui.QPainter, option, widget) -> None:
         painter.setBrush(Qt.NoBrush)
@@ -128,8 +136,10 @@ class CustomLine(CustomSegment):
         painter.setPen(pen)
         painter.drawLine(p0, p1)
         painter.setPen(dashed)
-        painter.drawLine(QtCore.QPointF(p0.x() + x_shift, p0.y() + y_shift),
-                         QtCore.QPointF(p1.x() - x_shift, p1.y() - y_shift))
+        painter.drawLine(
+            QtCore.QPointF(p0.x() + x_shift, p0.y() + y_shift),
+            QtCore.QPointF(p1.x() - x_shift, p1.y() - y_shift),
+        )
         super().paint(painter, option, widget)
 
 
@@ -163,7 +173,7 @@ class CustomRectangle(HasTags, MarkupRect):
     PEN_DASHED = QtGui.QPen(Qt.GlobalColor.green, 0, Qt.PenStyle.DashLine)
     from_json = classmethod(from_json_rect)
 
-    def __init__(self, schema, rect:Optional[QtCore.QRectF]=None, **kwargs):
+    def __init__(self, schema, rect: Optional[QtCore.QRectF] = None, **kwargs):
         super().__init__(rect, **kwargs)
         self._schema = schema
 
@@ -181,12 +191,16 @@ class CustomRectangle(HasTags, MarkupRect):
 
 class CustomPath(HasTags, EditableMarkupPolygon):
     from_json = classmethod(from_json_polygon)
-    CURSOR = QtGui.QCursor(QtGui.QPixmap('gmc:cursors/add_broken_line.svg'), 6, 6)
+    CURSOR = QtGui.QCursor(
+        QtGui.QPixmap("gmc:cursors/add_broken_line.svg"), 6, 6
+    )
 
-    def __init__(self,
-                 schema: 'TaggedObjects',
-                 polygon: Optional[QtGui.QPolygonF] = None,
-                 **kwargs: Any):
+    def __init__(
+        self,
+        schema: "TaggedObjects",
+        polygon: Optional[QtGui.QPolygonF] = None,
+        **kwargs: Any,
+    ):
         if polygon is None:
             polygon = QtGui.QPolygonF()
         elif not isinstance(polygon, QtGui.QPolygonF):
@@ -195,8 +209,9 @@ class CustomPath(HasTags, EditableMarkupPolygon):
         self._schema = schema
 
     def paint(self, painter: QtGui.QPainter, option, widget):
-        EditableMarkupPolygon.paint(self, painter, option, widget,
-                                    f=QtGui.QPainter.drawPolyline)
+        EditableMarkupPolygon.paint(
+            self, painter, option, widget, f=QtGui.QPainter.drawPolyline
+        )
         self.draw_tags(painter)
 
     def shape(self):
@@ -211,7 +226,7 @@ class CustomPath(HasTags, EditableMarkupPolygon):
 
 @with_brush
 class CustomRegion(CustomPath):
-    CURSOR = QtGui.QCursor(QtGui.QPixmap('gmc:cursors/add_region.svg'), 6, 6)
+    CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_region.svg"), 6, 6)
 
     def paint(self, painter: QtGui.QPainter, option, widget):
         painter.setBrush(self._current_color)
@@ -222,18 +237,18 @@ class CustomRegion(CustomPath):
         return EditableMarkupPolygon.shape(self)
 
 
-last_used_default_action = ''
+last_used_default_action = ""
 
 
 class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     _cls_to_type: ClassVar[Dict[str, str]] = {
-        'CustomQuadrangle': 'quad',
-        'CustomLine': 'line',
-        'CustomSegment': 'seg',
-        'CustomPoint': 'point',
-        'CustomRectangle': 'rect',
-        'CustomRegion': 'region',
-        'CustomPath': 'path',
+        "CustomQuadrangle": "quad",
+        "CustomLine": "line",
+        "CustomSegment": "seg",
+        "CustomPoint": "point",
+        "CustomRectangle": "rect",
+        "CustomRegion": "region",
+        "CustomPath": "path",
     }
 
     def __init__(self, markup_window, default_actions):
@@ -246,6 +261,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         splitter.addWidget(iw)
         iw.on_paste.connect(self._on_paste)
         from ...views.properties_view import PropertiesView
+
         self._properties_view = PropertiesView()
         splitter.addWidget(self._properties_view)
         layout.addWidget(splitter)
@@ -253,43 +269,82 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
         self._select_action = iw.add_select_action()
         self._add_quadrangle_action = iw.add_markup_action(
-            tr("Add Quadrangle"), "q", "quadrangle", lambda: CustomQuadrangle(self)
+            tr("Add Quadrangle"),
+            "q",
+            "quadrangle",
+            lambda: CustomQuadrangle(self),
         )
         self._add_line_action = iw.add_markup_action(
-            tr("Add Line"), "l", "line", lambda: CustomLine(self))
+            tr("Add Line"), "l", "line", lambda: CustomLine(self)
+        )
         self._add_segment_action = iw.add_markup_action(
-            tr("Add Segment"), "s", "segment", lambda: CustomSegment(self))
+            tr("Add Segment"), "s", "segment", lambda: CustomSegment(self)
+        )
         self._add_point_action = iw.add_markup_action(
-            tr("Add Point"), ".", "point", lambda: CustomPoint(self))
+            tr("Add Point"), ".", "point", lambda: CustomPoint(self)
+        )
         self._add_rect_action = iw.add_markup_action(
-            tr("Add Rectangle"), "r", "rect", lambda: CustomRectangle(self))
+            tr("Add Rectangle"), "r", "rect", lambda: CustomRectangle(self)
+        )
         self._add_broken_line_action = iw.add_markup_action(
-            tr("Add Broken Line"), "w", "broken_line", lambda: CustomPath(self))
+            tr("Add Broken Line"), "w", "broken_line", lambda: CustomPath(self)
+        )
         self._add_region_action = iw.add_markup_action(
-            tr("Add Region"), "g", "region", lambda: CustomRegion(self))
+            tr("Add Region"), "g", "region", lambda: CustomRegion(self)
+        )
         iw.add_action(separator(iw))
         self._tag_red_action = iw.add_user_action(
-            tr("Tag &Red"), "t,r", "tag_red", enabled=False, checkable=True,
-            triggered=lambda arg: self._trigger_tag('red', arg))
+            tr("Tag &Red"),
+            "t,r",
+            "tag_red",
+            enabled=False,
+            checkable=True,
+            triggered=lambda arg: self._trigger_tag("red", arg),
+        )
         self._tag_green_action = iw.add_user_action(
-            tr("Tag &Green"), "t,g", "tag_green", enabled=False, checkable=True,
-            triggered=lambda arg: self._trigger_tag('green', arg))
+            tr("Tag &Green"),
+            "t,g",
+            "tag_green",
+            enabled=False,
+            checkable=True,
+            triggered=lambda arg: self._trigger_tag("green", arg),
+        )
         self._tag_blue_action = iw.add_user_action(
-            tr("Tag &Blue"), "t,b", "tag_blue", enabled=False, checkable=True,
-            triggered=lambda arg: self._trigger_tag('blue', arg))
+            tr("Tag &Blue"),
+            "t,b",
+            "tag_blue",
+            enabled=False,
+            checkable=True,
+            triggered=lambda arg: self._trigger_tag("blue", arg),
+        )
         self._tag_yellow_action = iw.add_user_action(
-            tr("Tag &Yellow"), "t,y", "tag_yellow", enabled=False, checkable=True,
-            triggered=lambda arg: self._trigger_tag('yellow', arg))
+            tr("Tag &Yellow"),
+            "t,y",
+            "tag_yellow",
+            enabled=False,
+            checkable=True,
+            triggered=lambda arg: self._trigger_tag("yellow", arg),
+        )
         self._tag_txt_action = iw.add_user_action(
-            tr("Tag &Text"), "t,t", "tag_txt", enabled=False,
-            triggered=self._trigger_tag_edit)
+            tr("Tag &Text"),
+            "t,t",
+            "tag_txt",
+            enabled=False,
+            triggered=self._trigger_tag_edit,
+        )
         self._image_widget.scene().selectionChanged.connect(
-            self._on_selection_changed)
+            self._on_selection_changed
+        )
 
         show_cat_act = new_action(
-            markup_window, 'cat', tr("Show Mad Cat Toolbar"), ("Ctrl+T",),
-            checkable=True, checked=True,
-            toggled=cat_toolbar.setVisible)
+            markup_window,
+            "cat",
+            tr("Show Mad Cat Toolbar"),
+            ("Ctrl+T",),
+            checkable=True,
+            checked=True,
+            toggled=cat_toolbar.setVisible,
+        )
         iw.add_action(show_cat_act)
         iw.add_default_actions()
 
@@ -298,19 +353,31 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         self._unique_cache: Dict[str, Tuple[QtCore.QDateTime, Set[str]]] = {}
 
     @classmethod
-    def create_data_widget(cls, mdi_area: QtWidgets.QMdiArea, extra_args: Dict[str, Any]):
+    def create_data_widget(
+        cls, mdi_area: QtWidgets.QMdiArea, extra_args: Dict[str, Any]
+    ):
         splitter = super().create_data_widget(mdi_area, extra_args)
         iterpolate_act = new_action(
-            splitter, 'cat', tr("&Interpolate"), (Qt.CTRL + Qt.Key_I,),
-            triggered=cls._interpolate)
+            splitter,
+            "cat",
+            tr("&Interpolate"),
+            (Qt.CTRL + Qt.Key_I,),
+            triggered=cls._interpolate,
+        )
         tags_act = new_action(
-            splitter, 'cat', tr("Interpolate &Tags"),
+            splitter,
+            "cat",
+            tr("Interpolate &Tags"),
             (Qt.CTRL + Qt.ALT + Qt.Key_I,),
-            triggered=lambda: cls._interpolate(True))
+            triggered=lambda: cls._interpolate(True),
+        )
         tags_act = new_action(
-            splitter, 'paste', tr("&Paste Objects"),
+            splitter,
+            "paste",
+            tr("&Paste Objects"),
             (Qt.CTRL + Qt.Key_V,),
-            triggered=lambda: cls._on_paste_into_files())
+            triggered=lambda: cls._on_paste_into_files(),
+        )
         cls._source_widget.view().addActions((iterpolate_act, tags_act))
         return splitter
 
@@ -318,35 +385,51 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         toolbar = QtWidgets.QToolBar()
         # visibility action:
         self.tags_hidden = False
-        show_tags_icon = get_icon('tag_eye_close')
-        show_tags_icon.addFile('gmc:tag_eye_open.svg', state=show_tags_icon.On)
-        toolbar.addAction(new_action(
-            toolbar, show_tags_icon, tr("Toggle Tags &Visibility"),
-            ("t,v",), checkable=True, toggled=self._toggle_tag_visibility,
-            shortcutContext=Qt.WindowShortcut))
-        show_items_icon = get_icon('eye_close')
-        show_items_icon.addFile('gmc:eye_open.svg', state=show_items_icon.On)
-        toolbar.addAction(new_action(
-            toolbar, show_items_icon, tr("Toggle Selected &Items Visibility"),
-            ("h",), checkable=True, toggled=self._toggle_visibility,
-            shortcutContext=Qt.WindowShortcut))
+        show_tags_icon = get_icon("tag_eye_close")
+        show_tags_icon.addFile("gmc:tag_eye_open.svg", state=show_tags_icon.On)
+        toolbar.addAction(
+            new_action(
+                toolbar,
+                show_tags_icon,
+                tr("Toggle Tags &Visibility"),
+                ("t,v",),
+                checkable=True,
+                toggled=self._toggle_tag_visibility,
+                shortcutContext=Qt.WindowShortcut,
+            )
+        )
+        show_items_icon = get_icon("eye_close")
+        show_items_icon.addFile("gmc:eye_open.svg", state=show_items_icon.On)
+        toolbar.addAction(
+            new_action(
+                toolbar,
+                show_items_icon,
+                tr("Toggle Selected &Items Visibility"),
+                ("h",),
+                checkable=True,
+                toggled=self._toggle_visibility,
+                shortcutContext=Qt.WindowShortcut,
+            )
+        )
         toolbar.addSeparator()
         # default actions:
         self._default_action_cb = cb = QtWidgets.QComboBox()
         default_action_label = QtWidgets.QLabel(
-            tr("Default &Action:"), styleSheet="padding-left:1px")
+            tr("Default &Action:"), styleSheet="padding-left:1px"
+        )
         toolbar.addWidget(default_action_label)
         toolbar.addWidget(cb)
         default_action_label.setBuddy(cb)
         for text, icon_name, data in (
-                (tr("Select and Transform Objects"), "pointer", '_select_action'),
-                (tr("Add Quadrangle"), "quadrangle", '_add_quadrangle_action'),
-                (tr("Add Line"), "line", '_add_line_action'),
-                (tr("Add Segment"), "segment", '_add_segment_action'),
-                (tr("Add Point"), "point", '_add_point_action'),
-                (tr("Add Rectangle"), "rect", '_add_rect_action'),
-                (tr("Add Broken Line"), "broken_line", "_add_broken_line_action"),
-                (tr("Add Region"), "region", "_add_region_action"), ):
+            (tr("Select and Transform Objects"), "pointer", "_select_action"),
+            (tr("Add Quadrangle"), "quadrangle", "_add_quadrangle_action"),
+            (tr("Add Line"), "line", "_add_line_action"),
+            (tr("Add Segment"), "segment", "_add_segment_action"),
+            (tr("Add Point"), "point", "_add_point_action"),
+            (tr("Add Rectangle"), "rect", "_add_rect_action"),
+            (tr("Add Broken Line"), "broken_line", "_add_broken_line_action"),
+            (tr("Add Region"), "region", "_add_region_action"),
+        ):
             cb.addItem(get_icon(icon_name), text, data)
             if text == last_used_default_action:
                 cb.setCurrentIndex(cb.count() - 1)
@@ -355,21 +438,32 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         # default tags:
         hlp = "List of tags splitter by `,` character"
         default_tags_label = QtWidgets.QLabel(
-            tr("Default &Tags:"), toolTip=hlp, styleSheet="padding-left:1px")
+            tr("Default &Tags:"), toolTip=hlp, styleSheet="padding-left:1px"
+        )
         toolbar.addWidget(default_tags_label)
-        self._default_tags_edit = QtWidgets.QLineEdit(maximumWidth=97, toolTip=hlp)
+        self._default_tags_edit = QtWidgets.QLineEdit(
+            maximumWidth=97, toolTip=hlp
+        )
         default_tags_label.setBuddy(self._default_tags_edit)
         toolbar.addWidget(self._default_tags_edit)
         toolbar.addWidget(
-            QtWidgets.QPushButton(tr("&Unique Tag"), icon=get_icon('prev'),
-                              clicked=self._on_unique_tag, shortcut="Ctrl+U",
-                              toolTip="Generate unique tag per directory"))
+            QtWidgets.QPushButton(
+                tr("&Unique Tag"),
+                icon=get_icon("prev"),
+                clicked=self._on_unique_tag,
+                shortcut="Ctrl+U",
+                toolTip="Generate unique tag per directory",
+            )
+        )
         toolbar.addSeparator()
         # mad cat mode
         self._mad_cat_btn = QtWidgets.QPushButton(
-            tr("Mad Cat Mode"), icon=get_icon('cat'),
-            checkable=True, shortcut="Ctrl+M",
-            toolTip="Save and switch to next frame after adding any object")
+            tr("Mad Cat Mode"),
+            icon=get_icon("cat"),
+            checkable=True,
+            shortcut="Ctrl+M",
+            toolTip="Save and switch to next frame after adding any object",
+        )
         toolbar.addWidget(self._mad_cat_btn)
         return toolbar
 
@@ -383,14 +477,20 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         relative_path = cls._source_widget.get_root_qdir().relativeFilePath
         source_view = cls._source_widget.view()
         image_paths = source_view.selected_files()
-        return image_paths, [dst_dir.filePath(relative_path(path) + ".json")
-                             for path in image_paths],
+        return (
+            image_paths,
+            [
+                dst_dir.filePath(relative_path(path) + ".json")
+                for path in image_paths
+            ],
+        )
 
     @classmethod
-    def _interpolate(cls, use_filter: bool=False):
+    def _interpolate(cls, use_filter: bool = False):
         image_paths, markup_paths = cls._list_paths()
         try:
             from .markup_interpolation import interpolate_many
+
             interpolate_many(image_paths, markup_paths, use_filter)
         except Exception as e:
             MB.warning(cls._source_widget, tr("Can't interpolate:"), str(e))
@@ -401,29 +501,31 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         new_objects = clipboard.get_objects()
 
         def convert_to_markup(obj: Dict[str, Any]):
-            obj['type'] = cls._cls_to_type[obj.pop('_class')]
+            obj["type"] = cls._cls_to_type[obj.pop("_class")]
             return obj
 
         new_objects = [convert_to_markup(obj) for obj in new_objects]
 
         if not new_objects or not markup_paths:
             return
-        question = tr('Paste {} objects into {} files?').format(
-            len(new_objects), len(markup_paths))
-        if MB.question(cls._source_widget, tr("Paste"), question) != MB.StandardButton.Yes:
+        question = tr("Paste {} objects into {} files?").format(
+            len(new_objects), len(markup_paths)
+        )
+        if (
+            MB.question(cls._source_widget, tr("Paste"), question)
+            != MB.StandardButton.Yes
+        ):
             return
         for image_path, markup_path in zip(image_paths, markup_paths):
             if Path(markup_path).exists():
                 data = load_json(markup_path, cls._source_widget)
             else:
                 size = load_pixmap(image_path).size()
-                data = {
-                    "objects": [],
-                    "size": [size.width(), size.height()]
-                }
+                data = {"objects": [], "size": [size.width(), size.height()]}
             existing_objects: List[Any] = data["objects"]
             filtered_new_objects = [
-                obj for obj in new_objects if obj not in existing_objects]
+                obj for obj in new_objects if obj not in existing_objects
+            ]
             existing_objects.extend(filtered_new_objects)
             dump_json(markup_path, data)
 
@@ -439,7 +541,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     def on_object_created(self, obj: HasTags):
         default_tags = self._default_tags_edit.text()
         if default_tags:
-            for tag in default_tags.split(','):
+            for tag in default_tags.split(","):
                 obj.add_tag(tag.strip())
         if self._mad_cat_btn.isChecked() and self._next_action.isEnabled():
             self._next_action.trigger()
@@ -448,12 +550,13 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
     def _on_unique_tag(self):
         from json import load
+
         qdir = QtCore.QFileInfo(self._dst_markup_path).dir()
         dir_filter = qdir.Files | qdir.NoDotAndDotDot
         all_sets: List[Set[str]] = []
         cache = self._unique_cache
         for fi in qdir.entryInfoList(dir_filter, qdir.Name):
-            if fi.suffix() != 'json':
+            if fi.suffix() != "json":
                 continue
             last_modified = fi.lastModified()
             absolute_path = fi.absoluteFilePath()
@@ -463,14 +566,14 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
                     all_sets.append(tags)
                     continue
             try:
-                with open(absolute_path, 'r') as f:
+                with open(absolute_path, "r") as f:
                     data = load(f)
             except Exception:
                 print("invalid json", absolute_path, "(ignored)")
                 continue
             tags: Set[str] = set()
-            for obj in data.get('objects', ()):
-                tags |= set(obj.get('tags', ()))
+            for obj in data.get("objects", ()):
+                tags |= set(obj.get("tags", ()))
             all_sets.append(tags)
             cache[absolute_path] = (last_modified, tags)
 
@@ -491,6 +594,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     def _alpabet_gen():
         from string import digits, ascii_uppercase
         from itertools import product
+
         chars = ascii_uppercase + digits
         for n in range(1, 5):
             for comb in product(chars, repeat=n):
@@ -511,13 +615,14 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     def _toggle_visibility(self, state) -> None:
         scene = self._image_widget.scene()
         state = not state
-        for item in (scene.selectedItems() or scene.items()):
+        for item in scene.selectedItems() or scene.items():
             if isinstance(item, MarkupObjectMeta):
                 item.setVisible(state)
 
     def _trigger_tag_edit(self) -> None:
-        edit_tags(self._image_widget, self._get_selected_items(),
-                  self._user_tags)
+        edit_tags(
+            self._image_widget, self._get_selected_items(), self._user_tags
+        )
 
     def _get_selected_items(self) -> List[HasTags]:
         try:
@@ -533,23 +638,29 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
         self._tag_red_action.setEnabled(enabled)
         self._tag_red_action.setChecked(
-            all(item.has_tag('red') for item in items))
+            all(item.has_tag("red") for item in items)
+        )
         self._tag_green_action.setEnabled(enabled)
         self._tag_green_action.setChecked(
-            all(item.has_tag('green') for item in items))
+            all(item.has_tag("green") for item in items)
+        )
         self._tag_blue_action.setEnabled(enabled)
         self._tag_blue_action.setChecked(
-            all(item.has_tag('blue') for item in items))
+            all(item.has_tag("blue") for item in items)
+        )
         self._tag_yellow_action.setEnabled(enabled)
         self._tag_yellow_action.setChecked(
-            all(item.has_tag('yellow') for item in items))
+            all(item.has_tag("yellow") for item in items)
+        )
 
         self._tag_txt_action.setEnabled(enabled)
 
     def open_markup(self, src_data_path: str, dst_markup_path: str) -> None:
-        properties = read_properties((src_data_path, dst_markup_path), self._image_widget)
-        self._user_tags = set(properties.get('tags', ()))
-        if 'properties' in properties:
+        properties = read_properties(
+            (src_data_path, dst_markup_path), self._image_widget
+        )
+        self._user_tags = set(properties.get("tags", ()))
+        if "properties" in properties:
             self._properties_view.set_schema(properties)
             self._properties_view.show()
         else:
@@ -562,25 +673,26 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         self._dst_markup_path = dst_markup_path
         self._original_markup = {}  # for cases when 'load_json' raises
         self._original_markup = load_json(dst_markup_path, self._image_widget)
-        if 'properties' in self._original_markup:
+        if "properties" in self._original_markup:
             self._properties_view.set_properties(
-                self._original_markup['properties'])
+                self._original_markup["properties"]
+            )
         scene = self._image_widget.scene()
         # view = self._image_widget._view
         item = None
         mapping = {
-            'quad': CustomQuadrangle,
-            'line': CustomLine,
-            'seg': CustomSegment,
-            'point': CustomPoint,
-            'rect': CustomRectangle,
-            'path': CustomPath,
-            'region': CustomRegion,
+            "quad": CustomQuadrangle,
+            "line": CustomLine,
+            "seg": CustomSegment,
+            "point": CustomPoint,
+            "rect": CustomRectangle,
+            "path": CustomPath,
+            "region": CustomRegion,
         }
 
-        for obj in self._original_markup.get('objects', ()):
+        for obj in self._original_markup.get("objects", ()):
             try:
-                the_type = obj['type']
+                the_type = obj["type"]
             except KeyError:
                 raise KeyError(f"invalid type for {obj!r}")
             if the_type not in mapping:
@@ -599,16 +711,18 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     def markup_has_changes(self) -> bool:
         return not dicts_are_equal(self._get_markup(), self._original_markup)
 
-    def save_markup(self, force:bool=True) -> None:
+    def save_markup(self, force: bool = True) -> None:
         view = self._image_widget.view()
 
         # trick to make "Space" button to save tags
         if not self._mad_cat_btn.isChecked():
-            r_event = QtGui.QMouseEvent(QtCore.QEvent.MouseButtonRelease,
-                                        view.mapFromGlobal(QtGui.QCursor.pos()),
-                                        Qt.LeftButton,
-                                        Qt.NoButton,
-                                        Qt.NoModifier)
+            r_event = QtGui.QMouseEvent(
+                QtCore.QEvent.MouseButtonRelease,
+                view.mapFromGlobal(QtGui.QCursor.pos()),
+                Qt.LeftButton,
+                Qt.NoButton,
+                Qt.NoModifier,
+            )
             view._current_mouse_release(r_event, view)
         markup = self._get_markup()
         if dicts_are_equal(markup, self._original_markup) and not force:
@@ -620,27 +734,27 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
     def _get_markup(self) -> Dict[str, Any]:
         markup = defaultdict(list, self._original_markup)
-        markup['objects'] = []
-        markup['size'] = self._size
+        markup["objects"] = []
+        markup["size"] = self._size
         for item in self._image_widget.scene().items():
             the_type = self._cls_to_type.get(type(item).__name__)
             if the_type is None:
                 continue
             data = item.data()
-            assert 'type' not in data
-            data['type'] = the_type
-            markup['objects'].append(data)
+            assert "type" not in data
+            data["type"] = the_type
+            markup["objects"].append(data)
         properties = self._properties_view.get_properties()
         if properties:
-            markup['properties'] = properties
-        elif 'properties' in markup:
-            del markup['properties']  # so we don't store old options
+            markup["properties"] = properties
+        elif "properties" in markup:
+            del markup["properties"]  # so we don't store old options
         return markup
 
     def _on_paste(self, objects) -> None:
         scene = self._image_widget.scene()
         for obj in objects:
-            cls = globals().get(obj.get('_class'))
+            cls = globals().get(obj.get("_class"))
             if issubclass(cls, HasTags):
                 item = cls.from_json(self, obj)
                 scene.addItem(item)

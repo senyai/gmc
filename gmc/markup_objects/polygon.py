@@ -20,6 +20,7 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
 
     _polygon: QtGui.QPolygonF
     CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_line.svg"), 6, 6)
+    UNDO = True  # Allow subclasses to disable undoing
 
     def __init__(self, polygon: Optional[QtGui.QPolygonF]) -> None:
         super().__init__()
@@ -101,11 +102,13 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
             for diamond in self.childItems():
                 scene.removeItem(diamond)
             if self._start_edit_polygon != self._polygon:
-                scene.undo_stack.push(
-                    UndoPolygonEdit(self, self._start_edit_polygon)
-                )
-        # is not deleted in UndoPolygonUndoEdit
-        if hasattr(self, "._start_edit_polygon"):
+                undo = UndoPolygonEdit(self, self._start_edit_polygon)
+                if self.UNDO:
+                    scene.undo_stack.push(undo)
+                else:
+                    undo.redo()
+        # is not deleted in UndoPolygonEdit
+        if hasattr(self, "_start_edit_polygon"):
             del self._start_edit_polygon
 
     def on_change_polygon(self, _: QtGui.QPolygonF) -> None:
@@ -177,7 +180,11 @@ class EditableMarkupPolygon(MarkupPolygon):
             if scene is not None:
                 scene.removeItem(self)
         else:
-            scene.undo_stack.push(UndoPolygonDelPoints(self, indices))
+            undo = UndoPolygonDelPoints(self, indices)
+            if self.UNDO:
+                scene.undo_stack.push(undo)
+            else:
+                undo.redo()
             self.on_stop_edit()
             self.on_start_edit()
 
@@ -193,13 +200,17 @@ class EditableMarkupPolygon(MarkupPolygon):
             self._polygon.append(pos)
         else:
             if len(self._polygon) == 2:
-                scene.undo_stack.push(UndoPolygonCreate(scene, self))
+                undo = UndoPolygonCreate(scene, self)
             else:
                 new_points = QPointF(self._polygon[-1])
                 del self._polygon[-1]
-                scene.undo_stack.push(
-                    UndoPolygonAddPoint(self, len(self._polygon), new_points)
+                undo = UndoPolygonAddPoint(
+                    self, len(self._polygon), new_points
                 )
+            if self.UNDO:
+                scene.undo_stack.push(undo)
+            else:
+                undo.redo()
             distance = view.transform().map(self._polygon[-2] - pos)
             if (
                 hypot(distance.x(), distance.y()) < 2.5

@@ -173,7 +173,7 @@ class EditableMarkupPolygon(MarkupPolygon):
                 indices.append(item.idx)
         scene = self.scene()
         if len(self._polygon) == len(indices):
-            self.stop_edit_nodes()
+            self.ensure_edition_canceled()
             if scene is not None:
                 scene.removeItem(self)
         else:
@@ -258,7 +258,7 @@ class UndoPolygonCreate(QtWidgets.QUndoCommand):
 
     def undo(self) -> None:
         mp = self._markup_polygon
-        mp.stop_edit_nodes()
+        mp.ensure_edition_canceled()
         self._scene.removeItem(mp)
 
 
@@ -278,7 +278,7 @@ class UndoPolygonAddPoint(QtWidgets.QUndoCommand):
 
     def undo(self) -> None:
         mp = self._markup_polygon
-        mp.stop_edit_nodes()
+        mp.ensure_edition_canceled()
         del mp._polygon[self._idx]
         mp.update()
 
@@ -302,7 +302,7 @@ class UndoPolygonDelPoints(QtWidgets.QUndoCommand):
 
     def undo(self) -> None:
         mp = self._markup_polygon
-        mp.stop_edit_nodes()
+        mp.ensure_edition_canceled()
         for idx, point in zip(self._indices[::-1], self._points[::-1]):
             mp._polygon.insert(idx, point)
         mp.update()
@@ -319,14 +319,12 @@ class UndoPolygonEdit(QtWidgets.QUndoCommand):
 
     def redo(self) -> None:
         mp = self._markup_polygon
-        if mp.in_edit_mode():
-            mp.stop_edit_nodes()
+        mp.ensure_edition_canceled()
         mp._polygon = self._polygon[:]
         mp.update()
 
     def undo(self) -> None:
         mp = self._markup_polygon
-        if mp.in_edit_mode():
-            mp.stop_edit_nodes()
+        mp.ensure_edition_canceled()
         mp._polygon = self._prev_polygon[:]
         mp.update()

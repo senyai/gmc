@@ -38,6 +38,10 @@ class MarkupObjectMeta:
         self.on_start_edit()
         self.scene().set_current_markup_object(self)
 
+    def ensure_edition_canceled(self):
+        if self.in_edit_mode():
+            self.stop_edit_nodes()
+
     def stop_edit_nodes(self) -> None:
         assert (
             self._edit_mode

@@ -83,7 +83,7 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
             for item in self.childItems()
             if isinstance(item, MoveableDiamond)
         ):
-            self.stop_edit_nodes()
+            self.ensure_edition_canceled()
             self.scene().removeItem(self)
 
     def itemChange(
@@ -211,7 +211,7 @@ class UndoRectCreate(QtWidgets.QUndoCommand):
 
     def undo(self) -> None:
         mr = self._markup_rect
-        mr.stop_edit_nodes()
+        mr.ensure_edition_canceled()
         self._scene.removeItem(mr)
 
 
@@ -226,12 +226,12 @@ class UndoRectModification(QtWidgets.QUndoCommand):
 
     def redo(self) -> None:
         mr = self._markup_rect
-        mr.stop_edit_nodes()
+        mr.ensure_edition_canceled()
         mr._rect = QRectF(self._new_rect)
         mr.update()
 
     def undo(self) -> None:
         mr = self._markup_rect
-        mr.stop_edit_nodes()
+        mr.ensure_edition_canceled()
         mr._rect = QRectF(self._old_rect)
         mr.update()

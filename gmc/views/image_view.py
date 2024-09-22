@@ -125,11 +125,8 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         """
         if self._current_object is markup_object:
             return
-        if (
-            self._current_object is not None
-            and self._current_object.in_edit_mode()
-        ):
-            self._current_object.stop_edit_nodes()
+        if self._current_object is not None:
+            self._current_object.ensure_edition_canceled()
         self._current_object = markup_object
 
     def show_cross_cursor(self, pos: Optional[QPointF]) -> None:
@@ -268,7 +265,7 @@ class ImageView(QtWidgets.QGraphicsView):
                 # we check that item's scene exists, because `delete` method
                 # can remove other selected items.
                 if item.delete() and item.scene():
-                    item.stop_edit_nodes()
+                    item.ensure_edition_canceled()
                     self._scene.removeItem(item)
                     if isinstance(item, MarkupObjectMeta):
                         deleted_items.append(item)

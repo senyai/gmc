@@ -105,7 +105,7 @@ class Quadrangle(MarkupPolygon):
             for item in self.childItems()
             if isinstance(item, MoveableDiamond)
         ):
-            self.stop_edit_nodes()
+            self.ensure_edition_canceled()
             self.scene().removeItem(self)
 
     def _finish(self, view: ImageView):

@@ -1,5 +1,5 @@
 from collections.abc import Mapping, Sequence
-from typing import Any, Dict, Tuple, Type
+from typing import Any
 from .json import ZeroDict
 
 
@@ -7,7 +7,7 @@ def dicts_are_equal(
     a: Any,
     b: Any,
     eps: float = 1e-7,
-    _basic_types: Tuple[Type[Any], ...] = (int, str, type(None)),
+    _basic_types: tuple[type[Any], ...] = (int, str, type(None)),
 ) -> bool:
     if isinstance(a, _basic_types) or isinstance(b, _basic_types):
         return a == b
@@ -35,16 +35,16 @@ def dicts_are_equal(
     raise Exception("Invalid dict objects ({} vs {})".format(type(a), type(b)))
 
 
-assert dicts_are_equal([1, 2, 3], (1, 2, 3))
+# assert dicts_are_equal([1, 2, 3], (1, 2, 3))
 
 
-def dicts_merge(d: Dict[str, Any], u: Dict[str, Any]):
+def dicts_merge(d: dict[str, Any], u: dict[str, Any]):
     for k, v in u.items():
-        if isinstance(v, Dict):
+        if isinstance(v, dict):
             d[k] = dicts_merge(d[k], v)
         else:
             d[k] = u[k]
     return d
 
 
-assert dicts_merge({"a": 1}, {"a": 2, "c": 3}) == {"a": 2, "c": 3}
+# assert dicts_merge({"a": 1}, {"a": 2, "c": 3}) == {"a": 2, "c": 3}

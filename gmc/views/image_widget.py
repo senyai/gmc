@@ -1,4 +1,4 @@
-from typing import Any, List, Tuple, Union
+from typing import Any
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action
 from .image_view import ImageView
@@ -13,7 +13,7 @@ class ImageWidget(QtWidgets.QWidget):
     on_paste = QtCore.pyqtSignal(list)
 
     def __init__(
-        self, default_actions: List[QtWidgets.QAction], view_cls=ImageView
+        self, default_actions: list[QtWidgets.QAction], view_cls=ImageView
     ):
         super().__init__()
         self._default_actions = default_actions
@@ -28,7 +28,7 @@ class ImageWidget(QtWidgets.QWidget):
         self,
         name: str,
         shortcut: str,
-        icon: Union[str, QtGui.QIcon],
+        icon: str | QtGui.QIcon,
         **kwargs: Any,
     ) -> QtWidgets.QAction:
         action = new_action(self, icon, name, (shortcut,), **kwargs)
@@ -43,7 +43,7 @@ class ImageWidget(QtWidgets.QWidget):
     def add_markup_action(
         self,
         name: str,
-        shortcut: Union[str, Tuple[str, ...]],
+        shortcut: str | tuple[str, ...],
         icon: str,
         markup_object,
         **kwargs: Any,

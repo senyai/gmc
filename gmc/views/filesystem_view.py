@@ -1,4 +1,4 @@
-from typing import Any, Iterable, List, Optional, Tuple
+from typing import Any, Iterable
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action, tr
 
@@ -8,7 +8,7 @@ Qt = QtCore.Qt
 class FilesystemView(QtWidgets.QTreeView):
     _valid_root: bool = False
 
-    def __init__(self, actions: Optional[List[QtWidgets.QAction]] = None):
+    def __init__(self, actions: Iterable[QtWidgets.QAction] | None = None):
         super().__init__(
             headerHidden=True,
             selectionMode=self.ExtendedSelection,
@@ -108,7 +108,7 @@ class FilesystemView(QtWidgets.QTreeView):
             for action in self._actions:
                 action.setEnabled(all_file)
 
-    def selected_files(self, *_args: Any) -> List[str]:
+    def selected_files(self, *_args: Any) -> list[str]:
         return [
             info.filePath()
             for info in self._selected_info_map
@@ -120,7 +120,7 @@ class FilesystemView(QtWidgets.QTreeView):
         return map(self.model().fileInfo, self.selectedIndexes())
 
     @property
-    def selected_files_relative(self) -> List[str]:
+    def selected_files_relative(self) -> list[str]:
         root_dir: QtCore.QDir = self.model().root_dir_qdir
         return [
             root_dir.relativeFilePath(info.filePath())
@@ -130,7 +130,7 @@ class FilesystemView(QtWidgets.QTreeView):
 
     def all_files_in(
         self, path: QtCore.QDir, src_path: QtCore.QDir
-    ) -> List[str]:
+    ) -> list[str]:
         """
         :param path: `QDir` to list files in
         :param src_path: base `QDir` instance (== self.get_root_qdir())
@@ -166,8 +166,9 @@ class FilesystemView(QtWidgets.QTreeView):
         index = model.setRootPath(path)
         self.setRootIndex(index)
 
-    def set_name_filters(self, name_filters: Tuple[str, ...]):
-        self.model().setNameFilters(name_filters)
+    def set_name_filters(self, name_filters: Iterable[str]):
+        model: MinimalFileSystemModel = self.model()
+        model.setNameFilters(name_filters)
 
     def user_select_path(
         self, title: str, callback=lambda view, path: view.set_path(path)
@@ -184,7 +185,8 @@ class FilesystemView(QtWidgets.QTreeView):
 
 
 class MinimalFileSystemModel(QtWidgets.QFileSystemModel):
-    _sel_path = _root_dir = None
+    _sel_path: QtCore.QDir | None = None
+    _root_dir: QtCore.QDir | None = None
     HIGHLIGHT_BRUSH = QtGui.QBrush(QtGui.QColor(68, 170, 0, 90))
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
@@ -226,7 +228,7 @@ class MinimalFileSystemModel(QtWidgets.QFileSystemModel):
         return QtWidgets.QFileSystemModel.data(self, index, role)
 
     @property
-    def root_dir_qdir(self) -> Optional[QtCore.QDir]:
+    def root_dir_qdir(self) -> QtCore.QDir | None:
         # to check that directory is open, allow '_root_dir' to be None
         return self._root_dir  # or QtCore.QDir()
 

@@ -1,5 +1,5 @@
-# encoding: utf-8
-from typing import Any, ClassVar, Dict, Type, Union
+from __future__ import annotations
+from typing import Any, ClassVar
 from PyQt5.QtCore import QSettings, QByteArray
 from PyQt5.QtGui import QColor, QFont
 from PyQt5.QtWidgets import QMainWindow
@@ -13,7 +13,7 @@ default_font_label.setFixedPitch(False)
 class Settings:
     # `settings` as a public attribute, so custom properties are possible
     settings = QSettings("Visillect", "GMC")
-    _defaults: ClassVar[Dict[str, Union[QColor, QFont, int]]] = {
+    _defaults: ClassVar[dict[str, QColor | QFont | int]] = {
         "bg_1": QColor(0),
         "bg_2": QColor(0xF, 0xF, 0xF),
         "font_label": default_font_label,
@@ -33,7 +33,7 @@ class Settings:
 
     @classmethod
     def value(
-        cls, key: str, default: Any = None, type_: Type[Any] = str
+        cls, key: str, default: Any = None, type_: type[Any] = str
     ) -> Any:
         """for values that are rarely needed"""
         if key in cls._defaults:
@@ -45,7 +45,7 @@ class Settings:
             self.set_value(attr, getattr(self, attr))
         self.settings.sync()
 
-    def set_value(self, key: str, value: Any, type_: Type[Any] = str) -> None:
+    def set_value(self, key: str, value: Any, type_: type[Any] = str) -> None:
         if value is not None:
             if key in self._defaults:
                 type_ = type(self._defaults[key])

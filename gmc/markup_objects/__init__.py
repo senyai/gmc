@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, ClassVar, Dict, Tuple
+from typing import Any, ClassVar
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsSceneMouseEvent
@@ -13,7 +13,7 @@ class MarkupObjectMeta:
     PEN_SELECTED_DASHED = QtGui.QPen(
         Qt.GlobalColor.blue, 0, Qt.PenStyle.DashLine
     )
-    ACTION_KEYS: ClassVar[Dict[Qt.Key, Tuple[int, ...]]] = {}
+    ACTION_KEYS: ClassVar[dict[Qt.Key, tuple[int, ...]]] = {}
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         assert not hasattr(self, "_edit_mode")

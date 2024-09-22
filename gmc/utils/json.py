@@ -1,5 +1,5 @@
 import json
-from typing import Any, Dict
+from typing import Any
 from PyQt5.QtWidgets import QMessageBox, QWidget
 from PyQt5.QtCore import QFileInfo
 from . import CantOpenMarkup
@@ -26,7 +26,7 @@ def load(json_filename: str, widget: QWidget):
         return ZeroDict()  # special class so `dicts_are_equal` returns False
 
 
-def dump(json_filename: str, data: Dict[str, Any]) -> None:
+def dump(json_filename: str, data: dict[str, Any]) -> None:
     the_qdir = QFileInfo(json_filename).absoluteDir()
     the_qdir.mkpath(the_qdir.absolutePath())
 

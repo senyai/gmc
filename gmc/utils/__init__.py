@@ -1,4 +1,4 @@
-from typing import Any, Tuple, Union
+from typing import Any
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtGui import QIcon, QKeySequence
 from PyQt5.QtCore import QObject, Qt, QCoreApplication
@@ -27,9 +27,9 @@ def get_icon(name: str) -> QIcon:
 
 def new_action(
     parent: QObject,
-    icon: Union[str, QIcon],
+    icon: str | QIcon,
     text: str,
-    shortcuts: Tuple[Union[str, QKeySequence.StandardKey], ...] = (),
+    shortcuts: tuple[str | QKeySequence.StandardKey | Qt.Key, ...] = (),
     **kwargs: Any,
 ) -> QAction:
     sequences = [QKeySequence(s) for s in shortcuts]
@@ -45,7 +45,7 @@ def new_action(
         parent,
         toolTip=f"{text.replace('&', '')} ({shrtctext})",
         **kwargs,  # type: ignore[call-overload]
-    )  # type: QAction
+    )
     action.setShortcuts(sequences)
     return action
 

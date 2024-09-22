@@ -2,7 +2,7 @@ from __future__ import annotations
 import sys
 import abc
 import importlib
-from typing import Type, Iterable, Sequence
+from typing import Iterable, Sequence
 from PyQt5 import QtWidgets, QtCore
 from ..application import GMCArguments
 
@@ -49,7 +49,7 @@ class MarkupSchema(metaclass=abc.ABCMeta):
         raise NotImplementedError(cls)
 
 
-def load_schema_cls(mod_name: str, path: str | None) -> Type[MarkupSchema]:
+def load_schema_cls(mod_name: str, path: str | None) -> type[MarkupSchema]:
     if path is None:
         mod_path = "gmc.schemas." + mod_name
     else:

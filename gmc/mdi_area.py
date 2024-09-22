@@ -1,4 +1,4 @@
-from typing import Optional
+from __future__ import annotations
 from PyQt5 import QtGui, QtCore, QtWidgets
 from .utils import get_icon, separator, new_action, tr
 
@@ -111,12 +111,12 @@ class MdiArea(QtWidgets.QMdiArea):
             triggered=self.cascadeSubWindows,
         )
 
-        KS = QtGui.QKeySequence
+        SK = QtGui.QKeySequence.StandardKey
         next_act = new_action(
             self,
             "next",
             tr("Ne&xt"),
-            (KS.NextChild,),
+            (SK.NextChild,),
             triggered=self.activateNextSubWindow,
         )
 
@@ -124,7 +124,7 @@ class MdiArea(QtWidgets.QMdiArea):
             self,
             "prev",
             tr("Pre&vious"),
-            (KS.PreviousChild,),
+            (SK.PreviousChild,),
             triggered=self.activatePreviousSubWindow,
         )
 
@@ -168,7 +168,7 @@ class MdiArea(QtWidgets.QMdiArea):
         self,
         window: QtWidgets.QWidget,
         new: bool = False,
-        icon: Optional[str] = None,
+        icon: str | None = None,
     ) -> None:
         if (
             not new

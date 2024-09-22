@@ -1,4 +1,4 @@
-from typing import Any, Dict, Iterator, Sequence
+from typing import Any, Iterator, Sequence
 from PyQt5.QtCore import QFileInfo, QDir
 from PyQt5.QtWidgets import QWidget
 from .json import load
@@ -17,8 +17,8 @@ def read_properties(
     widget: QWidget,
     filename: str = ".gmc_properties.json",
     depth: int = 6,
-) -> Dict[str, Any]:
-    ret: Dict[str, Any] = {}
+) -> dict[str, Any]:
+    ret: dict[str, Any] = {}
     for path in paths:
         the_dir = QFileInfo(path).dir()
         properties_paths = list(_paths(the_dir, filename, depth))

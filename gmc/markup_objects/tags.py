@@ -1,4 +1,4 @@
-from typing import Any, Callable, DefaultDict, Dict, List, Sequence, Set
+from typing import Any, Callable, Sequence
 from PyQt5 import QtCore, QtGui, QtWidgets
 from collections import defaultdict
 from gmc.views.image_widget import ImageWidget
@@ -97,8 +97,8 @@ class HasTags:
     del grad
 
     def __init__(self, *args: Any, tags: Sequence[str] = (), **kwargs: Any):
-        self._tags: Set[str] = set(tags)
-        self._draws: List[Callable[[QtGui.QPainter], None]] = []
+        self._tags: set[str] = set(tags)
+        self._draws: list[Callable[[QtGui.QPainter], None]] = []
         self._tag_polygon = QtGui.QPolygonF()
         self._last_fm = None
         super().__init__(*args, **kwargs)
@@ -127,7 +127,7 @@ class HasTags:
         self.update()
         pass  # for overriding
 
-    def data(self) -> Dict[str, Any]:
+    def data(self) -> dict[str, Any]:
         tags = sorted(self._tags)
         ret = {"data": super().data()}
         if tags:
@@ -217,7 +217,7 @@ class TagEdit(QtWidgets.QLineEdit):
 
 def edit_tags(
     parent: ImageWidget,
-    items: List[MarkupObjectMeta],
+    items: list[MarkupObjectMeta],
     extra_tags: Sequence[str] = (),
 ) -> None:
     """
@@ -227,7 +227,7 @@ def edit_tags(
     """
     if not items:
         return
-    tags: DefaultDict[str, int] = defaultdict(
+    tags: defaultdict[str, int] = defaultdict(
         int, {tag: 0 for tag in extra_tags}
     )
     for item in items:
@@ -323,7 +323,7 @@ def edit_tags(
 
 class UndoTagModification(QtWidgets.QUndoCommand):
     def __init__(
-        self, items: List[HasTags], add: List[str], remove: List[str]
+        self, items: list[HasTags], add: list[str], remove: list[str]
     ):
         self._items = items
         self._add = add

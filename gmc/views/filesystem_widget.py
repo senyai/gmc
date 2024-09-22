@@ -1,4 +1,4 @@
-from typing import List, NamedTuple, Sequence
+from typing import NamedTuple, Sequence
 from PyQt5 import QtCore, QtWidgets
 from .filesystem_view import FilesystemView
 from ..help_label import HelpLabel
@@ -22,7 +22,7 @@ class SingleFilesystemWidget(QtWidgets.QFrame):
         self,
         parent: QtWidgets.QWidget,
         title: FilesystemTitle,
-        actions: List[QtWidgets.QAction],
+        actions: list[QtWidgets.QAction],
     ):
         assert isinstance(title, FilesystemTitle), title
         super().__init__(
@@ -65,8 +65,8 @@ class MultipleFilesystemWidget(QtWidgets.QFrame):
         self,
         parent: QtWidgets.QWidget,
         title: FilesystemTitle,
-        captions: List[str],
-        actions_list: Sequence[List[QtWidgets.QAction]],
+        captions: list[str],
+        actions_list: Sequence[list[QtWidgets.QAction]],
         N: int,
     ) -> None:
         super().__init__(
@@ -114,7 +114,7 @@ class MultipleFilesystemWidget(QtWidgets.QFrame):
             self._layout.addWidget(QtWidgets.QLabel(caption))
             self._layout.addWidget(view)
 
-    def views(self) -> List[FilesystemView]:
+    def views(self) -> list[FilesystemView]:
         return self._views
 
     def get_root_qdir(self) -> QtCore.QDir:

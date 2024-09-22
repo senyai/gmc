@@ -1,5 +1,4 @@
 # encoding: utf-8
-from typing import Any, Dict, Optional, Type
 from PyQt5 import QtCore, QtWidgets, QtGui
 from .mdi_area import MdiArea
 from .schemas import MarkupSchema, load_schema_cls, iter_schemas
@@ -14,7 +13,7 @@ tr = lambda text: QtCore.QCoreApplication.translate("@default", text)
 
 
 class MainWindow(QtWidgets.QMainWindow):
-    _schema_cls: Optional[Type[MarkupSchema]] = None
+    _schema_cls: type[MarkupSchema] | None = None
     _extra_args: GMCArguments
 
     def __init__(
@@ -74,7 +73,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.setCentralWidget(self._main_splitter)
 
-    def _sub_window_changed(self, window):
+    def _sub_window_changed(self, window: QtWidgets.QMdiSubWindow | None):
         if window is not None:
             try:
                 on_activate = window.widget().on_activate

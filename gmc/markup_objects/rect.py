@@ -1,4 +1,4 @@
-from typing import Any, Optional, Tuple
+from typing import Any
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QRectF, QPointF, QSizeF, QElapsedTimer
 
@@ -23,7 +23,7 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     }
     CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_rect.svg"), 6, 6)
 
-    def __init__(self, rect: Optional[QRectF] = None):
+    def __init__(self, rect: QRectF | None = None):
         super().__init__()
         if rect is None:
             rect = QRectF()
@@ -96,7 +96,7 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
                 self.on_deselect()
         return value
 
-    def _four_points(self) -> Tuple[QPointF, QPointF, QPointF, QPointF]:
+    def _four_points(self) -> tuple[QPointF, QPointF, QPointF, QPointF]:
         p = self._rect.topLeft()
         return (
             p + QPointF(0.0, 0.0),

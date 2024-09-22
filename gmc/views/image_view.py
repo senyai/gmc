@@ -1,4 +1,5 @@
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
+from __future__ import annotations
+from typing import Any, Callable
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPointF
 
@@ -8,16 +9,16 @@ from ..utils import new_action, get_icon, tr, clipboard
 Qt = QtCore.Qt
 
 
-def no_action(event: QtGui.QMouseEvent, self: "ImageView") -> bool:
+def no_action(event: QtGui.QMouseEvent, self: ImageView) -> bool:
     return False
 
 
-def no_cancel(view: "ImageView") -> None:
+def no_cancel(view: ImageView) -> None:
     pass
 
 
 class MarkupScene(QtWidgets.QGraphicsScene):
-    MOVEMENTS: Dict[int, QPointF] = {
+    MOVEMENTS: dict[int, QPointF] = {
         Qt.Key.Key_Up: QPointF(0, -1),
         # Qt.Key.Key_8: QPointF(0, -1),
         Qt.Key.Key_Right: QPointF(1, 0),
@@ -27,13 +28,13 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         Qt.Key.Key_Left: QPointF(-1, 0),
         # Qt.Key_4: QPointF(-1, 0),
     }
-    _current_object: Optional["MarkupObjectMeta"] = None
+    _current_object: MarkupObjectMeta | None = None
 
     # False: don't try to show cursor
     # None: cursor not on window
     # QPointF: draw cursor
 
-    _cross_pos: Optional[Union[QPointF, bool]] = False
+    _cross_pos: QPointF | bool | None = False
     _cross_pen = QtGui.QPen(
         QtGui.QColor(255, 32, 32, 224), 0.0, Qt.PenStyle.CustomDashLine
     )
@@ -97,7 +98,7 @@ class MarkupScene(QtWidgets.QGraphicsScene):
                     vec = vec * 0.25
                 elif modif & Qt.ShiftModifier:
                     vec = vec * 4.0
-                moved: List[MarkupObjectMeta] = []
+                moved: list[MarkupObjectMeta] = []
                 for item in selected:
                     if isinstance(item, MarkupObjectMeta):
                         moved.append(item)
@@ -116,7 +117,7 @@ class MarkupScene(QtWidgets.QGraphicsScene):
         self.parent().copy_action.setEnabled(bool(items))
 
     def set_current_markup_object(
-        self, markup_object: Optional["MarkupObjectMeta"]
+        self, markup_object: MarkupObjectMeta | None
     ) -> None:
         """
         :purpose: unknown
@@ -129,7 +130,7 @@ class MarkupScene(QtWidgets.QGraphicsScene):
             self._current_object.ensure_edition_canceled()
         self._current_object = markup_object
 
-    def show_cross_cursor(self, pos: Optional[QPointF]) -> None:
+    def show_cross_cursor(self, pos: QPointF | None) -> None:
         self._cross_pos = pos
         self.invalidate(QtCore.QRectF(), self.SceneLayer.ForegroundLayer)
 
@@ -230,7 +231,7 @@ class ImageView(QtWidgets.QGraphicsView):
         self.set_mouse_doubleclick(None)
         self.set_cancel(None)
 
-    def set_markup_object(self, cls: Type["MarkupObjectMeta"]) -> None:
+    def set_markup_object(self, cls: type[MarkupObjectMeta]) -> None:
         """
         :param cls: callable, that returns markup object.
         """
@@ -242,23 +243,23 @@ class ImageView(QtWidgets.QGraphicsView):
         obj = cls()  # SHOULD keep itself alive
         obj.attach(self)
 
-    def set_mouse_press(self, func: Optional[MouseCallback]) -> None:
+    def set_mouse_press(self, func: MouseCallback | None) -> None:
         self._current_mouse_press = func or no_action
 
-    def set_mouse_release(self, func: Optional[MouseCallback]) -> None:
+    def set_mouse_release(self, func: MouseCallback | None) -> None:
         self._current_mouse_release = func or no_action
 
-    def set_mouse_doubleclick(self, func: Optional[MouseCallback]) -> None:
+    def set_mouse_doubleclick(self, func: MouseCallback | None) -> None:
         self._current_mouse_doubleclick = func or no_action
 
-    def set_mouse_move(self, func: Optional[MouseCallback]) -> None:
+    def set_mouse_move(self, func: MouseCallback | None) -> None:
         self._current_mouse_move = func or self._dummy_mouse_move
 
-    def set_cancel(self, func: Optional[CancelCallback]) -> None:
+    def set_cancel(self, func: CancelCallback | None) -> None:
         self._current_cancel = func or no_cancel
 
     def _delete(self) -> None:
-        deleted_items: List[MarkupObjectMeta] = []
+        deleted_items: list[MarkupObjectMeta] = []
         for item in self._scene.selectedItems():
             # we delete even `MoveableDiamond` because how otherwise delete it
             if hasattr(item, "delete"):
@@ -275,11 +276,11 @@ class ImageView(QtWidgets.QGraphicsView):
             )
 
     def _copy(self) -> None:
-        data_list: List[Any] = []
+        data_list: list[dict[Any, Any]] = []
         for item in self._scene.selectedItems():
             if hasattr(item, "data"):
                 try:
-                    data: Dict = item.data()
+                    data: dict[Any, Any] = item.data()
                 except TypeError:
                     continue  # data(self, int): not enough arguments
                 data["_class"] = item.__class__.__name__
@@ -318,7 +319,7 @@ class ImageView(QtWidgets.QGraphicsView):
 
     def get_zoom_actions(
         self,
-    ) -> Tuple[
+    ) -> tuple[
         QtWidgets.QAction,
         QtWidgets.QAction,
         QtWidgets.QAction,
@@ -328,28 +329,28 @@ class ImageView(QtWidgets.QGraphicsView):
             self,
             "zoom_in",
             tr("Zoom In"),
-            [Qt.Key_Plus, Qt.Key_Equal],
+            (Qt.Key.Key_Plus, Qt.Key.Key_Equal),
             triggered=lambda: self._scale_view(1.2),
         )
         zoom_out = new_action(
             self,
             "zoom_out",
             tr("Zoom Out"),
-            (Qt.Key_Minus, Qt.Key_Underscore),
+            (Qt.Key.Key_Minus, Qt.Key.Key_Underscore),
             triggered=lambda: self._scale_view(1 / 1.2),
         )
         zoom_1_1 = new_action(
             self,
             "zoom_1_1",
             tr("Zoom 1:1"),
-            (Qt.Key_0, Qt.Key_Insert),
+            (Qt.Key.Key_0, Qt.Key.Key_Insert),
             triggered=lambda: self._set_scale(1.0),
         )
         self._auto_zoom_act = new_action(
             self,
             "zoom_auto",
             tr("Auto Zoom"),
-            (Qt.Key_ParenRight,),
+            (Qt.Key.Key_ParenRight,),
             checkable=True,
             triggered=self._auto_zoom,
         )
@@ -494,7 +495,7 @@ class ImageView(QtWidgets.QGraphicsView):
 
 class UndoObjectsMovement(QtWidgets.QUndoCommand):
     def __init__(
-        self, items: List[QtWidgets.QGraphicsItem], vec: QPointF
+        self, items: list[QtWidgets.QGraphicsItem], vec: QPointF
     ) -> None:
         self._items = items
         self._prev_poses = [item.pos() for item in items]
@@ -514,7 +515,7 @@ class UndoObjectsDelete(QtWidgets.QUndoCommand):
     def __init__(
         self,
         scene: QtWidgets.QGraphicsScene,
-        items: List[QtWidgets.QGraphicsItem],
+        items: list[QtWidgets.QGraphicsItem],
     ) -> None:
         self._scene = scene
         self._items = items

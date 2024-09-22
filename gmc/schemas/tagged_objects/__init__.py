@@ -1,8 +1,9 @@
+from __future__ import annotations
 from pathlib import Path
 from PyQt5 import QtCore, QtGui, QtWidgets
 from collections import defaultdict
 from math import hypot
-from typing import Any, ClassVar, Dict, List, Optional, Set, Tuple, Type
+from typing import Any, ClassVar
 
 from .. import MarkupSchema
 from ...markup_objects.polygon import EditableMarkupPolygon, MarkupObjectMeta
@@ -37,7 +38,7 @@ class with_brush:
         "concrete": QtGui.QColor(255, 0, 255, 128),
     }
 
-    def __new__(cls, markup_object: Type[HasTags]):
+    def __new__(cls, markup_object: type[HasTags]):
         assert not hasattr(markup_object, "_current_color")
         assert issubclass(markup_object, HasTags), markup_object
         markup_object._current_color = Qt.NoBrush
@@ -47,7 +48,7 @@ class with_brush:
 
     @staticmethod
     def on_tags_changed(
-        self: HasTags, brushes: Dict[str, QtGui.QColor] = _colors
+        self: HasTags, brushes: dict[str, QtGui.QColor] = _colors
     ) -> None:
         for tag in self._tags:
             color = brushes.get(tag)
@@ -66,18 +67,18 @@ class with_brush:
         HasTags._on_tags_changed(self)
 
 
-def from_json_polygon(cls, schema: "TaggedObjects", data: Dict[str, Any]):
+def from_json_polygon(cls, schema: TaggedObjects, data: dict[str, Any]):
     polygon = QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in data["data"]])
     return cls(schema, polygon, tags=data.get("tags", ()))
 
 
-def from_json_point(cls, schema: "TaggedObjects", data: Dict[str, Any]):
+def from_json_point(cls, schema: "TaggedObjects", data: dict[str, Any]):
     point = QtCore.QPointF(*data["data"])
     return cls(schema, point, tags=data.get("tags", ()))
 
 
 def from_json_rect(
-    cls: type["CustomRectangle"], schema: "TaggedObjects", data: Dict[str, Any]
+    cls: type["CustomRectangle"], schema: "TaggedObjects", data: dict[str, Any]
 ):
     rect = QtCore.QRectF(*data["data"])
     return cls(schema, rect, tags=data.get("tags", ()))
@@ -93,7 +94,12 @@ class CustomQuadrangle(HasTags, Quadrangle):
         super().__init__(frame, **kwargs)
         self._schema = schema
 
-    def paint(self, painter: QtGui.QPainter, option, widget) -> None:
+    def paint(
+        self,
+        painter: QtGui.QPainter,
+        option: QtWidgets.QStyleOptionGraphicsItem,
+        widget: QtWidgets.QWidget | None,
+    ) -> None:
         painter.setBrush(self._current_color)
         super().paint(painter, option, widget)
 
@@ -173,7 +179,7 @@ class CustomRectangle(HasTags, MarkupRect):
     PEN_DASHED = QtGui.QPen(Qt.GlobalColor.green, 0, Qt.PenStyle.DashLine)
     from_json = classmethod(from_json_rect)
 
-    def __init__(self, schema, rect: Optional[QtCore.QRectF] = None, **kwargs):
+    def __init__(self, schema, rect: QtCore.QRectF | None = None, **kwargs):
         super().__init__(rect, **kwargs)
         self._schema = schema
 
@@ -198,9 +204,9 @@ class CustomPath(HasTags, EditableMarkupPolygon):
     def __init__(
         self,
         schema: "TaggedObjects",
-        polygon: Optional[QtGui.QPolygonF] = None,
+        polygon: QtGui.QPolygonF | None = None,
         **kwargs: Any,
-    ):
+    ) -> None:
         if polygon is None:
             polygon = QtGui.QPolygonF()
         elif not isinstance(polygon, QtGui.QPolygonF):
@@ -208,13 +214,13 @@ class CustomPath(HasTags, EditableMarkupPolygon):
         super().__init__(polygon, **kwargs)
         self._schema = schema
 
-    def paint(self, painter: QtGui.QPainter, option, widget):
+    def paint(self, painter: QtGui.QPainter, option, widget) -> None:
         EditableMarkupPolygon.paint(
             self, painter, option, widget, f=QtGui.QPainter.drawPolyline
         )
         self.draw_tags(painter)
 
-    def shape(self):
+    def shape(self) -> QtGui.QPainterPath:
         return EditableMarkupPolygon.shape(self, close=False)
 
     def tag_pos(self) -> QtCore.QPointF:
@@ -241,7 +247,7 @@ last_used_default_action = ""
 
 
 class TaggedObjects(OneSourceOneDestination, MarkupSchema):
-    _cls_to_type: ClassVar[Dict[str, str]] = {
+    _cls_to_type: ClassVar[dict[str, str]] = {
         "CustomQuadrangle": "quad",
         "CustomLine": "line",
         "CustomSegment": "seg",
@@ -350,11 +356,11 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
         # so that user can go to the next file
         self._next_action = markup_window._next_action
-        self._unique_cache: Dict[str, Tuple[QtCore.QDateTime, Set[str]]] = {}
+        self._unique_cache: dict[str, tuple[QtCore.QDateTime, set[str]]] = {}
 
     @classmethod
     def create_data_widget(
-        cls, mdi_area: QtWidgets.QMdiArea, extra_args: Dict[str, Any]
+        cls, mdi_area: QtWidgets.QMdiArea, extra_args: dict[str, Any]
     ):
         splitter = super().create_data_widget(mdi_area, extra_args)
         iterpolate_act = new_action(
@@ -472,7 +478,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         last_used_default_action = text
 
     @classmethod
-    def _list_paths(cls) -> Tuple[List[str], List[str]]:
+    def _list_paths(cls) -> tuple[list[str], list[str]]:
         dst_dir = cls._destination_widget.get_root_qdir()
         relative_path = cls._source_widget.get_root_qdir().relativeFilePath
         source_view = cls._source_widget.view()
@@ -500,7 +506,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         image_paths, markup_paths = cls._list_paths()
         new_objects = clipboard.get_objects()
 
-        def convert_to_markup(obj: Dict[str, Any]):
+        def convert_to_markup(obj: dict[str, Any]):
             obj["type"] = cls._cls_to_type[obj.pop("_class")]
             return obj
 
@@ -522,7 +528,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             else:
                 size = load_pixmap(image_path).size()
                 data = {"objects": [], "size": [size.width(), size.height()]}
-            existing_objects: List[Any] = data["objects"]
+            existing_objects: list[Any] = data["objects"]
             filtered_new_objects = [
                 obj for obj in new_objects if obj not in existing_objects
             ]
@@ -553,7 +559,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
         qdir = QtCore.QFileInfo(self._dst_markup_path).dir()
         dir_filter = qdir.Files | qdir.NoDotAndDotDot
-        all_sets: List[Set[str]] = []
+        all_sets: list[set[str]] = []
         cache = self._unique_cache
         for fi in qdir.entryInfoList(dir_filter, qdir.Name):
             if fi.suffix() != "json":
@@ -571,13 +577,13 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             except Exception:
                 print("invalid json", absolute_path, "(ignored)")
                 continue
-            tags: Set[str] = set()
+            tags: set[str] = set()
             for obj in data.get("objects", ()):
                 tags |= set(obj.get("tags", ()))
             all_sets.append(tags)
             cache[absolute_path] = (last_modified, tags)
 
-        all_tags: Set[str] = set()
+        all_tags: set[str] = set()
         for item in self._image_widget.scene().items():
             if isinstance(item, HasTags):
                 all_tags |= item.get_tags()
@@ -624,7 +630,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             self._image_widget, self._get_selected_items(), self._user_tags
         )
 
-    def _get_selected_items(self) -> List[HasTags]:
+    def _get_selected_items(self) -> list[HasTags]:
         try:
             all_items = self._image_widget.scene().selectedItems()
         except RuntimeError:
@@ -732,7 +738,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         dump_json(self._dst_markup_path, markup)
         self._original_markup = markup
 
-    def _get_markup(self) -> Dict[str, Any]:
+    def _get_markup(self) -> dict[str, Any]:
         markup = defaultdict(list, self._original_markup)
         markup["objects"] = []
         markup["size"] = self._size

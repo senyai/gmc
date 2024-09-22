@@ -1,10 +1,11 @@
+from __future__ import annotations
 from PyQt5 import QtGui, QtWidgets
 
 from ..views.image_view import ImageView
 from . import MarkupObjectMeta
 from .moveable_diamond import MoveableDiamond
 from math import hypot
-from typing import Any, Optional, List, Callable
+from typing import Any, Callable
 from PyQt5.QtCore import Qt, QPointF, QCoreApplication, QRectF
 
 tr: Callable[[str], str] = lambda text: QCoreApplication.translate(
@@ -22,7 +23,7 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_line.svg"), 6, 6)
     UNDO = True  # Allow subclasses to disable undoing
 
-    def __init__(self, polygon: Optional[QtGui.QPolygonF]) -> None:
+    def __init__(self, polygon: QtGui.QPolygonF | None) -> None:
         super().__init__()
         if polygon is None:
             polygon = QtGui.QPolygonF()
@@ -170,7 +171,7 @@ class EditableMarkupPolygon(MarkupPolygon):
             MarkupObjectMeta.mouseDoubleClickEvent(self, event)
 
     def notify_delete(self) -> None:
-        indices: List[int] = []
+        indices: list[int] = []
         for item in self.childItems():
             if isinstance(item, MoveableDiamond) and item.isSelected():
                 indices.append(item.idx)
@@ -296,7 +297,7 @@ class UndoPolygonAddPoint(QtWidgets.QUndoCommand):
 
 class UndoPolygonDelPoints(QtWidgets.QUndoCommand):
     def __init__(
-        self, markup_polygon: MarkupPolygon, indices: List[int]
+        self, markup_polygon: MarkupPolygon, indices: list[int]
     ) -> None:
         indices.sort(reverse=True)
         polygon = markup_polygon._polygon

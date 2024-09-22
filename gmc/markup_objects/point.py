@@ -2,7 +2,7 @@ from PyQt5 import QtGui, QtWidgets
 
 from ..views.image_view import ImageView
 from . import MarkupObjectMeta
-from typing import Callable, Optional
+from typing import Callable
 from PyQt5.QtCore import Qt, QRectF, QPointF, QCoreApplication
 
 tr: Callable[[str], str] = lambda text: QCoreApplication.translate(
@@ -16,7 +16,7 @@ class MarkupPoint(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     PEN_SELECTED = QtGui.QPen(Qt.GlobalColor.yellow, 4)
     CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_point.svg"), 6, 6)
 
-    def __init__(self, pos: Optional[QPointF] = None):
+    def __init__(self, pos: QPointF | None = None):
         super(MarkupPoint, self).__init__()
         if pos is None:
             pos = QPointF()

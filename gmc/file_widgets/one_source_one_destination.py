@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Sequence
+from typing import Any, Callable, Sequence
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ..utils import separator, new_action
 from ..views.filesystem_widget import SingleFilesystemWidget, FilesystemTitle
@@ -14,7 +14,7 @@ tr: Callable[[str], str] = lambda text: QtCore.QCoreApplication.translate(
 class OneSourceOneDestination:
     @classmethod
     def create_data_widget(
-        cls, mdi_area: QtWidgets.QMdiArea, extra_args: Dict[str, Any]
+        cls, mdi_area: QtWidgets.QMdiArea, extra_args: dict[str, Any]
     ) -> QtWidgets.QSplitter:
         """
         :param cls: like `gmc.schemas.tagged_objects.TaggedObjects`
@@ -174,7 +174,7 @@ class OneSourceOneDestinationMarkupWindow(QtWidgets.QWidget):
         dst_dir: QtCore.QDir,
         src_dir: QtCore.QDir,
         file_path: str,
-        all_files: List[str],
+        all_files: list[str],
         schema,
     ):
         """

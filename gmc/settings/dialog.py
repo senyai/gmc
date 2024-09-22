@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 from PyQt5 import QtCore, QtGui, QtWidgets
 from gmc.settings import settings
 from ..utils import tr
@@ -62,7 +62,7 @@ class FontWidget(QtWidgets.QPushButton):
 def add_default(
     form: QtWidgets.QFormLayout,
     label: str,
-    widget: Union[QtWidgets.QSpinBox, FontWidget, ColorWidget],
+    widget: QtWidgets.QSpinBox | FontWidget | ColorWidget,
     attr: str,
 ) -> None:
     """ """

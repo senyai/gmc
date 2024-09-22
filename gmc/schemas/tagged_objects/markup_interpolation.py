@@ -4,12 +4,8 @@ from collections import OrderedDict
 from typing import (
     Any,
     Callable,
-    Dict,
     Iterator,
-    List,
     Literal,
-    Optional,
-    Tuple,
     TypedDict,
 )
 from ...utils.json import dump as dump_json
@@ -28,7 +24,7 @@ CONVERT = {  # channels, mintype
     QtGui.QImage.Format.Format_Indexed8: 1,
 }
 
-IMAGES_CACHE: Dict[str, Any] = OrderedDict()
+IMAGES_CACHE: dict[str, Any] = OrderedDict()
 
 
 class NumpyHolder:
@@ -38,16 +34,16 @@ class NumpyHolder:
 
 class GMCItem_(TypedDict):
     type: Literal["quad", "rect", "point"]
-    data: List[Any]
+    data: list[Any]
 
 
 class GMCItem(GMCItem_, total=False):
-    tags: List[str]
+    tags: list[str]
 
 
 class GMCMarkup(TypedDict):
-    size: Tuple[int, int]
-    objects: List[GMCItem]
+    size: tuple[int, int]
+    objects: list[GMCItem]
 
 
 def load_image(path: str) -> Any:
@@ -74,7 +70,7 @@ def load_image(path: str) -> Any:
     return nparray
 
 
-def read_markup(file_paths: List[str]) -> Iterator[Any]:
+def read_markup(file_paths: list[str]) -> Iterator[Any]:
     for path in file_paths:
         try:
             with open(path, "r", encoding="utf-8") as inp:
@@ -109,8 +105,8 @@ def get_filter_input():
 
 class iter_interpolatable_objects:
     def __new__(
-        cls, markup_list: List[Any], use_filter: bool
-    ) -> Iterator[Tuple[GMCItem, GMCItem, int, int]]:
+        cls, markup_list: list[Any], use_filter: bool
+    ) -> Iterator[tuple[GMCItem, GMCItem, int, int]]:
         objects = cls._iter_all_objects(markup_list)
         if use_filter:
             result, tags = get_filter_input()
@@ -132,8 +128,8 @@ class iter_interpolatable_objects:
 
     @staticmethod
     def _iter_all_objects(
-        markup_list: List[GMCMarkup],
-    ) -> Iterator[Tuple[int, GMCItem]]:
+        markup_list: list[GMCMarkup],
+    ) -> Iterator[tuple[int, GMCItem]]:
         for idx, markup in enumerate(markup_list):
             for obj in markup.get("objects", ()):
                 assert isinstance(obj, dict), obj
@@ -141,13 +137,13 @@ class iter_interpolatable_objects:
                     yield idx, obj
 
     @staticmethod
-    def _key(obj: GMCItem) -> Tuple[str, Tuple[str, ...]]:
+    def _key(obj: GMCItem) -> tuple[str, tuple[str, ...]]:
         return obj["type"], tuple(obj.get("tags", ()))
 
     @classmethod
     def _find_next_object(
-        cls, obj: GMCItem, markup_list: List[GMCItem]
-    ) -> Tuple[int, Optional[GMCItem]]:
+        cls, obj: GMCItem, markup_list: list[GMCItem]
+    ) -> tuple[int, GMCItem | None]:
         """
         Find first `obj` in `markup_list` using `cls.key`
         """
@@ -162,10 +158,10 @@ class iter_interpolatable_objects:
 
     @staticmethod
     def filter_by_tags(
-        objects: Iterator[Tuple[int, GMCItem]],
-        tags: List[str],
+        objects: Iterator[tuple[int, GMCItem]],
+        tags: list[str],
         f: Callable[[Iterator[bool]], bool],
-    ) -> Iterator[Tuple[int, GMCItem]]:
+    ) -> Iterator[tuple[int, GMCItem]]:
         for idx, obj in objects:
             obj_tags = obj.get("tags")
             if not obj_tags:  # because f(empty list) is always true
@@ -175,7 +171,7 @@ class iter_interpolatable_objects:
 
 
 def interpolate_many(
-    image_paths: List[str], markup_paths: List[str], use_filter: bool
+    image_paths: list[str], markup_paths: list[str], use_filter: bool
 ) -> None:
     MB = QtWidgets.QMessageBox
     if (
@@ -192,8 +188,8 @@ def interpolate_many(
     ):
         return
 
-    markup_list: List[Any] = list(read_markup(markup_paths))
-    save: Dict[str, Dict[str, Any]] = {}
+    markup_list: list[Any] = list(read_markup(markup_paths))
+    save: dict[str, dict[str, Any]] = {}
     objects = iter_interpolatable_objects(markup_list, use_filter)
     for obj, next_obj, idx, shift in objects:
         if shift == 0:
@@ -219,7 +215,7 @@ def interpolate_many(
 
 def prepare_obj(
     obj: GMCItem,
-) -> Tuple[Tuple[float, float], Tuple[float, float]]:
+) -> tuple[tuple[float, float], tuple[float, float]]:
     if obj["type"] == "point":
         size = (20, 20)  # TODO: size as parameter
         center = tuple(obj["data"])
@@ -234,7 +230,7 @@ def prepare_obj(
     return center, size
 
 
-def move_obj(pt: Tuple[float, float], obj: GMCItem) -> GMCItem:
+def move_obj(pt: tuple[float, float], obj: GMCItem) -> GMCItem:
     obj_moved = copy.deepcopy(obj)
 
     if obj["type"] == "point":
@@ -251,11 +247,11 @@ def move_obj(pt: Tuple[float, float], obj: GMCItem) -> GMCItem:
 
 
 def predict_cv(
-    objects: List[Any], frame1_path: str, frame2_path: str
-) -> List[GMCItem]:
+    objects: list[Any], frame1_path: str, frame2_path: str
+) -> list[GMCItem]:
     frame1 = load_image(frame1_path)
     frame2 = load_image(frame2_path)
-    prediction: List[GMCItem] = []
+    prediction: list[GMCItem] = []
     for obj in objects:
         center, size = prepare_obj(obj)
         center = np.atleast_2d(np.array(center)).astype(np.float32)
@@ -283,7 +279,7 @@ def merge_two_obj(obj1: GMCItem, obj2: GMCItem, k: float) -> GMCItem:
     return merged
 
 
-def normalize_rects(objects: List[GMCItem]) -> List[GMCItem]:
+def normalize_rects(objects: list[GMCItem]) -> list[GMCItem]:
     for obj in objects:
         if obj["type"] == "rect":
             d = obj["data"]
@@ -297,10 +293,10 @@ def normalize_rects(objects: List[GMCItem]) -> List[GMCItem]:
 
 
 def interpolate_core(
-    first_objects: List[GMCItem],
-    last_objects: List[GMCItem],
-    file_paths: List[str],
-) -> List[List[GMCItem]]:
+    first_objects: list[GMCItem],
+    last_objects: list[GMCItem],
+    file_paths: list[str],
+) -> list[list[GMCItem]]:
     assert file_paths, file_paths
 
     # normalize rects
@@ -308,14 +304,14 @@ def interpolate_core(
     last_objects = normalize_rects(last_objects)
 
     # forward loop
-    forw: List[List[GMCItem]] = []
+    forw: list[list[GMCItem]] = []
     forw.append(first_objects)
     for file1, file2 in zip(file_paths[:-1], file_paths[1:]):
         new_obj = predict_cv(forw[-1], file1, file2)
         forw.append(new_obj)
 
     # back loop
-    back: List[List[GMCItem]] = []
+    back: list[list[GMCItem]] = []
     back.append(last_objects)
     for file1, file2 in reversed(list(zip(file_paths[:-1], file_paths[1:]))):
         new_obj = predict_cv(back[-1], file2, file1)
@@ -323,14 +319,14 @@ def interpolate_core(
     back = back[::-1]
 
     # merge
-    ret: List[List[GMCItem]] = []
+    ret: list[list[GMCItem]] = []
     ret.append(first_objects)
     n_frames = len(forw) - 1
     for frame_idx, (frame1_obj, frame2_obj) in enumerate(
         list(zip(forw, back))[1:-1]
     ):
         k = float(n_frames - frame_idx - 1) / n_frames
-        merged_frame: List[GMCItem] = []
+        merged_frame: list[GMCItem] = []
         for obj1, obj2 in zip(frame1_obj, frame2_obj):
             m_obj = merge_two_obj(obj1, obj2, k)
             merged_frame.append(m_obj)
@@ -341,8 +337,8 @@ def interpolate_core(
 
 
 def intersect_objects(
-    a: List[GMCItem], b: List[GMCItem]
-) -> Tuple[List[GMCItem], List[GMCItem]]:
+    a: list[GMCItem], b: list[GMCItem]
+) -> tuple[list[GMCItem], list[GMCItem]]:
     # unused function
     a_objects = {
         ((obj["type"],), tuple(obj["tags"])): idx for idx, obj in enumerate(a)
@@ -362,7 +358,7 @@ def intersect_objects(
 def main_interpolate(
     first_frame_markup_path: str,
     last_frame_markup_path: str,
-    file_paths: List[str],
+    file_paths: list[str],
 ) -> None:
     # unused function
     with open(first_frame_markup_path) as f:

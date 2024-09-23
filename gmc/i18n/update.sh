@@ -14,8 +14,6 @@ pylupdate5 \
   gmc/markup_objects/rect.py \
   gmc/markup_objects/tags.py \
   gmc/mdi_area.py \
-  gmc/schemas/number_plates/__init__.py \
-  gmc/schemas/number_plates/plate_frame.py \
   gmc/schemas/tagged_objects/__init__.py \
   gmc/schemas/tagged_objects/markup_interpolation.py \
   gmc/settings/dialog.py \

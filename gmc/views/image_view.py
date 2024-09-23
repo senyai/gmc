@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Callable
+from typing import Any, Callable, TYPE_CHECKING
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import QPointF
 
@@ -491,6 +491,10 @@ class ImageView(QtWidgets.QGraphicsView):
 
     def hide_cross_cursor(self):
         self.scene().hide_cross_cursor()
+
+    if TYPE_CHECKING:
+
+        def scene(self) -> MarkupScene: ...
 
 
 class UndoObjectsMovement(QtWidgets.QUndoCommand):

@@ -26,16 +26,16 @@ class TabRenamer(QtCore.QObject):
 
 
 class MdiArea(QtWidgets.QMdiArea):
-    def __init__(self, parent: QtCore.QObject) -> None:
+    def __init__(self, parent: QtWidgets.QSplitter) -> None:
+        self._splitter = parent
         super().__init__(
             parent,
             objectName="mdi_area",
-            viewMode=QtWidgets.QMdiArea.TabbedView,
+            viewMode=QtWidgets.QMdiArea.ViewMode.TabbedView,
         )
-
         # Setting elide mode
         tab_bar: QtWidgets.QTabBar = self.findChild(QtWidgets.QTabBar)
-        tab_bar.setElideMode(Qt.ElideMiddle)
+        tab_bar.setElideMode(Qt.TextElideMode.ElideMiddle)
         tab_bar.setMovable(True)
         tab_bar.setTabsClosable(True)
         self._renamer = TabRenamer()
@@ -153,15 +153,13 @@ class MdiArea(QtWidgets.QMdiArea):
 
     def fullscreen(self, state: bool) -> None:
         if state:  # go fullscreen
-            self.splitter: QtWidgets.QSplitter = self.parent()
-            self._splitter_state = self.splitter.saveState()
-            self.setParent(self.splitter.parent())
+            self._splitter_state = self._splitter.saveState()
+            self.setParent(self._splitter.parent())
             self.setWindowFlags(Qt.Tool | Qt.FramelessWindowHint)
             self.showFullScreen()
         else:
-            self.setParent(self.splitter)
-            self.splitter.restoreState(self._splitter_state)
-            self.splitter = None
+            self.setParent(self._splitter)
+            self._splitter.restoreState(self._splitter_state)
             self.showNormal()
 
     def add(
@@ -232,3 +230,10 @@ class MdiArea(QtWidgets.QMdiArea):
             self.fullscreen_act.setChecked(False)
         else:
             return QtWidgets.QMdiArea.keyPressEvent(self, event)
+
+    def paintEvent(self, event: QtGui.QPaintEvent) -> None:
+        super().paintEvent(event)
+        if not self._splitter.sizes()[0]:
+            with QtGui.QPainter(self.viewport()) as p:
+                p.setPen(Qt.GlobalColor.darkRed)
+                p.drawText(3, 20, tr("Drag side bar to make it visible"))

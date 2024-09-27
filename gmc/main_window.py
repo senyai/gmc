@@ -158,18 +158,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 self,
                 "help",
                 tr("&Help"),
-                shortcuts=(Qt.Key_F1,),
+                shortcuts=(Qt.Key.Key_F1,),
                 triggered=self._on_help,
-                shortcutContext=Qt.WindowShortcut,
+                shortcutContext=Qt.ShortcutContext.WindowShortcut,
             )
         )
         settings_act = new_action(
             self,
             "gears",
             tr("Se&ttings"),
-            shortcuts=(Qt.CTRL + Qt.Key_Comma,),
+            shortcuts=(Qt.Modifier.CTRL + Qt.Key.Key_Comma,),
             triggered=self._on_settings,
-            shortcutContext=Qt.WindowShortcut,
+            shortcutContext=Qt.ShortcutContext.WindowShortcut,
         )
         main_menu.addAction(settings_act)
         self.addAction(settings_act)
@@ -191,7 +191,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 tr("E&xit"),
                 self,
                 triggered=QtWidgets.qApp.quit,
-                shortcut=Qt.CTRL + Qt.Key_Q,
+                shortcut=Qt.Modifier.CTRL + Qt.Ket.Key_Q,
                 menuRole=QtWidgets.QAction.QuitRole,
             )
         )
@@ -207,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
             webbrowser.open("file://" + path)
         else:
             msg = tr("Help not bundled. {} does not exist.").format(path)
-            MB.warning(self, self.windowTitle(), msg, MB.Ok)
+            MB.warning(self, self.windowTitle(), msg, MB.StandardButton.Ok)
 
     def _on_settings(self):
         from .settings.dialog import create_setting_dialog

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Any
 from PyQt5.QtWidgets import QAction
 from PyQt5.QtGui import QIcon, QKeySequence
@@ -30,13 +31,14 @@ def new_action(
     icon: str | QIcon,
     text: str,
     shortcuts: tuple[str | QKeySequence.StandardKey | Qt.Key | int, ...] = (),
+    shortcutContext: Qt.ShortcutContext = Qt.ShortcutContext.WidgetShortcut,
     **kwargs: Any,
 ) -> QAction:
     sequences = [QKeySequence(s) for s in shortcuts]
     shrtctext = "; ".join(
-        s.toString(format=QKeySequence.NativeText) for s in sequences
+        s.toString(format=QKeySequence.SequenceFormat.NativeText)
+        for s in sequences
     )
-    kwargs.setdefault("shortcutContext", Qt.ShortcutContext.WidgetShortcut)
     if not isinstance(icon, QIcon):
         icon = get_icon(icon)
     action = QAction(
@@ -44,6 +46,7 @@ def new_action(
         f"{text}\t{shrtctext}",
         parent,
         toolTip=f"{text.replace('&', '')} ({shrtctext})",
+        shortcutContext=shortcutContext,
         **kwargs,  # type: ignore[call-overload]
     )
     action.setShortcuts(sequences)

@@ -432,7 +432,7 @@ class ImageView(QtWidgets.QGraphicsView):
 
     @staticmethod
     def _dummy_mouse_move(
-        event: QtGui.QMouseEvent, self: "ImageView", *args: Any
+        event: QtGui.QMouseEvent, self: ImageView, *args: Any
     ) -> None:
         # Mouse is just moving
         # pos = self.mapToScene(event.pos())

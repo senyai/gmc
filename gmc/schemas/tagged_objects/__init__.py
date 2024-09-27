@@ -72,13 +72,13 @@ def from_json_polygon(cls, schema: TaggedObjects, data: dict[str, Any]):
     return cls(schema, polygon, tags=data.get("tags", ()))
 
 
-def from_json_point(cls, schema: "TaggedObjects", data: dict[str, Any]):
+def from_json_point(cls, schema: TaggedObjects, data: dict[str, Any]):
     point = QtCore.QPointF(*data["data"])
     return cls(schema, point, tags=data.get("tags", ()))
 
 
 def from_json_rect(
-    cls: type["CustomRectangle"], schema: "TaggedObjects", data: dict[str, Any]
+    cls: type["CustomRectangle"], schema: TaggedObjects, data: dict[str, Any]
 ):
     rect = QtCore.QRectF(*data["data"])
     return cls(schema, rect, tags=data.get("tags", ()))
@@ -89,7 +89,7 @@ class CustomQuadrangle(HasTags, Quadrangle):
     from_json = classmethod(from_json_polygon)
 
     def __init__(
-        self, schema: "TaggedObjects", frame=QtGui.QPolygonF(), **kwargs: Any
+        self, schema: TaggedObjects, frame=QtGui.QPolygonF(), **kwargs: Any
     ):
         super().__init__(frame, **kwargs)
         self._schema = schema
@@ -203,7 +203,7 @@ class CustomPath(HasTags, EditableMarkupPolygon):
 
     def __init__(
         self,
-        schema: "TaggedObjects",
+        schema: TaggedObjects,
         polygon: QtGui.QPolygonF | None = None,
         **kwargs: Any,
     ) -> None:

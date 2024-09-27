@@ -22,9 +22,7 @@ class BaseItem:
     def row_count(self) -> int:
         return len(self.children)
 
-    def index(
-        self, model: "PropertiesModel", column: int
-    ) -> QtCore.QModelIndex:
+    def index(self, model: PropertiesModel, column: int) -> QtCore.QModelIndex:
         if self is model.root:
             return QtCore.QModelIndex()
         return model.createIndex(self.row(), column, self)
@@ -70,7 +68,7 @@ class BaseItem:
 
 
 class RootItem(BaseItem):
-    def __init__(self, model: "PropertiesModel"):
+    def __init__(self, model: PropertiesModel):
         self.model = model
         self.children = []
 

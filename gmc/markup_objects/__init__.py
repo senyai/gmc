@@ -26,7 +26,7 @@ class MarkupObjectMeta:
         else:
             self.start_edit_nodes()
 
-    def attach(self, view: "ImageView") -> None:
+    def attach(self, view: ImageView) -> None:
         raise NotImplementedError(
             "class `{}` must implement `attach` method".format(
                 self.__class__.__name__
@@ -95,12 +95,12 @@ class MarkupObjectMeta:
 
 class MarkupSelect:
     @classmethod
-    def attach(cls, view: "ImageView") -> None:
+    def attach(cls, view: ImageView) -> None:
         view.setCursor(Qt.CursorShape.ArrowCursor)
         view.set_mouse_press(cls._mouse_press)
 
     @classmethod
-    def _mouse_press(cls, event: QtGui.QMouseEvent, view: "ImageView") -> bool:
+    def _mouse_press(cls, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         assert event.button() == Qt.MouseButton.LeftButton
         view.setDragMode(view.RubberBandDrag)
         view.set_mouse_press(None)
@@ -108,9 +108,7 @@ class MarkupSelect:
         return False
 
     @classmethod
-    def _mouse_release(
-        cls, event: QtGui.QMouseEvent, view: "ImageView"
-    ) -> bool:
+    def _mouse_release(cls, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         assert event.button() == Qt.MouseButton.LeftButton
 
         # weird trick to make sure that rubber band vanished

@@ -1,8 +1,10 @@
-from typing import Any, Callable, Sequence
+from __future__ import annotations
+from typing import Callable, Sequence
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ..utils import separator, new_action
 from ..views.filesystem_widget import SingleFilesystemWidget, FilesystemTitle
 from ..settings import settings
+from ..application import GMCArguments
 
 Qt = QtCore.Qt
 MB = QtWidgets.QMessageBox
@@ -14,7 +16,7 @@ tr: Callable[[str], str] = lambda text: QtCore.QCoreApplication.translate(
 class OneSourceOneDestination:
     @classmethod
     def create_data_widget(
-        cls, mdi_area: QtWidgets.QMdiArea, extra_args: dict[str, Any]
+        cls, mdi_area: QtWidgets.QMdiArea, extra_args: GMCArguments
     ) -> QtWidgets.QSplitter:
         """
         :param cls: like `gmc.schemas.tagged_objects.TaggedObjects`
@@ -197,32 +199,32 @@ class OneSourceOneDestinationMarkupWindow(QtWidgets.QWidget):
     def _get_default_actions(self):
         """:returns: actions, every markup window should have"""
 
-        def mod(*keys: int) -> tuple[int, ...]:
+        def mod(*keys: Qt.Key) -> tuple[Qt.Key, ...]:
             return (
                 keys
-                + tuple(key + Qt.SHIFT for key in keys)
-                + tuple(key + Qt.ALT for key in keys)
+                + tuple(key + Qt.Modifier.SHIFT for key in keys)
+                + tuple(key + Qt.Modifier.ALT for key in keys)
             )
 
         self._prev_action = new_action(
             self,
             "prev",
             tr("Previous File"),
-            mod(Qt.Key_P, Qt.Key_PageUp, Qt.Key_Backspace),
+            mod(Qt.Key.Key_P, Qt.Key.Key_PageUp, Qt.Key.Key_Backspace),
             triggered=lambda: self._go(-1),
         )
         self._next_action = new_action(
             self,
             "next",
             tr("Next File"),
-            mod(Qt.Key_N, Qt.Key_PageDown, Qt.Key_Space),
+            mod(Qt.Key.Key_N, Qt.Key.Key_PageDown, Qt.Key.Key_Space),
             triggered=lambda: self._go(1),
         )
         _save_action = new_action(
             self,
             "save",
             tr("Save"),
-            (Qt.CTRL + Qt.Key_S,),
+            (Qt.Modifier.CTRL + Qt.Key.Key_S,),
             triggered=lambda: self._schema.save_markup(),
         )
 

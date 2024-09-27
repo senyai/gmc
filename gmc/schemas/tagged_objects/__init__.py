@@ -19,6 +19,7 @@ from ...utils.image import load_pixmap
 from ...utils.read_properties import read_properties
 from ...utils import get_icon, separator, new_action, tr, clipboard
 from ...file_widgets.one_source_one_destination import OneSourceOneDestination
+from ...application import GMCArguments
 
 Qt = QtCore.Qt
 MB = QtWidgets.QMessageBox
@@ -360,7 +361,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
     @classmethod
     def create_data_widget(
-        cls, mdi_area: QtWidgets.QMdiArea, extra_args: dict[str, Any]
+        cls, mdi_area: QtWidgets.QMdiArea, extra_args: GMCArguments
     ):
         splitter = super().create_data_widget(mdi_area, extra_args)
         iterpolate_act = new_action(

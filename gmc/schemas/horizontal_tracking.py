@@ -1,3 +1,4 @@
+from __future__ import annotations
 from PyQt5 import QtCore, QtGui, QtWidgets
 from . import MarkupSchema
 from ..markup_objects.polygon import MarkupObjectMeta
@@ -45,7 +46,7 @@ from ..views.image_view import ImageView
 
 
 class MoveHorizontally:
-    def __init__(self, schema: "QuarrySchema"):
+    def __init__(self, schema: QuarrySchema):
         self._schema = schema
         self._rect_items = schema.get_rect_items()
         self._originals = [ri._rect.normalized() for ri in self._rect_items]

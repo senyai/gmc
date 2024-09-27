@@ -1,19 +1,23 @@
-from typing import Any
+from __future__ import annotations
+from typing import Any, Generic, TypeVar
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action
 from .image_view import ImageView
 from ..markup_objects import MarkupSelect
 
 Qt = QtCore.Qt
+T = TypeVar("T", bound=ImageView)
 tr = lambda text: QtCore.QCoreApplication.translate("@default", text)
 
 
-class ImageWidget(QtWidgets.QWidget):
+class ImageWidget(QtWidgets.QWidget, Generic[T]):
     # on_paste is emmited when user pastes objects, copied from gmc
     on_paste = QtCore.pyqtSignal(list)
 
     def __init__(
-        self, default_actions: list[QtWidgets.QAction], view_cls=ImageView
+        self,
+        default_actions: list[QtWidgets.QAction],
+        view_cls: type[T] = ImageView,
     ):
         super().__init__()
         self._default_actions = default_actions
@@ -95,7 +99,7 @@ class ImageWidget(QtWidgets.QWidget):
 
     def _create_toolbar(self) -> QtWidgets.QToolBar:
         toolbar = QtWidgets.QToolBar(self)
-        toolbar.setOrientation(Qt.Vertical)
+        toolbar.setOrientation(Qt.Orientation.Vertical)
         return toolbar
 
     def _set_markup_object(self, cls):
@@ -110,7 +114,7 @@ class ImageWidget(QtWidgets.QWidget):
         # Known to raise RuntimeError, since the scene can disappear
         return self._view.scene()
 
-    def view(self) -> ImageView:
+    def view(self) -> T:
         return self._view  # user might want to zoom or something
 
     def focusInEvent(self, event: QtGui.QFocusEvent) -> None:

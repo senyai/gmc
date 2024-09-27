@@ -129,7 +129,7 @@ SWAP_ICON = icon_from_data(
 )
 
 
-class FieldsSchema(MarkupSchema, OneSourceOneDestination):
+class FieldsSchema(OneSourceOneDestination, MarkupSchema):
     tags_hidden = False
 
     def __init__(self, markup_window, default_actions):

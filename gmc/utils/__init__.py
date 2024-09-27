@@ -29,7 +29,7 @@ def new_action(
     parent: QObject,
     icon: str | QIcon,
     text: str,
-    shortcuts: tuple[str | QKeySequence.StandardKey | Qt.Key, ...] = (),
+    shortcuts: tuple[str | QKeySequence.StandardKey | Qt.Key | int, ...] = (),
     **kwargs: Any,
 ) -> QAction:
     sequences = [QKeySequence(s) for s in shortcuts]

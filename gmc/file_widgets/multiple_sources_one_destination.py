@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import Callable
 from PyQt5 import QtCore, QtWidgets
 from ..utils import separator, get_icon
@@ -7,6 +8,7 @@ from ..views.filesystem_widget import (
     FilesystemTitle,
 )
 from itertools import zip_longest
+from ..application import GMCArguments
 
 Qt = QtCore.Qt
 tr: Callable[[str], str] = lambda text: QtCore.QCoreApplication.translate(
@@ -19,7 +21,7 @@ class MultipleSourcesOneDestination:
     SOURCE_TITLES = ["First Image", "Second Image"]
 
     @classmethod
-    def create_data_widget(cls, mdi_area, settings, extra_args):
+    def create_data_widget(cls, mdi_area, settings, extra_args: GMCArguments):
         def _on_open_src(view_idx, new_tab):
             view = cls._source_widget.views()[view_idx]
             dst_dir = cls._destination_widget.get_root_qdir()

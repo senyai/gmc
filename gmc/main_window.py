@@ -191,7 +191,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 tr("E&xit"),
                 self,
                 triggered=QtWidgets.qApp.quit,
-                shortcut=Qt.Modifier.CTRL + Qt.Ket.Key_Q,
+                shortcut=Qt.Modifier.CTRL + Qt.Key.Key_Q,
                 menuRole=QtWidgets.QAction.QuitRole,
             )
         )

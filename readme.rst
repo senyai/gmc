@@ -7,12 +7,10 @@ GMC - General Markup Creator
 
 To start GMC:
 
-  #. Install numpy (pip3 install numpy)
-  #. Install PyQt5 (pip3 install pyqt5)
-  #. Optionally install cv2 (pip3 install opencv-python)
-  #. Install gmc (pip3 install git+https://github.com/senyai/gmc.git)
+  #. Install gmc (`python -m pip install git+https://github.com/senyai/gmc.git`)
+  #. Optionally install extra libraries (`python -m pip install opencv-python pillow numpy`)
   #. Run `python -m gmc`
 
 For developers:
 
-  1. Run resources/build_rc.bat to regenerate resource file
+  1. Run `gmc/resources/build_rc.bat` to regenerate localization file

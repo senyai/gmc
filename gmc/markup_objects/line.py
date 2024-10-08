@@ -2,7 +2,7 @@ from PyQt5 import QtGui, QtCore
 
 from ..views.image_view import ImageView
 from ..settings import settings
-from .polygon import MarkupPolygon, UndoPolygonCreate
+from .polygon import MarkupPolygon, EditableMarkupPolygon, UndoPolygonCreate
 
 Qt = QtCore.Qt
 
@@ -52,11 +52,7 @@ class MarkupLine(MarkupPolygon):
         view.scene().addItem(self)
         return True
 
-    def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        self._polygon[1] = view.mapToScene(event.pos())
-        self.update()
-        self.on_change_polygon(self._polygon)
-        return True
+    mouse_move = EditableMarkupPolygon.mouse_move
 
     def mouse_release(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         self.mouse_move(event, view)
@@ -73,7 +69,4 @@ class MarkupLine(MarkupPolygon):
             view.set_mouse_press(self.prevent_event)
         return True
 
-    def cancel(self, view: ImageView):
-        view.unset_all_events()
-        view.scene().removeItem(self)
-        view.set_mouse_press(self.mouse_press)  # start over
+    cancel = EditableMarkupPolygon.cancel

@@ -1,4 +1,5 @@
 from typing import Any
+from math import copysign
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QRectF, QPointF, QSizeF, QElapsedTimer
 
@@ -158,7 +159,16 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         return True  # if not 'return True', back objects will be selected
 
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        self._rect.setBottomRight(view.mapToScene(event.pos()))
+        if QtGui.QGuiApplication.keyboardModifiers() != Qt.ShiftModifier:
+            self._rect.setBottomRight(view.mapToScene(event.pos()))
+        else:
+            rc = self._rect
+            rc.setBottomRight(view.mapToScene(event.pos()))
+            w, h = rc.width(), rc.height()
+            size = max(abs(w), abs(h))
+            rc.setWidth(copysign(size, w))
+            rc.setHeight(copysign(size, h))
+            self._rect = rc
         self.update()
         self.on_change_rect(self._rect)
         return True

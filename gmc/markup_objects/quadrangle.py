@@ -1,3 +1,4 @@
+from math import copysign
 from PyQt5 import QtGui, QtCore, QtWidgets
 from ..markup_objects.moveable_diamond import MoveableDiamond
 from ..views.image_view import ImageView
@@ -72,14 +73,17 @@ class Quadrangle(MarkupPolygon):
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         p0 = self._polygon.at(0)
         p2 = view.mapToScene(event.pos())
-        polygon = QtGui.QPolygonF(
-            [
-                p0,
-                QtCore.QPointF(p2.x(), p0.y()),
-                p2,
-                QtCore.QPointF(p0.x(), p2.y()),
-            ]
-        )
+        if QtGui.QGuiApplication.keyboardModifiers() != Qt.ShiftModifier:
+            p1 = QtCore.QPointF(p2.x(), p0.y())
+            p3 = QtCore.QPointF(p0.x(), p2.y())
+        else:
+            w, h = p2.x() - p0.x(), p2.y() - p0.y()
+            size = max(abs(w), abs(h))
+            w, h = copysign(size, w), copysign(size, h)
+            p1 = QtCore.QPointF(p0.x() + w, p0.y())
+            p2 = QtCore.QPointF(p0.x() + w, p0.y() + h)
+            p3 = QtCore.QPointF(p0.x(), p0.y() + h)
+        polygon = QtGui.QPolygonF((p0, p1, p2, p3))
         self._polygon = polygon
         self.update()
         self.on_change_polygon(polygon)

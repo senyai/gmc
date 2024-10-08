@@ -4,7 +4,7 @@ from PyQt5 import QtGui, QtWidgets
 from ..views.image_view import ImageView
 from . import MarkupObjectMeta
 from .moveable_diamond import MoveableDiamond
-from math import hypot
+from math import hypot, atan2, degrees, radians, sin, cos
 from typing import Any, Callable
 from PyQt5.QtCore import Qt, QPointF, QCoreApplication, QRectF
 
@@ -239,7 +239,16 @@ class EditableMarkupPolygon(MarkupPolygon):
         return True
 
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        self._polygon[-1] = view.mapToScene(event.pos())
+        pt = view.mapToScene(event.pos())
+        if QtGui.QGuiApplication.keyboardModifiers() == Qt.ShiftModifier:
+            step_deg = 15
+            a: QPointF = self._polygon[-2]
+            dx, dy = pt.x() - a.x(), pt.y() - a.y()
+            angle = degrees(atan2(dx, dy)) + step_deg * 0.5
+            d = hypot(dx, dy)
+            fixed_angle = radians(angle - angle % step_deg)
+            pt = a + QPointF(d * sin(fixed_angle), d * cos(fixed_angle))
+        self._polygon[-1] = pt
         self.update()
         self.on_change_polygon(self._polygon)
         return True

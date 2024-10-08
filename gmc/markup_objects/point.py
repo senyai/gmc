@@ -70,9 +70,11 @@ class MarkupPoint(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         pass  # for overriding
 
     def mouse_press(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        self._create_pos = view.mapToScene(event.pos())
+        pos = view.mapToScene(event.pos())
+        if QtGui.QGuiApplication.keyboardModifiers() == Qt.Modifier.SHIFT:
+            pos = QPointF(round(pos.x(), round(pos.y())))
         scene = view.scene()
-        scene.undo_stack.push(UndoPointCreate(scene, self, self._create_pos))
+        scene.undo_stack.push(UndoPointCreate(scene, self, pos))
         view.set_mouse_move(self.mouse_move)
         view.set_mouse_release(self.mouse_release)
         view.set_mouse_press(None)

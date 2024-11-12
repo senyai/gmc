@@ -1,4 +1,5 @@
 from __future__ import annotations
+import os
 import sys
 import abc
 import importlib
@@ -50,12 +51,9 @@ class MarkupSchema(metaclass=abc.ABCMeta):
 
 
 def load_schema_cls(mod_name: str, path: str | None) -> type[MarkupSchema]:
-    if path is None:
-        mod_path = "gmc.schemas." + mod_name
-    else:
+    if path is not None:
         sys.path.insert(0, path)
-        mod_path = mod_name
-    mod = importlib.import_module(mod_path)
+    mod = importlib.import_module(mod_name)
     for obj in vars(mod).values():
         if (
             isinstance(obj, type)
@@ -63,19 +61,27 @@ def load_schema_cls(mod_name: str, path: str | None) -> type[MarkupSchema]:
             and obj is not MarkupSchema
         ):
             return obj
-    raise Exception("There are no schemas in `{}` module".format(mod_path))
+    raise Exception("There are no schemas in `{}` module".format(mod_name))
 
 
 def iter_schemas(
     external_schemas: Sequence[str],
 ) -> Iterable[tuple[str, str, str | None]]:
     """
-    :param external_schemas: - paths to .py file importable directory
+    :param external_schemas: paths to .py file importable directory,
+                             or fully qualified module name
+    :returns: sequence of (module_name, q_action_caption, path_add_to_sys_path)
     """
     for path in external_schemas:
         fi = QtCore.QFileInfo(path)
-        name = fi.baseName()
-        yield name, name.replace("_", " ").title(), fi.absolutePath()
+        if fi.exists():
+            full_name = name = fi.baseName()
+            sys_path = fi.absolutePath()
+        else:
+            full_name = path  # path like "my.module.markup"
+            name = path.split(".")[-1]
+            sys_path = None
+        yield full_name, name.replace("_", " ").title(), sys_path
 
     QDir = QtCore.QDir
     qdir = QDir(__file__)
@@ -87,4 +93,6 @@ def iter_schemas(
         if fi.suffix() in ("py", "pyc") or fi.isDir():
             name = fi.baseName()
             if name:  # case for `.mypy_cache` folder
-                yield name, name.replace("_", " ").title(), None
+                yield "gmc.schemas." + name, name.replace(
+                    "_", " "
+                ).title(), None

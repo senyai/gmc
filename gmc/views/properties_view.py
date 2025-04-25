@@ -1,16 +1,19 @@
 from __future__ import annotations
+from typing import Any, TypeVar, TYPE_CHECKING
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ..utils import get_icon, tr
-from typing import Any, TypeVar
+
+if TYPE_CHECKING:
+    from ..utils.read_properties import GMCProps, BoolProp
 
 Qt = QtCore.Qt
 
 
 def _check_state(
     value: bool | None,
-    checked: Qt.CheckState = Qt.Checked,
-    unchecked: Qt.CheckState = Qt.Unchecked,
-    partially: Qt.CheckState = Qt.PartiallyChecked,
+    checked: Qt.CheckState = Qt.CheckState.Checked,
+    unchecked: Qt.CheckState = Qt.CheckState.Unchecked,
+    partially: Qt.CheckState = Qt.CheckState.PartiallyChecked,
 ) -> Qt.CheckState:
     return checked if value else (partially if value is None else unchecked)
 
@@ -64,7 +67,7 @@ class BaseItem:
 
     def __repr__(self) -> str:
         # to shorten the representation
-        return "<{} at 0x{:x}>".format(self.__class__.__name__, id(self))
+        return f"<{self.__class__.__name__} at 0x{id(self):x}>"
 
 
 class RootItem(BaseItem):
@@ -74,12 +77,24 @@ class RootItem(BaseItem):
 
 
 class PropertyItemBase(BaseItem):
-    has_children = False
-    flags = Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
+    """
+    Base class for all properties
+    """
 
-    def __init__(self, parent: BaseItem, kwargs: dict[str, str]) -> None:
+    has_children = False
+    flags = (
+        Qt.ItemFlag.ItemIsEnabled
+        | Qt.ItemFlag.ItemIsSelectable
+        | Qt.ItemFlag.ItemIsEditable
+    )
+
+    def __init__(self, parent: BaseItem, prop: dict[str, str | int]) -> None:
         self.parent = parent
-        self.name = kwargs.pop("name")
+        match prop:
+            case {"name": name, **kwargs}:
+                self.name = name
+            case _:
+                raise ValueError(f"'name' field is required `{prop}`")
         self._display_name = kwargs.pop("display", self.name)
         self._kwargs = kwargs
         parent.insert(parent.get_model(), items=[self])
@@ -117,6 +132,9 @@ class PropertyItemBase(BaseItem):
     def set_edit(self, value: str | int | bool) -> None:
         """common method"""
         self._value = value
+
+    def emit(self) -> tuple[str, Any]:
+        return (self.name, self.value)
 
 
 TWidget = TypeVar("TWidget", bound=QtWidgets.QWidget)
@@ -156,24 +174,29 @@ class BoolItem(PropertyItemBase):
 
     display_role1 = None
     flags = (
-        Qt.ItemIsEnabled
-        | Qt.ItemIsSelectable
-        | Qt.ItemIsEditable
-        | Qt.ItemIsUserCheckable
+        Qt.ItemFlag.ItemIsEnabled
+        | Qt.ItemFlag.ItemIsSelectable
+        | Qt.ItemFlag.ItemIsEditable
+        | Qt.ItemFlag.ItemIsUserCheckable
     )
 
-    def __init__(self, parent: BaseItem, kwargs: dict[str, Any]):
-        self._value = kwargs.pop("value", None)
+    def __init__(self, parent: SetItem | RootItem, kwargs: dict[str, object]):
+        self._value = kwargs.get("value", None)
         super().__init__(parent, kwargs)
 
-    def create_widget(self, parent: QtWidgets.QWidget) -> QtWidgets.QCheckBox:
-        return _apply_kwargs(QtWidgets.QCheckBox(parent), self._kwargs)
+    def create_widget(self, parent: QtWidgets.QWidget):
+        return None
 
     def set_editor_value(
         self, widget: QtWidgets.QCheckBox, index: QtCore.QModelIndex
     ) -> None:
         edit_data = index.data(Qt.ItemDataRole.EditRole)
         widget.setCheckState(_check_state(edit_data))
+
+    def emit(self) -> tuple[str, Any]:
+        if isinstance(self.parent, SetItem):
+            return self.parent.emit()
+        return super().emit()
 
 
 class StringItem(PropertyItemBase):
@@ -193,22 +216,22 @@ class StringItem(PropertyItemBase):
 class RadioItem(PropertyItemBase):
     display_role1 = None
     flags = (
-        Qt.ItemIsEnabled
-        | Qt.ItemIsSelectable
-        | Qt.ItemIsEditable
-        | Qt.ItemIsUserCheckable
+        Qt.ItemFlag.ItemIsEnabled
+        | Qt.ItemFlag.ItemIsSelectable
+        | Qt.ItemFlag.ItemIsEditable
+        | Qt.ItemFlag.ItemIsUserCheckable
     )
 
     def __init__(
-        self, parent: BaseItem, kwargs: dict[str, str], checked: bool
+        self, parent: SingleItem, kwargs: dict[str, str], checked: bool
     ):
         super().__init__(parent, kwargs)
         self._value = checked
 
     def create_widget(self, parent: QtWidgets.QWidget):
-        return _apply_kwargs(QtWidgets.QCheckBox(parent), self._kwargs)
+        return None
 
-    def set_edit(self, value: bool):
+    def set_edit(self, value: bool) -> None:
         self._value = value
         if value:
             model = self.get_model()
@@ -229,11 +252,18 @@ class RadioItem(PropertyItemBase):
         edit_data = index.data(Qt.ItemDataRole.EditRole)
         widget.setCheckState(_check_state(edit_data))
 
+    def emit(self) -> tuple[str, Any]:
+        return (self.parent.name, self.name)
+
 
 class SingleItem(PropertyItemBase):
+    """
+    List of radios
+    """
+
     display_role1 = None
     has_children = True
-    flags = Qt.ItemIsSelectable
+    flags = Qt.ItemFlag.ItemIsSelectable
 
     def __init__(self, parent: BaseItem, kwargs: dict[str, Any]) -> None:
         self.children: list[RadioItem] = []
@@ -259,7 +289,7 @@ class SingleItem(PropertyItemBase):
 class SetItem(PropertyItemBase):
     display_role1 = None
     has_children = True
-    flags = Qt.ItemIsSelectable
+    flags = Qt.ItemFlag.ItemIsSelectable
 
     def __init__(self, parent: BaseItem, kwargs: dict[str, Any]) -> None:
         self.children: list[BoolItem] = []
@@ -282,7 +312,7 @@ class SetItem(PropertyItemBase):
 
 class SeparatorItem(BaseItem):
     has_children = False
-    flags = Qt.ItemNeverHasChildren
+    flags = Qt.ItemFlag.ItemNeverHasChildren
     display_role0 = display_role1 = None
 
     def __init__(self, parent: BaseItem) -> None:
@@ -291,6 +321,7 @@ class SeparatorItem(BaseItem):
 
 class PropertiesModel(QtCore.QAbstractItemModel):
     headers = (tr("Property"), tr("Value"))
+    property_changed = QtCore.pyqtSignal(tuple, name="property_changed")
 
     def __init__(self):
         super().__init__()
@@ -344,9 +375,12 @@ class PropertiesModel(QtCore.QAbstractItemModel):
             item.set_edit(value)
         elif role == Qt.CheckStateRole:
             item = index.internalPointer()
-            item.set_edit(value == Qt.Checked)
+            value = value == Qt.CheckState.Checked
+            item.set_edit(value)
         else:
-            assert False, "Invalid role=`{}`".format(role)
+            assert False, f"Invalid role=`{role}`"
+        self.dataChanged.emit(index, index)
+        self.property_changed.emit(item.emit())
         return True
 
     def flags(self, index: QtCore.QModelIndex):
@@ -358,7 +392,7 @@ class PropertiesModel(QtCore.QAbstractItemModel):
         item = parent.internalPointer()
         return bool(item.has_children and len(item.children))
 
-    def columnCount(self, parent):
+    def columnCount(self, parent: QtCore.QModelIndex) -> int:
         return len(self.headers)
 
     def headerData(self, section, orientation, role):
@@ -373,6 +407,8 @@ class PropertiesModel(QtCore.QAbstractItemModel):
     ) -> bool:
         parent_item = self._get_item(parent)
         self.beginRemoveRows(parent, row, row + count - 1)
+        for item in parent_item.children[row : row + count]:
+            self.property_changed.emit((item.emit()[0], None))
         del parent_item.children[row : row + count]
         self.endRemoveRows()
         self.dataChanged.emit(parent, parent)
@@ -383,34 +419,39 @@ class PropertiesModel(QtCore.QAbstractItemModel):
             return index.internalPointer()
         return self.root
 
-    def _create_item(self, prop: dict[str, Any]) -> None:
-        root = self.root
-        type_name = prop.pop("type")
-        if type_name == "separator":
-            if prop:
-                raise TypeError("excess attributes `{}`".format(prop))
-            SeparatorItem(self.root)
-        elif type_name == "bool":
-            BoolItem(root, prop)
-        elif type_name == "float":
-            FloatItem(root, prop)
-        elif type_name == "int":
-            IntegerItem(root, prop)
-        elif type_name == "item":
-            return SingleItem(root, prop).row()
-        elif type_name == "set":
-            return SetItem(root, prop).row()
-        elif type_name == "str":
-            StringItem(root, prop)
-        else:
-            raise TypeError("unsupported type `{}`".format(type_name))
+    def _create_item(self, prop: GMCProps) -> int | None:
+        """
+        inserts item into the tree
 
-    def set_schema(self, schema: dict[str, Any]):
+        returns item row, that indicates that items spans
+        """
+        root = self.root
+        match prop:
+            case {"type": "separator", **extra}:
+                if extra:
+                    raise TypeError(f"excess attributes `{prop}`")
+                SeparatorItem(self.root)
+            case {"type": "bool", **extra}:
+                BoolItem(root, extra)
+            case {"type": "float", **extra}:
+                FloatItem(root, extra)
+            case {"type": "int", **extra}:
+                IntegerItem(root, extra)
+            case {"type": "item", **extra}:
+                return SingleItem(root, extra).row()
+            case {"type": "set", **extra}:
+                return SetItem(root, extra).row()
+            case {"type": "str", **extra}:
+                StringItem(root, extra)
+            case _:
+                raise ValueError(f"unsupported type `{prop}`")
+
+    def set_schema(self, schema: list[GMCProps]):
         self.beginResetModel()
         del self.root.children[:]
         self.endResetModel()
 
-        for prop in schema.get("properties", ()):
+        for prop in schema:
             span_row = self._create_item(prop)
             if span_row is not None:
                 yield span_row
@@ -421,20 +462,36 @@ class PropertiesModel(QtCore.QAbstractItemModel):
             for prop in self.root.children
             if not type(prop) is SeparatorItem
         }
+        extra: list[str] = []
         for name, value in properties.items():
             if name in current_items:
-                index = current_items[name].index(self, 1)
-                self.setData(index, value, Qt.EditRole)
-                self.dataChanged.emit(index, index)
+                item = current_items[name]
+                item.set_edit(value)
             else:
-                print("skipped `{}` = `{}`".format(name, value))
+                extra.append(name)
+        self._unsupported_properties = {}
+        for name in extra:
+            value = properties[name]
+            if type(value) in (int, str, float, bool):
+                self._create_item(
+                    {
+                        "type": type(value).__name__,
+                        "name": name,
+                        "value": value,
+                    }
+                )
+            else:
+                # we can show the item in the gui in the future
+                print(f"hiding `{name}` = `{value}`")
+                self._unsupported_properties[name] = value
 
     def get_properties(self) -> dict[str, Any]:
-        properties = {}
+        properties: dict[str, Any] = {}
         for child in self.root.children:
             if isinstance(child, SeparatorItem):
                 continue
             properties[child.name] = child.value
+        properties.update(self._unsupported_properties)
         return properties
 
 
@@ -455,11 +512,14 @@ class ValueDelegate(QtWidgets.QItemDelegate):
         item.set_editor_value(editor, index)
 
     def setModelData(
-        self, editor: QtWidgets.QWidget, model, index: QtCore.QModelIndex
+        self,
+        editor: QtWidgets.QWidget,
+        model: QtCore.QAbstractItemModel,
+        index: QtCore.QModelIndex,
     ):
         if isinstance(editor, QtWidgets.QComboBox):
             value = editor.currentData()
-            model.setData(index, value, Qt.EditRole)
+            model.setData(index, value, Qt.ItemDataRole.EditRole)
         else:
             super().setModelData(editor, model, index)
 
@@ -514,7 +574,8 @@ class PropertiesView(QtWidgets.QTreeView):
             frameShape=self.WinPanel,
             contextMenuPolicy=Qt.ActionsContextMenu,
             allColumnsShowFocus=True,
-            rootIsDecorated=False,
+            rootIsDecorated=False,  #  Hides the expand/collapse arrows
+            itemsExpandable=False,  # Disables expanding/collapsing entirely
             styleSheet="QTreeView::item{color: palette(text);}",
             editTriggers=(
                 self.DoubleClicked | self.SelectedClicked | self.EditKeyPressed
@@ -525,7 +586,7 @@ class PropertiesView(QtWidgets.QTreeView):
 
         self._del_act = QtWidgets.QAction(
             get_icon("delete"),
-            "Delete",
+            tr("Delete"),
             self,
             triggered=self._on_delete,
             enabled=False,
@@ -534,7 +595,7 @@ class PropertiesView(QtWidgets.QTreeView):
         )
         self._add_act = QtWidgets.QAction(
             get_icon("new"),
-            "Add Property",
+            tr("Add Property"),
             self,
             triggered=self._on_add,
             shortcutContext=Qt.WidgetShortcut,
@@ -545,20 +606,34 @@ class PropertiesView(QtWidgets.QTreeView):
         self._model = PropertiesModel()
         self.setModel(self._model)
 
+    @property
+    def property_changed(self):
+        return self._model.property_changed
+
     def _on_add(self):
-        name, ok = QtWidgets.QInputDialog.getText(self, "Add Property", "Name")
-        # needs to be (re)implemented
-        # if name and ok:
-        #     item, ok = QtWidgets.QInputDialog.getItem(
-        #         self, "Add Property", "Type", ("Bool", "Float", "Int", "String"))
-        #     if ok:
-        #         the_type = {
-        #             "Bool": bool,
-        #             "Float": float,
-        #             "Int": int,
-        #             "String": str,
-        #         }[item]
-        #         self._model.insert(name, the_type, the_type(), {})
+        name, ok = QtWidgets.QInputDialog.getText(
+            self, tr("Add Property"), tr("Name")
+        )
+        if name and ok:
+            item, ok = QtWidgets.QInputDialog.getItem(
+                self,
+                tr("Add Property"),
+                tr("Type"),
+                ("Bool", "Float", "Int", "String"),
+            )
+            if ok:
+                the_type = {
+                    "Bool": "bool",
+                    "Float": "float",
+                    "Int": "int",
+                    "String": "str",
+                }[item]
+                self._model._create_item(
+                    {
+                        "type": the_type,
+                        "name": name,
+                    }
+                )
 
     def _on_delete(self) -> None:
         """
@@ -599,7 +674,10 @@ class PropertiesView(QtWidgets.QTreeView):
                     return False
         return QtWidgets.QTreeView.edit(self, index, trigger, event)
 
-    def set_schema(self, schema: dict[str, Any]):
+    def set_schema(self, schema: list[GMCProps]):
+        """
+        initial schema load, with data from .gmc_properties.json
+        """
         span_rows = list(self._model.set_schema(schema))
         for span_row in span_rows:
             self.setFirstColumnSpanned(span_row, QtCore.QModelIndex(), True)
@@ -608,6 +686,9 @@ class PropertiesView(QtWidgets.QTreeView):
         self.expandAll()
 
     def set_properties(self, properties: dict[str, Any]):
+        """
+        schema["properties"]
+        """
         self._model.set_properties(properties)
         self.resizeColumnToContents(0)
         self.resizeColumnToContents(1)

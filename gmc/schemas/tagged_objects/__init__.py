@@ -4,6 +4,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from collections import defaultdict
 from math import hypot
 from typing import Any, ClassVar
+from copy import deepcopy
 
 from .. import MarkupSchema
 from ...markup_objects.polygon import EditableMarkupPolygon, MarkupObjectMeta
@@ -16,7 +17,7 @@ from ...views.image_widget import ImageWidget
 from ...utils.json import load as load_json, dump as dump_json
 from ...utils.dicts import dicts_are_equal
 from ...utils.image import load_pixmap
-from ...utils.read_properties import read_properties
+from ...utils.read_properties import read_properties, prop_schema_for_tags
 from ...utils import get_icon, separator, new_action, tr, clipboard
 from ...file_widgets.one_source_one_destination import OneSourceOneDestination
 from ...application import GMCArguments
@@ -68,21 +69,38 @@ class with_brush:
         HasTags._on_tags_changed(self)
 
 
-def from_json_polygon(cls, schema: TaggedObjects, data: dict[str, Any]):
-    polygon = QtGui.QPolygonF([QtCore.QPointF(x, y) for x, y in data["data"]])
-    return cls(schema, polygon, tags=data.get("tags", ()))
+def from_json_polygon(
+    cls: type[CustomQuadrangle | CustomSegment | CustomPath],
+    schema: TaggedObjects,
+    data: dict[str, Any],
+):
+    match data:
+        case {"data": points, **extra}:
+            polygon = QtGui.QPolygonF(
+                [QtCore.QPointF(x, y) for x, y in points]
+            )
+            return cls(schema, polygon, **extra)
+    raise ValueError(f"incorrect {cls.__name__} `{data}`")
 
 
-def from_json_point(cls, schema: TaggedObjects, data: dict[str, Any]):
-    point = QtCore.QPointF(*data["data"])
-    return cls(schema, point, tags=data.get("tags", ()))
+def from_json_point(
+    cls: type[CustomPoint], schema: TaggedObjects, data: dict[str, Any]
+):
+    match data:
+        case {"data": xy, **extra}:
+            point = QtCore.QPointF(*xy)
+            return cls(schema, point, **extra)
+    raise ValueError(f"incorrect point `{data}`")
 
 
 def from_json_rect(
-    cls: type["CustomRectangle"], schema: TaggedObjects, data: dict[str, Any]
+    cls: type[CustomRectangle], schema: TaggedObjects, data: dict[str, Any]
 ):
-    rect = QtCore.QRectF(*data["data"])
-    return cls(schema, rect, tags=data.get("tags", ()))
+    match data:
+        case {"data": points, **extra}:
+            rect = QtCore.QRectF(*points)
+            return cls(schema, rect, **extra)
+    raise ValueError(f"incorrect rect `{data}`")
 
 
 @with_brush
@@ -257,6 +275,8 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         "CustomRegion": "region",
         "CustomPath": "path",
     }
+    _current_root_properties: dict[str, Any] | None
+    _current_properties: dict[str, Any] | None
 
     def __init__(self, markup_window, default_actions):
         iw = self._image_widget = ImageWidget(default_actions)
@@ -271,6 +291,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
         self._properties_view = PropertiesView()
         splitter.addWidget(self._properties_view)
+        self._properties_view.property_changed.connect(self._property_changed)
         layout.addWidget(splitter)
         splitter.setSizes([1000, 300])
 
@@ -639,7 +660,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         # check for HasTags, since `MoveableDiamond` can be selected too
         return [item for item in all_items if isinstance(item, HasTags)]
 
-    def _on_selection_changed(self):
+    def _on_selection_changed(self) -> None:
         items = self._get_selected_items()
         enabled = bool(items)
 
@@ -661,18 +682,55 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         )
 
         self._tag_txt_action.setEnabled(enabled)
+        try:
+            self._update_properties(items)
+        except RuntimeError:
+            pass  # wrapped C/C++ object of type PropertiesView has been deleted
+
+    def _update_properties(self, items: list[HasTags]) -> None:
+        self._current_properties = None
+        if not items:
+            if self._current_root_properties is not None:
+                prop_schema = self._properties.get("properties", [])
+                self._properties_view.set_schema(prop_schema)
+                self._properties_view.set_properties(
+                    self._current_root_properties
+                )
+                self._current_properties = self._current_root_properties
+                self._properties_view.show()
+            else:
+                self._properties_view.hide()
+        elif len(items) == 1:
+            if hasattr(items[0], "properties"):
+                properties = items[0].properties
+            else:
+                properties = items[0].properties = {}
+            if "objects" in self._properties:
+                tags = set[str].intersection(
+                    *[item.get_tags() for item in items]
+                )
+                prop_schema = prop_schema_for_tags(
+                    self._properties["objects"], tags
+                )
+                self._properties_view.set_schema(prop_schema)
+                self._properties_view.set_properties(properties)
+                self._current_properties = properties
+        else:
+            self._properties_view.set_schema([])
+
+    def _property_changed(self, key_value: tuple[str, Any]):
+        if self._current_properties is not None:
+            key, value = key_value
+            if value is None:
+                self._current_properties.pop(key)
+            else:
+                self._current_properties[key] = value
 
     def open_markup(self, src_data_path: str, dst_markup_path: str) -> None:
-        properties = read_properties(
+        self._properties = read_properties(
             (src_data_path, dst_markup_path), self._image_widget
         )
-        self._user_tags = set(properties.get("tags", ()))
-        if "properties" in properties:
-            self._properties_view.set_schema(properties)
-            self._properties_view.show()
-        else:
-            self._properties_view.hide()
-
+        self._user_tags = set(self._properties.get("tags", ()))
         pixmap = load_pixmap(src_data_path)
         self._size = (pixmap.width(), pixmap.height())
         self._image_widget.set_pixmap(pixmap)
@@ -681,11 +739,12 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         self._original_markup = {}  # for cases when 'load_json' raises
         self._original_markup = load_json(dst_markup_path, self._image_widget)
         if "properties" in self._original_markup:
-            self._properties_view.set_properties(
+            self._current_root_properties = deepcopy(
                 self._original_markup["properties"]
             )
+        else:
+            self._current_root_properties = None
         scene = self._image_widget.scene()
-        # view = self._image_widget._view
         item = None
         mapping = {
             "quad": CustomQuadrangle,
@@ -698,22 +757,25 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         }
 
         for obj in self._original_markup.get("objects", ()):
-            try:
-                the_type = obj["type"]
-            except KeyError:
-                raise KeyError(f"invalid type for {obj!r}")
+            match obj:
+                case {"type": the_type, **rest}:
+                    pass
+                case _:
+                    raise KeyError(f"invalid type for {obj!r}")
             if the_type not in mapping:
                 print("ignoring unknown object type = `{}`".format(the_type))
                 continue
             cls = mapping[the_type]
-            item = cls.from_json(self, obj)
+            item = cls.from_json(self, rest)
             scene.addItem(item)
 
         self._trigger_default_action()
         self._image_widget.setFocus()
 
+        self._update_properties([])
         if item is not None:
             item.setSelected(True)
+            self._on_selection_changed()
 
     def markup_has_changes(self) -> bool:
         return not dicts_are_equal(self._get_markup(), self._original_markup)

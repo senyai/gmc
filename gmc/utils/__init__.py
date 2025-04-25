@@ -7,6 +7,7 @@ from PyQt5.QtCore import QObject, Qt, QCoreApplication
 
 class CantOpenMarkup(Exception):
     "When a schema can't open markup, ignore it"
+
     pass
 
 

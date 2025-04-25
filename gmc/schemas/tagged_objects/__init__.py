@@ -592,13 +592,13 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         for tags in all_sets:
             all_tags |= tags
 
-        for tag in self._alpabet_gen():
+        for tag in self._alphabet_gen():
             if tag not in all_tags:
                 break
         self._default_tags_edit.setText(tag)
 
     @staticmethod
-    def _alpabet_gen():
+    def _alphabet_gen():
         from string import digits, ascii_uppercase
         from itertools import product
 

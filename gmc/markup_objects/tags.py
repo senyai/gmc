@@ -95,12 +95,15 @@ class HasTags:
     grad.setColorAt(1, QtGui.QColor(149, 147, 252))
     tag_brush_sel = QtGui.QBrush(grad)
     del grad
+    properties: dict[str, float | int | str | bool]  # optional properties
 
     def __init__(self, *args: Any, tags: Sequence[str] = (), **kwargs: Any):
         self._tags: set[str] = set(tags)
         self._draws: list[Callable[[QtGui.QPainter], None]] = []
         self._tag_polygon = QtGui.QPolygonF()
         self._last_fm = None
+        if "properties" in kwargs:
+            self.properties = kwargs.pop("properties")
         super().__init__(*args, **kwargs)
         self._on_tags_changed()
 
@@ -132,6 +135,8 @@ class HasTags:
         ret = {"data": super().data()}
         if tags:
             ret["tags"] = tags
+        if hasattr(self, "properties"):
+            ret["properties"] = self.properties
         return ret
 
     def paint(self, painter: QtGui.QPainter, option, widget, **kwargs) -> None:

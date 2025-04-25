@@ -597,5 +597,20 @@ before closing?</source>
         <source>GMC Interpolation</source>
         <translation>GMC Интерполяция</translation>
     </message>
+    <message>
+        <location filename="../views/properties_view.py" line="620"/>
+        <source>Add Property</source>
+        <translation>Добавить свойство</translation>
+    </message>
+    <message>
+        <location filename="../views/properties_view.py" line="616"/>
+        <source>Name</source>
+        <translation>Имя</translation>
+    </message>
+    <message>
+        <location filename="../views/properties_view.py" line="620"/>
+        <source>Type</source>
+        <translation>Тип</translation>
+    </message>
 </context>
 </TS>

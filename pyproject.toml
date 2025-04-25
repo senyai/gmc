@@ -1,6 +1,6 @@
 [project]
 name = "run-gmc"
-version = "1.5.5"
+dynamic = ["version"]
 authors = [
   { name="Arseniy Terekhin", email="senyai@gmail.com" },
 ]
@@ -30,3 +30,5 @@ exclude = ["testdata", "doc"]
 line-length = 79
 [project.scripts]
 run-gmc = "gmc.application:main"
+[tool.setuptools.dynamic]
+version = {attr = "gmc.__version__"}

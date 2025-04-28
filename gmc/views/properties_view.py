@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Any, TypeVar, TYPE_CHECKING
 from PyQt5 import QtCore, QtWidgets, QtGui
 from ..utils import get_icon, tr
+from json import loads, dumps
 
 if TYPE_CHECKING:
     from ..utils.read_properties import GMCProps, BoolProp
@@ -593,7 +594,7 @@ class PropertiesView(QtWidgets.QTreeView):
             shortcutContext=Qt.WidgetShortcut,
             shortcut=Qt.Key_Delete,
         )
-        self._add_act = QtWidgets.QAction(
+        add_act = QtWidgets.QAction(
             get_icon("new"),
             tr("Add Property"),
             self,
@@ -601,7 +602,23 @@ class PropertiesView(QtWidgets.QTreeView):
             shortcutContext=Qt.WidgetShortcut,
             shortcut=Qt.Key_Plus,
         )
-        for act in self._del_act, self._add_act:
+        self._copy_act = QtWidgets.QAction(
+            get_icon("copy"),
+            tr("Copy"),
+            self,
+            triggered=self._on_copy,
+            shortcutContext=Qt.WidgetShortcut,
+            shortcut=QtGui.QKeySequence.StandardKey.Copy,
+        )
+        paste_act = QtWidgets.QAction(
+            get_icon("paste"),
+            tr("Parse"),
+            self,
+            triggered=self._on_paste,
+            shortcutContext=Qt.WidgetShortcut,
+            shortcut=QtGui.QKeySequence.StandardKey.Paste,
+        )
+        for act in self._del_act, add_act, self._copy_act, paste_act:
             self.addAction(act)
         self._model = PropertiesModel()
         self.setModel(self._model)
@@ -635,6 +652,28 @@ class PropertiesView(QtWidgets.QTreeView):
                     }
                 )
 
+    def _on_copy(self):
+        items = {}
+        for index in self.selectedIndexes():
+            item = index.internalPointer()
+            if index.column() == 0:
+                key, value = item.emit()
+                items[key] = value
+        mime_data = QtCore.QMimeData()
+        mime_data.setData("application/gmc-json-prop", dumps(items).encode())
+        QtWidgets.QApplication.clipboard().setMimeData(mime_data)
+
+    def _on_paste(self):
+        data = (
+            QtWidgets.QApplication.clipboard()
+            .mimeData()
+            .data("application/gmc-json-prop")
+        )
+        if not data:
+            return
+        properties = loads(data.data())
+        self._model.set_properties(properties)
+
     def _on_delete(self) -> None:
         """
         There's `Delete` option in context menu
@@ -653,7 +692,9 @@ class PropertiesView(QtWidgets.QTreeView):
         deselected: QtCore.QItemSelection,
     ) -> None:
         super().selectionChanged(selected, deselected)
-        self._del_act.setEnabled(bool(self.selectedIndexes()))
+        has_selection = bool(self.selectedIndexes())
+        self._del_act.setEnabled(has_selection)
+        self._copy_act.setEnabled(has_selection)
 
     def edit(
         self,

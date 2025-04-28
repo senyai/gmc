@@ -135,7 +135,7 @@ class HasTags:
         ret = {"data": super().data()}
         if tags:
             ret["tags"] = tags
-        if hasattr(self, "properties"):
+        if hasattr(self, "properties") and self.properties:
             ret["properties"] = self.properties
         return ret
 

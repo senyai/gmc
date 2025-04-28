@@ -717,6 +717,9 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
                 self._current_properties = properties
         else:
             self._properties_view.set_schema([])
+            self._properties_view.setEnabled(False)
+            return
+        self._properties_view.setEnabled(True)
 
     def _property_changed(self, key_value: tuple[str, Any]):
         if self._current_properties is not None:

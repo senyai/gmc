@@ -613,7 +613,7 @@ class PropertiesView(QtWidgets.QTreeView):
         )
         paste_act = QtWidgets.QAction(
             get_icon("paste"),
-            tr("Parse"),
+            tr("Paste"),
             self,
             triggered=self._on_paste,
             shortcutContext=Qt.WidgetShortcut,

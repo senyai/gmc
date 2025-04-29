@@ -689,36 +689,34 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
 
     def _update_properties(self, items: list[HasTags]) -> None:
         self._current_properties = None
-        if not items:
-            if self._current_root_properties is not None:
-                prop_schema = self._properties.get("properties", [])
-                self._properties_view.set_schema(prop_schema)
-                self._properties_view.set_properties(
-                    self._current_root_properties
-                )
-                self._current_properties = self._current_root_properties
-                self._properties_view.show()
-            else:
-                self._properties_view.hide()
-        elif len(items) == 1:
+        if not items and self._current_root_properties is not None:
+            prop_schema = self._properties.get("properties", [])
+            self._properties_view.set_schema(prop_schema)
+            self._properties_view.set_properties(self._current_root_properties)
+            self._current_properties = self._current_root_properties
+        elif len(items) == 1 and "objects" in self._properties:
             if hasattr(items[0], "properties"):
                 properties = items[0].properties
             else:
                 properties = items[0].properties = {}
-            if "objects" in self._properties:
-                tags = set[str].intersection(
-                    *[item.get_tags() for item in items]
-                )
-                prop_schema = prop_schema_for_tags(
-                    self._properties["objects"], tags
-                )
-                self._properties_view.set_schema(prop_schema)
-                self._properties_view.set_properties(properties)
-                self._current_properties = properties
+            tags = set[str].intersection(*[item.get_tags() for item in items])
+            prop_schema = prop_schema_for_tags(
+                self._properties["objects"], tags
+            )
+            self._properties_view.set_schema(prop_schema)
+            self._properties_view.set_properties(properties)
+            self._current_properties = properties
         else:
             self._properties_view.set_schema([])
             self._properties_view.setEnabled(False)
             return
+        if (
+            self._current_root_properties is not None
+            or "objects" in self._properties
+        ):
+            self._properties_view.show()
+        else:
+            self._properties_view.hide()
         self._properties_view.setEnabled(True)
 
     def _property_changed(self, key_value: tuple[str, Any]):

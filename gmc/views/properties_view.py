@@ -160,6 +160,7 @@ class IntegerItem(PropertyItemBase):
 class FloatItem(PropertyItemBase):
     def __init__(self, parent: BaseItem, kwargs: dict[str, Any]) -> None:
         self._value = kwargs.pop("value", 0.0)
+        kwargs.setdefault("decimals", 6)
         super().__init__(parent, kwargs)
 
     def create_widget(

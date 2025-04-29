@@ -327,6 +327,7 @@ class PropertiesModel(QtCore.QAbstractItemModel):
     def __init__(self):
         super().__init__()
         self.root = RootItem(self)
+        self._unsupported_properties: dict[str, Any] = {}
 
     def rowCount(self, parent: QtCore.QModelIndex) -> int:
         return self._get_item(parent).row_count()
@@ -470,7 +471,7 @@ class PropertiesModel(QtCore.QAbstractItemModel):
                 item.set_edit(value)
             else:
                 extra.append(name)
-        self._unsupported_properties = {}
+        self._unsupported_properties.clear()
         for name in extra:
             value = properties[name]
             if type(value) in (int, str, float, bool):

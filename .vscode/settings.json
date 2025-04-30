@@ -1,0 +1,10 @@
+{
+    "json.schemas": [
+        {
+            "fileMatch": [
+                ".gmc_properties.json"
+            ],
+            "url": "./schema.json"
+        },
+    ]
+}

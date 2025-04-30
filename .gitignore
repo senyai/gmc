@@ -3,3 +3,5 @@
 *.tar.gz
 /build
 *.egg-info
+/doc/build
+schema.json

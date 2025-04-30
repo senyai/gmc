@@ -12,6 +12,7 @@ if TYPE_CHECKING:
         type: Literal["bool"]
         name: str
         value: NotRequired[bool]
+        display: NotRequired[str]
 
     class SeparatorProp(TypedDict):
         type: Literal["separator"]
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
         value: NotRequired[float]
         minimum: NotRequired[float]
         maximum: NotRequired[float]
+        display: NotRequired[str]
 
     class IntProp(TypedDict):
         type: Literal["int"]
@@ -29,11 +31,13 @@ if TYPE_CHECKING:
         value: NotRequired[int]
         minimum: NotRequired[int]
         maximum: NotRequired[int]
+        display: NotRequired[str]
 
     class StrProp(TypedDict):
         type: Literal["str"]
         name: str
         value: NotRequired[str]
+        display: NotRequired[str]
 
     class VisItem(TypedDict):
         name: str

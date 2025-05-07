@@ -33,8 +33,8 @@ class GMCJSONEncoder(json.JSONEncoder):
         if isinstance(o, float):
             if o.is_integer():
                 return f"{o}"  # don't need extra zeroes
-            return f"{o:0.6f}".rstrip(
-                "0"
+            return f"{o:0.6f}".rstrip("0").rstrip(
+                "."
             )  # 1e-6 of a pixel should be all right
         if isinstance(o, (list, tuple)):
             return self._encode_list(o)

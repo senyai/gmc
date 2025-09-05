@@ -215,6 +215,22 @@ class StringItem(PropertyItemBase):
         widget.setText(index.data(Qt.ItemDataRole.EditRole))
 
 
+class UserItem(PropertyItemBase):
+    flags = Qt.ItemFlag.ItemIsEnabled
+
+    def __init__(self, parent: BaseItem, kwargs: dict[str, Any]) -> None:
+        self._value = kwargs["value"]
+        super().__init__(parent, kwargs)
+
+    def create_widget(self, parent: QtWidgets.QWidget):
+        pass
+
+    def set_editor_value(
+        self, widget: QtWidgets.QLineEdit, index: QtCore.QModelIndex
+    ):
+        pass
+
+
 class RadioItem(PropertyItemBase):
     display_role1 = None
     flags = (
@@ -328,7 +344,6 @@ class PropertiesModel(QtCore.QAbstractItemModel):
     def __init__(self):
         super().__init__()
         self.root = RootItem(self)
-        self._unsupported_properties: dict[str, Any] = {}
 
     def rowCount(self, parent: QtCore.QModelIndex) -> int:
         return self._get_item(parent).row_count()
@@ -446,6 +461,8 @@ class PropertiesModel(QtCore.QAbstractItemModel):
                 return SetItem(root, extra).row()
             case {"type": "str", **extra}:
                 StringItem(root, extra)
+            case {"type": "user", **extra}:
+                UserItem(root, extra)
             case _:
                 raise ValueError(f"unsupported type `{prop}`")
 
@@ -472,21 +489,20 @@ class PropertiesModel(QtCore.QAbstractItemModel):
                 item.set_edit(value)
             else:
                 extra.append(name)
-        self._unsupported_properties.clear()
         for name in extra:
             value = properties[name]
-            if type(value) in (int, str, float, bool):
-                self._create_item(
-                    {
-                        "type": type(value).__name__,
-                        "name": name,
-                        "value": value,
-                    }
-                )
-            else:
-                # we can show the item in the gui in the future
-                print(f"hiding `{name}` = `{value}`")
-                self._unsupported_properties[name] = value
+            type_name = (
+                type(value).__name__
+                if type(value) in (int, str, float, bool)
+                else "user"
+            )
+            self._create_item(
+                {
+                    "type": type_name,
+                    "name": name,
+                    "value": value,
+                }
+            )
 
     def get_properties(self) -> dict[str, Any]:
         properties: dict[str, Any] = {}
@@ -494,7 +510,6 @@ class PropertiesModel(QtCore.QAbstractItemModel):
             if isinstance(child, SeparatorItem):
                 continue
             properties[child.name] = child.value
-        properties.update(self._unsupported_properties)
         return properties
 
 

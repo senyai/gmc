@@ -40,7 +40,7 @@ def dicts_are_equal(
 
 def dicts_merge(d: dict[str, Any], u: dict[str, Any]):
     for k, v in u.items():
-        if isinstance(v, dict):
+        if isinstance(v, dict) and k in d:
             d[k] = dicts_merge(d[k], v)
         else:
             d[k] = u[k]

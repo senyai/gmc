@@ -694,14 +694,16 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             self._properties_view.set_schema(prop_schema)
             self._properties_view.set_properties(self._current_root_properties)
             self._current_properties = self._current_root_properties
-        elif len(items) == 1 and "objects" in self._properties:
+        elif len(items) == 1 and (
+            "objects" in self._properties or hasattr(items[0], "properties")
+        ):
             if hasattr(items[0], "properties"):
                 properties = items[0].properties
             else:
                 properties = items[0].properties = {}
             tags = set[str].intersection(*[item.get_tags() for item in items])
             prop_schema = prop_schema_for_tags(
-                self._properties["objects"], tags
+                self._properties.get("objects", {}), tags
             )
             self._properties_view.set_schema(prop_schema)
             self._properties_view.set_properties(properties)

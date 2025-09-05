@@ -57,14 +57,21 @@ if TYPE_CHECKING:
         items: list[VisItem]
         value: list[str]
 
+    class UserProp(TypedDict):
+        type: Literal["user"]
+        name: str
+        display: str
+        value: Any
+
     GMCProps = (
-        StrProp
-        | IntProp
+        BoolProp
         | FloatProp
-        | BoolProp
-        | SeparatorProp
+        | IntProp
         | ItemProp
+        | SeparatorProp
         | SetProp
+        | StrProp
+        | UserProp
     )
 
     class ObjectsProperty(TypedDict):

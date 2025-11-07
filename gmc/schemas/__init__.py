@@ -10,15 +10,16 @@ from ..application import GMCArguments
 
 class MarkupSchema(metaclass=abc.ABCMeta):
     DATA_FILTERS = (
-        "*.png",
+        "*.bmp",
+        "*.jp2",
         "*.jpeg",
         "*.jpg",
+        "*.png",
+        "*.tga",
         "*.tif",
         "*.tiff",
-        "*.jp2",
-        "*.tga",
-        "*.webp",
         "*.wbmp",
+        "*.webp",
     )  # Qt supported formats
     MARKUP_FILTERS = ("*.json",)  # reasonable default
 

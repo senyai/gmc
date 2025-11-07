@@ -385,14 +385,14 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         cls, mdi_area: QtWidgets.QMdiArea, extra_args: GMCArguments
     ):
         splitter = super().create_data_widget(mdi_area, extra_args)
-        iterpolate_act = new_action(
+        interpolate_act = new_action(
             splitter,
             "cat",
             tr("&Interpolate"),
             (Qt.CTRL + Qt.Key_I,),
             triggered=cls._interpolate,
         )
-        iterpolate_tags_act = new_action(
+        interpolate_tags_act = new_action(
             splitter,
             "cat",
             tr("Interpolate &Tags"),
@@ -407,7 +407,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             triggered=lambda: cls._on_paste_into_files(),
         )
         cls._source_widget.view().addActions(
-            (iterpolate_act, iterpolate_tags_act, paste_act)
+            (interpolate_act, interpolate_tags_act, paste_act)
         )
         return splitter
 

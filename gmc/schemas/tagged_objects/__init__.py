@@ -392,21 +392,23 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             (Qt.CTRL + Qt.Key_I,),
             triggered=cls._interpolate,
         )
-        tags_act = new_action(
+        iterpolate_tags_act = new_action(
             splitter,
             "cat",
             tr("Interpolate &Tags"),
             (Qt.CTRL + Qt.ALT + Qt.Key_I,),
             triggered=lambda: cls._interpolate(True),
         )
-        tags_act = new_action(
+        paste_act = new_action(
             splitter,
             "paste",
             tr("&Paste Objects"),
             (Qt.CTRL + Qt.Key_V,),
             triggered=lambda: cls._on_paste_into_files(),
         )
-        cls._source_widget.view().addActions((iterpolate_act, tags_act))
+        cls._source_widget.view().addActions(
+            (iterpolate_act, iterpolate_tags_act, paste_act)
+        )
         return splitter
 
     def _create_cat_toolbar(self) -> QtWidgets.QToolBar:

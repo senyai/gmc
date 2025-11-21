@@ -77,6 +77,8 @@ def from_json_polygon(
 ):
     match data:
         case {"data": points, **extra}:
+            if not points:
+                raise ValueError(f"{cls.__name__} has 0 points")
             polygon = QtGui.QPolygonF(
                 [QtCore.QPointF(x, y) for x, y in points]
             )
@@ -770,19 +772,28 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             "path": CustomPath,
             "region": CustomRegion,
         }
+        warnings: list[str] = []
 
         for obj in self._original_markup.get("objects", ()):
             match obj:
                 case {"type": the_type, **rest}:
                     pass
                 case _:
-                    raise KeyError(f"invalid type for {obj!r}")
+                    warnings.append(f"invalid type for {obj!r}")
+                    continue
             if the_type not in mapping:
-                print("ignoring unknown object type = `{}`".format(the_type))
+                warnings.append(f"ignoring unknown object type `{the_type}`")
                 continue
             cls = mapping[the_type]
-            item = cls.from_json(self, rest)
-            scene.addItem(item)
+            try:
+                item = cls.from_json(self, rest)
+            except ValueError as e:
+                warnings.append(f"ignoring broken `{the_type}`: {e}")
+            else:
+                scene.addItem(item)
+
+        if warnings:
+            MB.warning(self._source_widget, tr("Warning"), "\n".join(warnings))
 
         self._trigger_default_action()
         self._image_widget.setFocus()

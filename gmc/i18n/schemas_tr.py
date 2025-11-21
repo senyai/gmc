@@ -1,3 +1,4 @@
+# special file that helps translate schemas names
 tr("Tagged Objects")
 tr("Ballfish")
 tr("Feature Matching")

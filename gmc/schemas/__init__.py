@@ -62,7 +62,7 @@ def load_schema_cls(mod_name: str, path: str | None) -> type[MarkupSchema]:
             and obj is not MarkupSchema
         ):
             return obj
-    raise Exception("There are no schemas in `{}` module".format(mod_name))
+    raise Exception(f"There are no schemas in `{mod_name}` module")
 
 
 def iter_schemas(

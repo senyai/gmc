@@ -74,4 +74,4 @@ def check_ret(ret):
         if ret in err_dict:
             raise FFMPEGException(err_dict[ret])
         else:
-            raise Exception("Unknown Error `{}`".format(ret))
+            raise Exception(f"Unknown Error `{ret}`")

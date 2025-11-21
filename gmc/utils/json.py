@@ -113,7 +113,7 @@ def load(json_filename: str, widget: QWidget):
         with open(json_filename, "r", encoding="utf-8") as inp:
             return json.load(inp)
     except ValueError as e:
-        msg = "Failed parsing `{}`\n{}".format(json_filename, e)
+        msg = f"Failed parsing `{json_filename}`\n{e}"
         QMessageBox.warning(widget, "Warning", msg)
         raise CantOpenMarkup(msg)
     except IOError as e:

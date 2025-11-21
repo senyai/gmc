@@ -90,7 +90,7 @@ class VideoWidget(QtWidgets.QWidget):
     def add_markup_action(self, name, shortcut, icon, markup_object, **kwargs):
         action = QtWidgets.QAction(
             get_icon(icon),
-            "{} ({})".format(name, shortcut),
+            f"{name} ({shortcut})",
             self,
             triggered=lambda: self._set_markup_object(markup_object),
             shortcut=shortcut,

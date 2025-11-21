@@ -28,9 +28,7 @@ class MarkupObjectMeta:
 
     def attach(self, view: ImageView) -> None:
         raise NotImplementedError(
-            "class `{}` must implement `attach` method".format(
-                self.__class__.__name__
-            )
+            f"class `{type(self).__name__}` must implement `attach` method"
         )
 
     def start_edit_nodes(self) -> None:

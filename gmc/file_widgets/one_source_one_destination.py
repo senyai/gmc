@@ -47,8 +47,7 @@ class OneSourceOneDestination:
                     MB.warning(
                         mdi_area,
                         tr("Error"),
-                        "Error while opening {file_path}:"
-                        "\n{e}".format(file_path=file_path, e=e),
+                        f"Error while opening {file_path}:\n{e}",
                     )
                     print("Printing traceback for the developer")
                     print("=" * 40)
@@ -240,7 +239,7 @@ class OneSourceOneDestinationMarkupWindow(QtWidgets.QWidget):
         self._update_actions()
         current_path = self._all_files[self._idx]
         n = len(self._all_files)
-        title = "({}/{}) {}".format(self._idx + 1, n, current_path)
+        title = f"({self._idx + 1}/{n}) {current_path}"
         self.setWindowTitle(title)
         markup_ext = getattr(self._schema, "MARKUP_EXT", ".json")
         self._dst_markup_path = self._dst_dir.filePath(

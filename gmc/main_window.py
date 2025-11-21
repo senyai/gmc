@@ -35,14 +35,14 @@ class MainWindow(QtWidgets.QMainWindow):
         )
         if lang == "ru":
             translator = QtCore.QTranslator(self)
-            translator.load("gmc:gmc_{}.qm".format(lang))
+            translator.load(f"gmc:gmc_{lang}.qm")
             if translator.isEmpty():
-                print("failed to load translator ({})".format(lang))
+                print(f"failed to load translator ({lang})")
             app.installTranslator(translator)
         else:  # in case "C.utf8" locale or something else
             lang = "en"
         self.setWindowTitle(
-            tr("GMC {} - General Markup Creator".format(version))
+            tr("GMC {} - General Markup Creator").format(version)
         )
 
         self._setup_ui()
@@ -217,10 +217,11 @@ class MainWindow(QtWidgets.QMainWindow):
     def _on_about_qt(self):
         import platform
 
-        extra = " @ python {} : {}".format(
-            platform.python_version(), platform.architecture()[0]
+        MB.aboutQt(
+            self,
+            f"{self.windowTitle()} @ python "
+            f"{platform.python_version()} : {platform.architecture()[0]}",
         )
-        MB.aboutQt(self, self.windowTitle() + extra)
 
     def _schema_triggered(self, action: QtWidgets.QAction):
         if self._schema_cls is not None:
@@ -228,7 +229,7 @@ class MainWindow(QtWidgets.QMainWindow):
         try:
             self._schema_cls = load_schema_cls(*action.data())
         except Exception as e:
-            msg = "Schema `{}` loading error:<br>{}".format(action.data(), e)
+            msg = f"Schema `{action.data()}` loading error:<br>{e}"
             MB.warning(self, self.windowTitle(), msg)
             import traceback
 

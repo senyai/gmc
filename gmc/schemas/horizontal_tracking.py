@@ -307,7 +307,7 @@ class QuarrySchema(OneSourceOneDestination, MarkupSchema):
             if the_type == "rect":
                 cls, args = CustomRectangle, (QtCore.QRectF(*obj["data"]),)
             else:
-                print("invalid object type = `{}`".format(the_type))
+                print(f"invalid object type = `{the_type}`")
             item = cls(self, *args, tags=obj.get("tags", ()))
             scene.addItem(item)
 
@@ -347,7 +347,7 @@ class QuarrySchema(OneSourceOneDestination, MarkupSchema):
     def save_markup(self, force=True):
         markup = self._get_markup()
         if dicts_are_equal(markup, self._original_markup) and not force:
-            print("not changed `{}`".format(self._dst_markup_path))
+            print(f"not changed `{self._dst_markup_path}`")
             return
         print("saving to", self._dst_markup_path)
         dump_json(self._dst_markup_path, markup)

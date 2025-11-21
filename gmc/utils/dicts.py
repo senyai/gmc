@@ -28,11 +28,11 @@ def dicts_are_equal(
     if type(a) is not type(b):
         # this happens when comparing list of "objects" that have different
         # type i.e "quad" vs "rect"
-        # print("WARNING: comparing `{}` and `{}`, which shouldn't happen"
-        #       .format(type(a), type(b)))
+        # print(f"WARNING: comparing `{type(a)}` and `{type(b)}`, "
+        #       "which shouldn't happen")
         # print("a = ", a, "b = ", b)
         return False
-    raise Exception("Invalid dict objects ({} vs {})".format(type(a), type(b)))
+    raise Exception(f"Invalid dict objects ({type(a)} vs {type(b)})")
 
 
 # assert dicts_are_equal([1, 2, 3], (1, 2, 3))

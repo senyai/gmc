@@ -1,9 +1,9 @@
 from __future__ import annotations
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, Callable
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action
 from .image_view import ImageView
-from ..markup_objects import MarkupSelect
+from ..markup_objects import MarkupSelect, MarkupObjectMeta
 
 Qt = QtCore.Qt
 T = TypeVar("T", bound=ImageView)
@@ -49,7 +49,7 @@ class ImageWidget(QtWidgets.QWidget, Generic[T]):
         name: str,
         shortcut: str | tuple[str, ...],
         icon: str,
-        markup_object,
+        markup_object: Callable[[], MarkupObjectMeta],
         **kwargs: Any,
     ) -> QtWidgets.QAction:
         if isinstance(shortcut, str):
@@ -102,7 +102,7 @@ class ImageWidget(QtWidgets.QWidget, Generic[T]):
         toolbar.setOrientation(Qt.Orientation.Vertical)
         return toolbar
 
-    def _set_markup_object(self, cls):
+    def _set_markup_object(self, cls: Callable[[], MarkupObjectMeta]):
         return self._view.set_markup_object(cls)
 
     def set_pixmap(

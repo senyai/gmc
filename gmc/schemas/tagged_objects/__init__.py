@@ -21,6 +21,7 @@ from ...utils.read_properties import read_properties, prop_schema_for_tags
 from ...utils import get_icon, separator, new_action, tr, clipboard
 from ...file_widgets.one_source_one_destination import OneSourceOneDestination
 from ...application import GMCArguments
+from ...settings import settings
 
 Qt = QtCore.Qt
 MB = QtWidgets.QMessageBox
@@ -262,9 +263,6 @@ class CustomRegion(CustomPath):
         return EditableMarkupPolygon.shape(self)
 
 
-last_used_default_action = ""
-
-
 class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     _cls_to_type: ClassVar[dict[str, str]] = {
         "CustomQuadrangle": "quad",
@@ -277,6 +275,12 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     }
     _current_root_properties: dict[str, Any] | None
     _current_properties: dict[str, Any] | None
+    last_used_default_action: ClassVar[str] = settings.value(
+        "TaggedObjects_default_action"
+    )
+    last_used_cat_mode: ClassVar[bool] = settings.value(
+        "TaggedObjects_cat_mode", type_=bool
+    )
 
     def __init__(self, markup_window, default_actions):
         iw = self._image_widget = ImageWidget(default_actions)
@@ -461,9 +465,9 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             (tr("Add Region"), "region", "_add_region_action"),
         ):
             cb.addItem(get_icon(icon_name), text, data)
-            if text == last_used_default_action:
+            if text == self.last_used_default_action:
                 cb.setCurrentIndex(cb.count() - 1)
-        cb.currentTextChanged.connect(self._default_action_cb_updated)
+        cb.currentTextChanged.connect(self._update_last_used_default_action)
         toolbar.addSeparator()
         # default tags:
         hlp = "List of tags splitter by `,` character"
@@ -491,15 +495,21 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             tr("Mad Cat Mode"),
             icon=get_icon("cat"),
             checkable=True,
+            checked=self.last_used_cat_mode,
+            clicked=self._update_last_used_cat_mode,
             shortcut="Ctrl+M",
             toolTip="Save and switch to next frame after adding any object",
         )
         toolbar.addWidget(self._mad_cat_btn)
         return toolbar
 
-    def _default_action_cb_updated(self, text: str):
-        global last_used_default_action
-        last_used_default_action = text
+    @classmethod
+    def _update_last_used_default_action(cls, text: str):
+        cls.last_used_default_action = text
+
+    @classmethod
+    def _update_last_used_cat_mode(cls, value: bool):
+        cls.last_used_cat_mode = value
 
     @classmethod
     def _list_paths(cls) -> tuple[list[str], list[str]]:
@@ -832,3 +842,11 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             if issubclass(cls, HasTags):
                 item = cls.from_json(self, obj)
                 scene.addItem(item)
+
+    @classmethod
+    def save_settings(cls, settings: QtCore.QSettings) -> None:
+        super().save_settings(settings)
+        settings.setValue(
+            "TaggedObjects_default_action", cls.last_used_default_action
+        )
+        settings.setValue("TaggedObjects_cat_mode", cls.last_used_cat_mode)

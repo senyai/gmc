@@ -231,7 +231,7 @@ class ImageView(QtWidgets.QGraphicsView):
         self.set_mouse_doubleclick(None)
         self.set_cancel(None)
 
-    def set_markup_object(self, cls: type[MarkupObjectMeta]) -> None:
+    def set_markup_object(self, cls: Callable[[], MarkupObjectMeta]) -> None:
         """
         :param cls: callable, that returns markup object.
         """

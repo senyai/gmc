@@ -821,7 +821,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             view._current_mouse_release(r_event, view)
         markup = self._get_markup()
         if dicts_are_equal(markup, self._original_markup) and not force:
-            print("not changed `{self._dst_markup_path}`")
+            print(f"not changed `{self._dst_markup_path}`")
             return
         print(f"saving to {self._dst_markup_path}")
         dump_json(self._dst_markup_path, markup)

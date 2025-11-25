@@ -519,6 +519,20 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         relative_path = cls._source_widget.get_root_qdir().relativeFilePath
         source_view = cls._source_widget.view()
         image_paths = source_view.selected_files()
+        if len(image_paths) == 1:
+            # user surely doesn't want to interpolate one single file,
+            # so instead, list all paths
+            from PyQt5.QtCore import QDir
+
+            parent = QtCore.QFileInfo(image_paths[0]).dir()
+            image_paths = [
+                parent.absoluteFilePath(f)
+                for f in parent.entryList(
+                    cls.DATA_FILTERS,
+                    QDir.Files | QDir.NoSymLinks,
+                    QDir.Name | QDir.IgnoreCase,
+                )
+            ]
         return (
             image_paths,
             [

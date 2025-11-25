@@ -15,11 +15,11 @@ jobs:
       security-events: read
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
-          cache: 'pip'
       - uses: psf/black@25.1.0
+      - name: unittest
+        run: |
+          sudo apt-get install -y python3-pyqt5 xvfb
+          xvfb-run -a python3 -m unittest discover -v --start-directory tests
       - name: wheel
         run: |
           pip install build

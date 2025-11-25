@@ -220,110 +220,127 @@ class TagEdit(QtWidgets.QLineEdit):
         super().keyPressEvent(event)
 
 
-def edit_tags(
-    parent: ImageWidget,
-    items: list[MarkupObjectMeta],
-    extra_tags: Sequence[str] = (),
-) -> None:
-    """
-    :param parent: QDialog's parent QWidget
-    :param tags: dict. tag name: number of objects with that tag
-    :param items: number of objects selected. guaranteed to be > 0
-    """
-    if not items:
-        return
-    tags: defaultdict[str, int] = defaultdict(
-        int, {tag: 0 for tag in extra_tags}
-    )
-    for item in items:
-        for tag in item.get_tags():
-            tags[tag] += 1
+class TagsDialog(QtWidgets.QDialog):
+    def __init__(
+        self,
+        parent: ImageWidget[Any],
+        items: list[HasTags],
+        extra_tags: Sequence[str] = (),
+    ) -> None:
+        """
+        :param parent: ImageWidget for staring undo actions
+        :param items: objects with "get_tags" method
+        :param extra_tags: typically a list of string from configuration file
+        """
+        super().__init__(parent, windowTitle=tr("Edit Tags"))
+        self._items = items
+        # self.setAttribute(Qt.WA_DeleteOnClose)
 
-    dialog = QtWidgets.QDialog(parent, windowTitle=tr("Edit Tags"))
-
-    def item_changed(item: QtWidgets.QListWidgetItem) -> None:
-        if (
-            item.checkState() == Qt.Checked
-            and int(QtGui.QGuiApplication.keyboardModifiers()) == Qt.ALT
-        ):
-            for i in range(tag_list_widget.count()):
-                it = tag_list_widget.item(i)
-                if it.checkState() == Qt.Checked and it != item:
-                    it.setCheckState(Qt.Unchecked)
-
-    tag_list_widget = QtWidgets.QListWidget(
-        itemChanged=item_changed, toolTip="Alt+click to check single item"
-    )
-    tags_label = QtWidgets.QLabel(tr("&Tags:"))
-    tags_label.setBuddy(tag_list_widget)
-
-    count = len(items)
-    for tag in sorted(tags):
-        item = QtWidgets.QListWidgetItem(tag, tag_list_widget)
-        item.setFlags(item.flags() | Qt.ItemIsTristate | Qt.ItemIsEditable)
-        if tags[tag] == count:
-            state = Qt.Checked
-        elif tags[tag]:
-            state = Qt.PartiallyChecked
-        else:
-            state = Qt.Unchecked
-        item.setCheckState(state)
-
-    tag_line_edit = TagEdit()
-    add_tag_label = QtWidgets.QLabel(tr("&Add Tag:"))
-    add_tag_label.setBuddy(tag_line_edit)
-
-    layout = QtWidgets.QVBoxLayout(dialog)
-    layout.addWidget(tags_label)
-    layout.addWidget(tag_list_widget)
-
-    add_layout = QtWidgets.QHBoxLayout(margin=0)
-    add_layout.addWidget(tag_line_edit)
-
-    def append_tag() -> None:
-        tag = tag_line_edit.text().strip()
-        if not tag:
-            return
-        tag_line_edit.setText("")
-        existing_item = tag_list_widget.findItems(tag, Qt.MatchExactly)
-        if existing_item:
-            existing_item[0].setCheckState(Qt.Checked)
-        else:
-            item = QtWidgets.QListWidgetItem(tag, tag_list_widget)
-            item.setFlags(item.flags() | Qt.ItemIsTristate)
-            item.setCheckState(Qt.Checked)
-
-    tag_line_edit.commit.connect(append_tag)
-    add_layout.addWidget(
-        QtWidgets.QPushButton(
-            tr("A&ppend"), clicked=append_tag, toolTip="Ctrl+Enter, Ald+Enter"
+        tags: defaultdict[str, int] = defaultdict(
+            int, {tag: 0 for tag in extra_tags}
         )
-    )
-    layout.addWidget(add_tag_label)
-    layout.addLayout(add_layout)
+        for item in items:
+            for tag in item.get_tags():
+                tags[tag] += 1
+        self._initial_tags = set(tags)
 
-    box = QtWidgets.QDialogButtonBox
-    button_box = box(box.Ok | box.Cancel, Qt.Horizontal, dialog)
-    button_box.accepted.connect(dialog.accept)
-    button_box.rejected.connect(dialog.reject)
-    layout.addWidget(button_box)
-    tag_line_edit.setFocus()
+        self._tag_list_widget = tag_list_widget = QtWidgets.QListWidget(
+            toolTip=tr("Alt+click to check single item"),
+        )
+        tags_label = QtWidgets.QLabel(tr("&Tags:"))
+        tags_label.setBuddy(tag_list_widget)
 
-    if dialog.exec_() == dialog.Accepted:
+        count = len(items)
+        for tag in sorted(tags):
+            item = QtWidgets.QListWidgetItem(tag, tag_list_widget)
+            item.setFlags(item.flags() | Qt.ItemIsTristate | Qt.ItemIsEditable)
+            if tags[tag] == count:
+                state = Qt.Checked
+            elif tags[tag]:
+                state = Qt.PartiallyChecked
+            else:
+                state = Qt.Unchecked
+            item.setCheckState(state)
+
+        self._tag_line_edit = tag_line_edit = TagEdit()
+        add_tag_label = QtWidgets.QLabel(tr("&Add Tag:"))
+        add_tag_label.setBuddy(tag_line_edit)
+
+        layout = QtWidgets.QVBoxLayout(self)
+        layout.addWidget(tags_label)
+        layout.addWidget(tag_list_widget)
+
+        add_layout = QtWidgets.QHBoxLayout(margin=0)
+        add_layout.addWidget(tag_line_edit)
+
+        tag_line_edit.commit.connect(self._append_tag)
+        add_layout.addWidget(
+            QtWidgets.QPushButton(
+                tr("A&ppend"),
+                clicked=self._append_tag,
+                toolTip="Ctrl+Enter, Ald+Enter",
+            )
+        )
+        layout.addWidget(add_tag_label)
+        layout.addLayout(add_layout)
+
+        box = QtWidgets.QDialogButtonBox
+        button_box = box(box.Ok | box.Cancel, Qt.Horizontal, self)
+        button_box.accepted.connect(self._on_accept)
+        button_box.rejected.connect(self.reject)
+        layout.addWidget(button_box)
+        tag_list_widget.itemChanged.connect(self._item_changed)
+        tag_line_edit.setFocus()
+
+    def _on_accept(self):
         add, remove = [], []
-        append_tag()
+        tag_list_widget = self._tag_list_widget
+        self._append_tag()
+
+        current_tags = {
+            tag_list_widget.item(idx).text()
+            for idx in range(tag_list_widget.count())
+        }
+        remove.extend(self._initial_tags - current_tags)
+
         for idx in range(tag_list_widget.count()):
             item = tag_list_widget.item(idx)
             state = item.checkState()
             # ToDo: make code cooler by not readding tags
+            text = item.text()
             if state == Qt.Checked:
-                add.append(item.text())
+                add.append(text)
             elif state == Qt.Unchecked:
-                remove.append(item.text())
+                remove.append(text)
         if remove or add:
-            parent.scene().undo_stack.push(
-                UndoTagModification(items, add, remove)
+            self.parent().scene().undo_stack.push(
+                UndoTagModification(self._items, add, remove)
             )
+        self.accept()
+
+    def _append_tag(self) -> None:
+        tag = self._tag_line_edit.text().strip()
+        if not tag:
+            return
+        self._tag_line_edit.setText("")
+        existing_item = self._tag_list_widget.findItems(tag, Qt.MatchExactly)
+        if existing_item:
+            existing_item[0].setCheckState(Qt.Checked)
+        else:
+            item = QtWidgets.QListWidgetItem(tag, self._tag_list_widget)
+            item.setFlags(item.flags() | Qt.ItemIsTristate)
+            item.setCheckState(Qt.Checked)
+
+    def _item_changed(self, item: QtWidgets.QListWidgetItem) -> None:
+        # when user Alt clicks item, unselect all other actions
+        if (
+            item.checkState() == Qt.Checked
+            and int(QtGui.QGuiApplication.keyboardModifiers()) == Qt.ALT
+        ):
+            for i in range(self._tag_list_widget.count()):
+                it = self._tag_list_widget.item(i)
+                if it.checkState() == Qt.Checked and it != item:
+                    it.setCheckState(Qt.Unchecked)
 
 
 class UndoTagModification(QtWidgets.QUndoCommand):

@@ -12,7 +12,7 @@ from ...markup_objects.quadrangle import Quadrangle
 from ...markup_objects.line import MarkupLine
 from ...markup_objects.point import MarkupPoint
 from ...markup_objects.rect import MarkupRect
-from ...markup_objects.tags import HasTags, edit_tags, UndoTagModification
+from ...markup_objects.tags import HasTags, TagsDialog, UndoTagModification
 from ...views.image_widget import ImageWidget
 from ...utils.json import load as load_json, dump as dump_json
 from ...utils.dicts import dicts_are_equal
@@ -676,9 +676,9 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
                 item.setVisible(state)
 
     def _trigger_tag_edit(self) -> None:
-        edit_tags(
+        TagsDialog(
             self._image_widget, self._get_selected_items(), self._user_tags
-        )
+        ).exec()
 
     def _get_selected_items(self) -> list[HasTags]:
         try:

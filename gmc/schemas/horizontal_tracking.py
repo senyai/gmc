@@ -2,7 +2,7 @@ from __future__ import annotations
 from PyQt5 import QtCore, QtGui, QtWidgets
 from . import MarkupSchema
 from ..markup_objects.polygon import MarkupObjectMeta
-from ..markup_objects.tags import HasTags, edit_tags
+from ..markup_objects.tags import HasTags, TagsDialog
 from ..views.image_widget import ImageWidget
 from ..utils.json import load as load_json, dump as dump_json
 from ..utils.dicts import dicts_are_equal
@@ -235,9 +235,9 @@ class QuarrySchema(OneSourceOneDestination, MarkupSchema):
                 item.setVisible(state)
 
     def _trigger_tag_edit(self):
-        edit_tags(
+        TagsDialog(
             self._image_widget, self._get_selected_items(), self._user_tags
-        )
+        ).exec()
 
     def _get_selected_items(self):
         try:

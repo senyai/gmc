@@ -2,7 +2,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from collections import defaultdict
 from . import MarkupSchema
 from ..markup_objects.polygon import EditableMarkupPolygon, MarkupObjectMeta
-from ..markup_objects.tags import HasTags, edit_tags
+from ..markup_objects.tags import HasTags, TagsDialog
 from ..views.image_widget import ImageWidget
 from ..utils.json import load as load_json, dump as dump_json
 from ..utils.dicts import dicts_are_equal
@@ -218,9 +218,9 @@ class FieldsSchema(OneSourceOneDestination, MarkupSchema):
                 item.setVisible(state)
 
     def _trigger_tag_edit(self):
-        edit_tags(
+        TagsDialog(
             self._image_widget, self._get_selected_items(), self._user_tags
-        )
+        ).exec()
 
     def _swap(self):
         for item in self._get_selected_items():

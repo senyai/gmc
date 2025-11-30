@@ -200,14 +200,12 @@ class EditableMarkupPolygon(MarkupPolygon):
             scene.addItem(self)
             self._polygon.append(pos)
         else:
+            self._polygon[-1] = pos
             if len(self._polygon) == 2:
                 undo = UndoPolygonCreate(scene, self)
             else:
-                new_points = QPointF(self._polygon[-1])
                 del self._polygon[-1]
-                undo = UndoPolygonAddPoint(
-                    self, len(self._polygon), new_points
-                )
+                undo = UndoPolygonAddPoint(self, len(self._polygon), pos)
             if self.UNDO:
                 scene.undo_stack.push(undo)
             else:
@@ -218,7 +216,7 @@ class EditableMarkupPolygon(MarkupPolygon):
             ):  # clicked on the same point
                 self.mouse_doubleclick(event, view)
                 return True
-        self._polygon.append(pos)
+        self._polygon.append(pos)  # add second point, so it follows cursor
 
         self.setFlag(self.GraphicsItemFlag.ItemIsSelectable, False)
         self.setFlag(self.GraphicsItemFlag.ItemIsMovable, False)

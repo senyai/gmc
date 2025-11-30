@@ -1,14 +1,11 @@
 from __future__ import annotations
-import sys
 import unittest
 
-
+from __init__ import qapplication
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtTest import QTest
 
 Qt = QtCore.Qt
-# QApplication must be created before AdvancedSpinbox
-_qapplication = QtWidgets.QApplication(sys.argv)
 
 from gmc.markup_objects.tags import TagsDialog
 from gmc.views.image_widget import ImageWidget

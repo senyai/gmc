@@ -73,3 +73,56 @@ class TaggedObjectsTest(unittest.TestCase):
         self.assertEqual(schema._get_markup(), ref_region_markup)
         view.redo_action.trigger()
         self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+
+    def test_quadrangle(self):
+        schema, view, viewport, make_pos, _reference = self._create_schema()
+        schema._add_quadrangle_action.trigger()
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(10, 10))
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(200, 10))
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(190, 20))
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(10, 20))
+        ref_quad_markup = {
+            "objects": [
+                {
+                    "data": [
+                        (10.0, 10.0),
+                        (200.0, 10.0),
+                        (190.0, 20.0),
+                        (10, 20),
+                    ],
+                    "type": "quad",
+                }
+            ],
+            "size": [640, 480],
+        }
+        self.assertEqual(dict(schema._get_markup()), ref_quad_markup)
+
+        QTest.mouseDClick(viewport, Qt.LeftButton, pos=make_pos(10, 20))
+        view.select_all_action.trigger()
+        view.delete_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+        view.undo_action.trigger()
+        self.assertEqual(dict(schema._get_markup()), ref_quad_markup)
+
+    def test_rect(self):
+        schema, view, viewport, make_pos, _reference = self._create_schema()
+        schema._add_rect_action.trigger()
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(10, 10))
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(200, 21))
+        ref_rect_markup = {
+            "objects": [
+                {
+                    "data": [10.0, 10.0, 190.0, 11.0],
+                    "type": "rect",
+                }
+            ],
+            "size": [640, 480],
+        }
+        self.assertEqual(dict(schema._get_markup()), ref_rect_markup)
+
+        QTest.mouseDClick(viewport, Qt.LeftButton, pos=make_pos(10, 20))
+        view.select_all_action.trigger()
+        view.delete_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+        view.undo_action.trigger()
+        self.assertEqual(dict(schema._get_markup()), ref_rect_markup)

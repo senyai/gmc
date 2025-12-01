@@ -85,7 +85,7 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
             if isinstance(item, MoveableDiamond)
         ):
             self.ensure_edition_canceled()
-            self.scene().removeItem(self)
+            self.scene().add_undo_delete([self])
 
     def itemChange(
         self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any

@@ -67,7 +67,6 @@ class TaggedObjectsTest(unittest.TestCase):
             "size": [640, 480],
         }
         self.assertEqual(dict(schema._get_markup()), ref_region_markup)
-        view.select_all_action.trigger()
         view.delete_action.trigger()
         self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
         view.undo_action.trigger()

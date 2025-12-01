@@ -139,6 +139,9 @@ class MarkupScene(QtWidgets.QGraphicsScene):
             self._cross_pos = False
             self.invalidate(QtCore.QRectF(), self.SceneLayer.ForegroundLayer)
 
+    def add_undo_delete(self, deleted_items: list[QtWidgets.QGraphicsItem]):
+        self.undo_stack.push(UndoObjectsDelete(self, deleted_items))
+
 
 # should return `True` when the event is accepted
 MouseCallback = Callable[[QtGui.QMouseEvent, "ImageView"], bool]
@@ -271,9 +274,7 @@ class ImageView(QtWidgets.QGraphicsView):
                     if isinstance(item, MarkupObjectMeta):
                         deleted_items.append(item)
         if deleted_items:
-            self._scene.undo_stack.push(
-                UndoObjectsDelete(self._scene, deleted_items)
-            )
+            self._scene.add_undo_delete(deleted_items)
 
     def _copy(self) -> None:
         data_list: list[dict[Any, Any]] = []

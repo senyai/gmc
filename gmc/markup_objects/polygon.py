@@ -182,7 +182,7 @@ class EditableMarkupPolygon(MarkupPolygon):
         if len(self._polygon) == len(indices):
             self.ensure_edition_canceled()
             if scene is not None:
-                scene.removeItem(self)
+                scene.add_undo_delete([self])
         else:
             undo = UndoPolygonDelPoints(self, indices)
             if self.UNDO:

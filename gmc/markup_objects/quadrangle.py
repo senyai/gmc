@@ -110,7 +110,7 @@ class Quadrangle(MarkupPolygon):
             if isinstance(item, MoveableDiamond)
         ):
             self.ensure_edition_canceled()
-            self.scene().removeItem(self)
+            self.scene().add_undo_delete([self])
 
     def _finish(self, view: ImageView):
         view.unset_all_events()

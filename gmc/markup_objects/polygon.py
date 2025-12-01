@@ -171,6 +171,9 @@ class EditableMarkupPolygon(MarkupPolygon):
             MarkupObjectMeta.mouseDoubleClickEvent(self, event)
 
     def notify_delete(self) -> None:
+        """
+        User pressed "Del" on `MoveableDiamond`, we get notified
+        """
         indices: list[int] = []
         for item in self.childItems():
             if isinstance(item, MoveableDiamond) and item.isSelected():
@@ -233,7 +236,7 @@ class EditableMarkupPolygon(MarkupPolygon):
         # important: there's no strong enough reason to remove one point paths
         self.setFlag(self.ItemIsSelectable, True)
         self.on_change_polygon(self._polygon)
-        self.after_creation()
+        self.on_created()
         return True
 
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
@@ -256,7 +259,7 @@ class EditableMarkupPolygon(MarkupPolygon):
         view.scene().removeItem(self)
         view.set_mouse_press(self.mouse_press)  # start over
 
-    def after_creation(self):
+    def on_created(self):
         pass
 
 

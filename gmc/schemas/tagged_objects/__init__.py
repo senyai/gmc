@@ -106,6 +106,11 @@ def from_json_rect(
     raise ValueError(f"incorrect rect `{data}`")
 
 
+def _select_on_created(self: Any) -> None:
+    self.setSelected(True)
+    self._schema.on_object_created(self)
+
+
 @with_brush
 class CustomQuadrangle(HasTags, Quadrangle):
     from_json = classmethod(from_json_polygon)
@@ -125,9 +130,7 @@ class CustomQuadrangle(HasTags, Quadrangle):
         painter.setBrush(self._current_color)
         super().paint(painter, option, widget)
 
-    def on_created(self) -> None:
-        self.setSelected(True)
-        self._schema.on_object_created(self)
+    on_created = _select_on_created
 
     def tag_pos(self) -> QtCore.QPointF:
         return self._polygon.at(1)
@@ -187,9 +190,7 @@ class CustomPoint(HasTags, MarkupPoint):
             self.PEN = MarkupPoint.PEN
         super()._on_tags_changed()
 
-    def on_created(self) -> None:
-        self.setSelected(True)
-        self._schema.on_object_created(self)
+    on_created = _select_on_created
 
     def tag_pos(self):
         return QtCore.QPointF()
@@ -209,9 +210,7 @@ class CustomRectangle(HasTags, MarkupRect):
         painter.setBrush(self._current_color)
         super().paint(painter, option, widget)
 
-    def on_created(self) -> None:
-        self.setSelected(True)
-        self._schema.on_object_created(self)
+    on_created = _select_on_created
 
     def tag_pos(self):
         return self._rect.topRight()
@@ -248,8 +247,7 @@ class CustomPath(HasTags, EditableMarkupPolygon):
     def tag_pos(self) -> QtCore.QPointF:
         return self._polygon[0]
 
-    def after_creation(self):
-        self._schema.on_object_created(self)
+    on_created = _select_on_created
 
 
 @with_brush

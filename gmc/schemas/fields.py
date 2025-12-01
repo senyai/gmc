@@ -59,7 +59,7 @@ class CustomPath(HasTags, EditableMarkupPolygon):
     def tag_pos(self):
         return self._polygon[0]
 
-    def after_creation(self):
+    def on_created(self):
         if self._base:
             self._schema._add_m_broken_line_action.trigger()
         else:
@@ -94,7 +94,7 @@ class CustomRegion(CustomPath):
     def shape(self):
         return EditableMarkupPolygon.shape(self)
 
-    def after_creation(self):
+    def on_created(self):
         if self._base:
             self._schema._add_m_region_action.trigger()
         else:

@@ -245,7 +245,7 @@ class TagsDialog(QtWidgets.QDialog):
         self._initial_tags = set(tags)
 
         self._tag_list_widget = tag_list_widget = QtWidgets.QListWidget(
-            toolTip=tr("Alt+click to check single item"),
+            toolTip=tr("Alt+Click to check single tag"),
         )
         tags_label = QtWidgets.QLabel(tr("&Tags:"))
         tags_label.setBuddy(tag_list_widget)

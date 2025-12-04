@@ -523,11 +523,6 @@ before closing?</source>
         <translation>удаление точек многоугольника</translation>
     </message>
     <message>
-        <location filename="../markup_objects/polygon.py" line="330"/>
-        <source>Polygon Edition</source>
-        <translation>редактирование многоугольника</translation>
-    </message>
-    <message>
         <location filename="../markup_objects/rect.py" line="204"/>
         <source>Rectangle Creation</source>
         <translation>создание прямоугольника</translation>
@@ -611,6 +606,16 @@ before closing?</source>
         <location filename="../views/properties_view.py" line="620"/>
         <source>Type</source>
         <translation>Тип</translation>
+    </message>
+    <message>
+        <location filename="../markup_objects/polygon.py" line="342"/>
+        <source>Point Movement</source>
+        <translation>движение точки</translation>
+    </message>
+    <message>
+        <location filename="../markup_objects/tags.py" line="247"/>
+        <source>Alt+Click to check single tag</source>
+        <translation>Alt+Click для выбора единственной метки</translation>
     </message>
 </context>
 </TS>

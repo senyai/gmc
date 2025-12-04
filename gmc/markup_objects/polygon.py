@@ -7,6 +7,7 @@ from .moveable_diamond import MoveableDiamond
 from math import hypot, atan2, degrees, radians, sin, cos
 from typing import Any, Callable
 from PyQt5.QtCore import Qt, QPointF, QCoreApplication, QRectF
+from time import monotonic
 
 tr: Callable[[str], str] = lambda text: QCoreApplication.translate(
     "@default", text
@@ -75,9 +76,12 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         return ps.createStroke(path)
 
     def notify(self, idx: int, pos: QPointF) -> None:
-        p = self._polygon
-        p[idx] = pos
-        self.on_change_polygon(p)
+        undo = UndoPolygonPointMove(self, idx, pos)
+        if self.UNDO:
+            self.scene().undo_stack.push(undo)
+        else:
+            undo.redo()
+        self.on_change_polygon(self._polygon)
 
     def itemChange(
         self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
@@ -92,7 +96,6 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     def on_start_edit(self) -> None:
         self.setFlag(self.GraphicsItemFlag.ItemIsMovable, False)
         self.setFlag(self.GraphicsItemFlag.ItemIsSelectable, False)
-        self._start_edit_polygon = self._polygon[:]
         for idx, pos in enumerate(self._polygon):
             MoveableDiamond(self, idx, pos)
 
@@ -102,15 +105,6 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         if scene:
             for diamond in self.childItems():
                 scene.removeItem(diamond)
-            if self._start_edit_polygon != self._polygon:
-                undo = UndoPolygonEdit(self, self._start_edit_polygon)
-                if self.UNDO:
-                    scene.undo_stack.push(undo)
-                else:
-                    undo.redo()
-        # is not deleted in UndoPolygonEdit
-        if hasattr(self, "_start_edit_polygon"):
-            del self._start_edit_polygon
 
     def on_change_polygon(self, _: QtGui.QPolygonF) -> None:
         pass  # for overriding
@@ -129,14 +123,17 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
 class dist_squared:
     ":returns: distance from segment to a point"
 
-    def __new__(cls, a: QPointF, b: QPointF, d: QPointF):
+    def __new__(
+        cls, a: QPointF, b: QPointF, d: QPointF
+    ) -> tuple[QPointF, float]:
         "a and b segment line; d - the point"
         p = b - a
         l2 = cls.length(p)
         if not l2:
-            return cls.length(a - d)
+            return a, cls.length(a - d)
         u = max(0.0, min(1.0, cls.add(cls.mul((d - a), p)) / l2))
-        return cls.length(a + u * p - d)
+        nearest = a + u * p
+        return nearest, cls.length(nearest - d)
 
     @staticmethod
     def mul(a: QPointF, b: QPointF) -> QPointF:
@@ -157,15 +154,26 @@ class EditableMarkupPolygon(MarkupPolygon):
             the_point = event.scenePos()
             min_dist = 1e900
             prev_point = self._polygon[-1]
+            min_idx = -1
             for idx, point in enumerate(self._polygon):
-                dist = dist_squared(point, prev_point, the_point)
+                pt, dist = dist_squared(point, prev_point, the_point)
                 prev_point = point
                 if dist < min_dist:
                     min_idx = idx
                     min_dist = dist
-            self._polygon.insert(min_idx, the_point)
+                    mid_pt = pt
+            if min_idx == -1:
+                return
+            undo = UndoPolygonAddPoint(self, min_idx, mid_pt)
+            if self.UNDO:
+                self.scene().undo_stack.push(undo)
+            else:
+                undo.redo()
+
+            # ensure new diamond handle appears
             self.on_stop_edit()
             self.start_edit_nodes()
+            self.childItems()[min_idx].setSelected(True)
             self.update()
         else:
             MarkupObjectMeta.mouseDoubleClickEvent(self, event)
@@ -286,7 +294,7 @@ class UndoPolygonCreate(QtWidgets.QUndoCommand):
 
 class UndoPolygonAddPoint(QtWidgets.QUndoCommand):
     def __init__(
-        self, markup_polygon: MarkupPolygon, idx: int, pos: QPointF
+        self, markup_polygon: EditableMarkupPolygon, idx: int, pos: QPointF
     ) -> None:
         self._markup_polygon = markup_polygon
         self._idx = idx
@@ -305,9 +313,49 @@ class UndoPolygonAddPoint(QtWidgets.QUndoCommand):
         mp.update()
 
 
+class UndoPolygonPointMove(QtWidgets.QUndoCommand):
+    __slots__ = ("_markup_polygon", "_idx", "_point", "_timestamp")
+
+    def __init__(
+        self, markup_polygon: EditableMarkupPolygon, idx: int, point: QPointF
+    ) -> None:
+        self._markup_polygon = markup_polygon
+        self._idx = idx
+        self._point = point
+        self._timestamp = monotonic()
+        super().__init__(tr("Point Movement"))
+
+    def redo(self) -> None:
+        mp, idx = self._markup_polygon, self._idx
+        diamonds = mp.childItems()
+        if len(diamonds) == len(mp._polygon):
+            diamonds[idx].setPos(self._point)
+        self._point, mp._polygon[idx] = (
+            QPointF(mp._polygon[idx]),
+            self._point,
+        )
+        mp.update()
+
+    undo = redo
+
+    def id(self):
+        return id(UndoPolygonPointMove) & 0x7FFFFFFF
+
+    def mergeWith(self, other: QtWidgets.QUndoCommand | None) -> bool:
+        if (
+            isinstance(other, UndoPolygonPointMove)
+            and other._timestamp - self._timestamp < 0.15
+            and self._idx == other._idx
+            and self._markup_polygon is other._markup_polygon
+        ):
+            self._point = other._point
+            return True
+        return False
+
+
 class UndoPolygonDelPoints(QtWidgets.QUndoCommand):
     def __init__(
-        self, markup_polygon: MarkupPolygon, indices: list[int]
+        self, markup_polygon: EditableMarkupPolygon, indices: list[int]
     ) -> None:
         indices.sort(reverse=True)
         polygon = markup_polygon._polygon
@@ -318,8 +366,8 @@ class UndoPolygonDelPoints(QtWidgets.QUndoCommand):
 
     def redo(self) -> None:
         mp = self._markup_polygon
-        for index in self._indices:
-            mp._polygon.remove(index)
+        for idx in self._indices:
+            mp._polygon.remove(idx)
         mp.update()
 
     def undo(self) -> None:
@@ -327,26 +375,4 @@ class UndoPolygonDelPoints(QtWidgets.QUndoCommand):
         mp.ensure_edition_canceled()
         for idx, point in zip(self._indices[::-1], self._points[::-1]):
             mp._polygon.insert(idx, point)
-        mp.update()
-
-
-class UndoPolygonEdit(QtWidgets.QUndoCommand):
-    def __init__(
-        self, markup_polygon: MarkupPolygon, prev_polygon: QtGui.QPolygonF
-    ) -> None:
-        self._markup_polygon = markup_polygon
-        self._prev_polygon = prev_polygon
-        self._polygon = markup_polygon._polygon[:]
-        super().__init__(tr("Polygon Edition"))
-
-    def redo(self) -> None:
-        mp = self._markup_polygon
-        mp.ensure_edition_canceled()
-        mp._polygon = self._polygon[:]
-        mp.update()
-
-    def undo(self) -> None:
-        mp = self._markup_polygon
-        mp.ensure_edition_canceled()
-        mp._polygon = self._prev_polygon[:]
         mp.update()

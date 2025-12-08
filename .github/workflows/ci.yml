@@ -16,10 +16,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@25.1.0
-      - name: unittest
+      - name: apt-get
         run: |
+          sudo apt-get update -y
           sudo apt-get install -y python3-pyqt5 xvfb
-          xvfb-run -a python3 -m unittest discover -v --start-directory tests
+      - name: unittest
+        run: xvfb-run -a python3 -m unittest discover -v --start-directory tests
       - name: wheel
         run: |
           pip install build

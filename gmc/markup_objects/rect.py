@@ -1,7 +1,7 @@
 from typing import Any
 from math import copysign
-from PyQt5 import QtGui, QtWidgets
-from PyQt5.QtCore import Qt, QRectF, QPointF, QSizeF, QElapsedTimer
+from PyQt5 import QtGui, QtWidgets, QtCore
+from PyQt5.QtCore import Qt, QRectF, QPointF, QSizeF
 
 from ..views.image_view import ImageView
 from . import MarkupObjectMeta
@@ -145,7 +145,7 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         view.set_mouse_press(self.mouse_press)
 
     def mouse_press(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        self._press_timer = QElapsedTimer()
+        self._press_timer = QtCore.QElapsedTimer()
         self._press_timer.start()
         self._rect = QRectF(view.mapToScene(event.pos()), QSizeF(0, 0))
         self.setFlag(self.ItemIsSelectable, False)

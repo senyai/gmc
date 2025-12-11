@@ -859,8 +859,9 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
     def _on_paste(self, objects) -> None:
         scene = self._image_widget.scene()
         for obj in objects:
-            cls = globals().get(obj.get("_class"))
-            if issubclass(cls, HasTags):
+            classname = obj.pop("_class")
+            if classname in self._cls_to_type:
+                cls = self._mapping[self._cls_to_type[classname]]
                 item = cls.from_json(self, obj)
                 scene.addItem(item)
 

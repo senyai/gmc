@@ -1,5 +1,7 @@
 from __future__ import annotations
+from typing import Literal
 import unittest
+from unittest.mock import patch
 
 from __init__ import qapplication
 from PyQt5 import QtCore, QtWidgets
@@ -43,11 +45,17 @@ class TaggedObjectsTest(unittest.TestCase):
             "size": [640, 480],
         }
         self.assertEqual(schema._get_markup(), ref_point_markup)
+        view.copy_action.trigger()
         view.delete_action.trigger()
         self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
         view.undo_action.trigger()
         self.assertEqual(schema._get_markup(), ref_point_markup)
         view.redo_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+        view.paste_action.trigger()
+        self.assertEqual(schema._get_markup(), ref_point_markup)
+        view.select_all_action.trigger()
+        view.delete_action.trigger()
         self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
 
     def test_region(self):
@@ -74,7 +82,8 @@ class TaggedObjectsTest(unittest.TestCase):
         view.redo_action.trigger()
         self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
 
-    def test_quadrangle(self):
+    @patch("PyQt5.QtCore.QElapsedTimer")
+    def test_quadrangle(self, _timer):
         schema, view, viewport, make_pos, _reference = self._create_schema()
         schema._add_quadrangle_action.trigger()
         QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(10, 10))
@@ -96,15 +105,22 @@ class TaggedObjectsTest(unittest.TestCase):
             "size": [640, 480],
         }
         self.assertEqual(dict(schema._get_markup()), ref_quad_markup)
-
-        QTest.mouseDClick(viewport, Qt.LeftButton, pos=make_pos(10, 20))
-        view.select_all_action.trigger()
+        view.copy_action.trigger()
         view.delete_action.trigger()
         self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
         view.undo_action.trigger()
         self.assertEqual(dict(schema._get_markup()), ref_quad_markup)
+        view.select_all_action.trigger()
+        view.delete_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+        view.paste_action.trigger()
+        self.assertEqual(dict(schema._get_markup()), ref_quad_markup)
+        view.select_all_action.trigger()
+        view.delete_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
 
-    def test_rect(self):
+    @patch("PyQt5.QtCore.QElapsedTimer")
+    def test_rect(self, _timer):
         schema, view, viewport, make_pos, _reference = self._create_schema()
         schema._add_rect_action.trigger()
         QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(10, 10))
@@ -119,10 +135,54 @@ class TaggedObjectsTest(unittest.TestCase):
             "size": [640, 480],
         }
         self.assertEqual(dict(schema._get_markup()), ref_rect_markup)
-
-        QTest.mouseDClick(viewport, Qt.LeftButton, pos=make_pos(10, 20))
-        view.select_all_action.trigger()
+        view.copy_action.trigger()
         view.delete_action.trigger()
         self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
         view.undo_action.trigger()
         self.assertEqual(dict(schema._get_markup()), ref_rect_markup)
+        view.redo_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+        view.paste_action.trigger()
+        self.assertEqual(dict(schema._get_markup()), ref_rect_markup)
+        view.select_all_action.trigger()
+        view.delete_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+
+    def _test_two_points(
+        self,
+        name_type: (
+            tuple[Literal["seg"], Literal["segment"]]
+            | tuple[Literal["line"], Literal["line"]]
+        ),
+    ):
+        schema, view, viewport, make_pos, _reference = self._create_schema()
+        getattr(schema, f"_add_{name_type[1]}_action").trigger()
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(10, 20))
+        QTest.mouseClick(viewport, Qt.LeftButton, pos=make_pos(11, 40))
+        ref_segment_markup = {
+            "objects": [
+                {"data": [(10.0, 20.0), (11.0, 40.0)], "type": name_type[0]}
+            ],
+            "size": [640, 480],
+        }
+        self.assertEqual(dict(schema._get_markup()), ref_segment_markup)
+        view.copy_action.trigger()
+        view.delete_action.trigger()
+        self.assertEqual(dict(schema._get_markup()), self.REF_EMPTY_MARKUP)
+        view.undo_action.trigger()
+        self.assertEqual(schema._get_markup(), ref_segment_markup)
+        view.redo_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+        view.paste_action.trigger()
+        self.assertEqual(dict(schema._get_markup()), ref_segment_markup)
+        view.select_all_action.trigger()
+        view.delete_action.trigger()
+        self.assertEqual(schema._get_markup(), self.REF_EMPTY_MARKUP)
+
+    @patch("PyQt5.QtCore.QElapsedTimer")
+    def test_segment(self, _timer):
+        self._test_two_points(("seg", "segment"))
+
+    @patch("PyQt5.QtCore.QElapsedTimer")
+    def test_line(self, _timer):
+        self._test_two_points(("line", "line"))

@@ -20,7 +20,6 @@ class MarkupPolygon(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     by subclassing and calling paint with different `f` argument.
     """
 
-    _polygon: QtGui.QPolygonF
     CURSOR = QtGui.QCursor(QtGui.QPixmap("gmc:cursors/add_line.svg"), 6, 6)
     UNDO = True  # Allow subclasses to disable undoing
 

@@ -491,7 +491,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
                 icon=get_icon("prev"),
                 clicked=self._on_unique_tag,
                 shortcut="Ctrl+U",
-                toolTip="Generate unique tag per directory",
+                toolTip=tr("Generate unique tag per directory"),
             )
         )
         toolbar.addSeparator()
@@ -503,7 +503,9 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             checked=self.last_used_cat_mode,
             clicked=self._update_last_used_cat_mode,
             shortcut="Ctrl+M",
-            toolTip="Save and switch to next frame after adding any object",
+            toolTip=tr(
+                "Save and switch to next frame after adding any object"
+            ),
         )
         toolbar.addWidget(self._mad_cat_btn)
         return toolbar

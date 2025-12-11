@@ -617,5 +617,15 @@ before closing?</source>
         <source>Alt+Click to check single tag</source>
         <translation>Alt+Click для выбора единственной метки</translation>
     </message>
+    <message>
+        <location filename="../schemas/tagged_objects/__init__.py" line="488"/>
+        <source>Generate unique tag per directory</source>
+        <translation>Генерировать уникальный тег в текущей директории</translation>
+    </message>
+    <message>
+        <location filename="../schemas/tagged_objects/__init__.py" line="499"/>
+        <source>Save and switch to next frame after adding any object</source>
+        <translation>Переключаться на следующий файл после добавления объекта</translation>
+    </message>
 </context>
 </TS>

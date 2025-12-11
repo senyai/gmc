@@ -264,15 +264,20 @@ class CustomRegion(CustomPath):
 
 
 class TaggedObjects(OneSourceOneDestination, MarkupSchema):
-    _cls_to_type: ClassVar[dict[str, str]] = {
-        "CustomQuadrangle": "quad",
-        "CustomLine": "line",
-        "CustomSegment": "seg",
-        "CustomPoint": "point",
-        "CustomRectangle": "rect",
-        "CustomRegion": "region",
-        "CustomPath": "path",
+    _mapping: ClassVar[dict[str, type[HasTags]]] = {
+        "quad": CustomQuadrangle,
+        "line": CustomLine,
+        "seg": CustomSegment,
+        "point": CustomPoint,
+        "rect": CustomRectangle,
+        "region": CustomRegion,
+        "path": CustomPath,
     }
+
+    _cls_to_type: ClassVar[dict[str, str]] = {
+        cls.__name__: name for name, cls in _mapping.items()
+    }
+
     _current_root_properties: dict[str, Any] | None
     _current_properties: dict[str, Any] | None
     last_used_default_action: ClassVar[str] = settings.value(
@@ -775,15 +780,6 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             self._current_root_properties = None
         scene = self._image_widget.scene()
         item = None
-        mapping = {
-            "quad": CustomQuadrangle,
-            "line": CustomLine,
-            "seg": CustomSegment,
-            "point": CustomPoint,
-            "rect": CustomRectangle,
-            "path": CustomPath,
-            "region": CustomRegion,
-        }
         warnings: list[str] = []
 
         for obj in self._original_markup.get("objects", ()):
@@ -793,10 +789,10 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
                 case _:
                     warnings.append(f"invalid type for {obj!r}")
                     continue
-            if the_type not in mapping:
+            if the_type not in self._mapping:
                 warnings.append(f"ignoring unknown object type `{the_type}`")
                 continue
-            cls = mapping[the_type]
+            cls = self._mapping[the_type]
             try:
                 item = cls.from_json(self, rest)
             except ValueError as e:

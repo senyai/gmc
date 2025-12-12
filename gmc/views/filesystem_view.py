@@ -5,6 +5,21 @@ from ..utils import separator, new_action, tr
 Qt = QtCore.Qt
 
 
+def _question_deletion(paths: list[str]) -> str:
+    print("TRANSLATION RESULT", tr("""Total files"""))
+    n = len(paths)
+    if n < 6:
+        return "\n".join(paths)
+    extensions = set(path[path.rfind(".") + 1 :] for path in paths)
+    if len(extensions) == 1:
+        total = f"{n} .{next(iter(extensions))}"
+    else:
+        total = n
+    return tr("Total {} files\n(including\n{}\n…)").format(
+        total, "\n".join(paths[:3])
+    )
+
+
 class FilesystemView(QtWidgets.QTreeView):
     _valid_root: bool = False
 
@@ -76,7 +91,10 @@ class FilesystemView(QtWidgets.QTreeView):
                 self,
                 "GMC",
                 "\n".join(
-                    (tr("Move selected files to trash?"), "\n".join(paths))
+                    (
+                        tr("Move selected files to trash?"),
+                        _question_deletion(paths),
+                    )
                 ),
             )
             if response == QtWidgets.QMessageBox.Yes:

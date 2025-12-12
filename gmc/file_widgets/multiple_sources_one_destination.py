@@ -1,7 +1,6 @@
 from __future__ import annotations
-from typing import Callable
-from PyQt5 import QtCore, QtWidgets
-from ..utils import separator, get_icon
+from PyQt5 import QtCore, QtWidgets, QtGui
+from ..utils import separator, get_icon, tr
 from ..views.filesystem_widget import (
     MultipleFilesystemWidget,
     SingleFilesystemWidget,
@@ -9,11 +8,9 @@ from ..views.filesystem_widget import (
 )
 from itertools import zip_longest
 from ..application import GMCArguments
+from ..mdi_area import MdiArea
 
 Qt = QtCore.Qt
-tr: Callable[[str], str] = lambda text: QtCore.QCoreApplication.translate(
-    "@default", text
-)
 
 
 class MultipleSourcesOneDestination:
@@ -21,8 +18,10 @@ class MultipleSourcesOneDestination:
     SOURCE_TITLES = ["First Image", "Second Image"]
 
     @classmethod
-    def create_data_widget(cls, mdi_area, settings, extra_args: GMCArguments):
-        def _on_open_src(view_idx, new_tab):
+    def create_data_widget(
+        cls, mdi_area: MdiArea, settings, extra_args: GMCArguments
+    ):
+        def _on_open_src(view_idx: int, new_tab: bool) -> None:
             view = cls._source_widget.views()[view_idx]
             dst_dir = cls._destination_widget.get_root_qdir()
             if dst_dir is None:
@@ -50,15 +49,15 @@ class MultipleSourcesOneDestination:
                 )
                 new_tab = True
 
-        def _on_open_dst(self, new=False):
-            def selected_files(root_path):
+        def _on_open_dst(self, new: bool = False) -> None:
+            def selected_files(root_path: QtCore.QFileInfo):
                 for path in self._destination_view.selected_files_relative:
                     path = path[: -len(".json")]
                     yield root_path.filePath(path)
 
             self._on_open(selected_files, new)
 
-        def _on_view_dst_file():
+        def _on_view_dst_file() -> None:
             for path in cls._destination_widget.view().selected_files():
                 f = QtCore.QFile(path)
                 if not f.open(f.ReadOnly | f.Text):
@@ -139,7 +138,7 @@ class MultipleSourcesOneDestination:
         return splitter
 
     @classmethod
-    def save_settings(cls, settings):
+    def save_settings(cls, settings) -> None:
         settings.setValue(
             cls.__name__ + "_src_dir", cls._source_widget.get_root_string()
         )
@@ -172,7 +171,9 @@ class MultipleSourcesOneDestinationMarkupWindow(QtWidgets.QWidget):
         self._all_files = [None] * schema.NSOURCES
         self._idx = [None] * schema.NSOURCES
 
-    def _create_go_actions(self, n, actions_name, actions, icon, where):
+    def _create_go_actions(
+        self, n: int, actions_name: str, actions, icon: QtGui.QIcon, where: int
+    ):
         for idx, (caption, shortcuts) in zip_longest(
             range(n), actions, fillvalue=(actions_name, None)
         ):
@@ -186,7 +187,7 @@ class MultipleSourcesOneDestinationMarkupWindow(QtWidgets.QWidget):
             shortcuts and action.setShortcuts(shortcuts)
             yield action
 
-    def _get_default_actions(self, n):
+    def _get_default_actions(self, n: int):
         """:returns: actions, every markup window should have."""
         prev_shortcuts = (
             (
@@ -240,7 +241,14 @@ class MultipleSourcesOneDestinationMarkupWindow(QtWidgets.QWidget):
         ):
             yield prev_action, next_action, separator(self), save_action
 
-    def open_current(self, view_idx, dst_dir, src_dir, file_path, all_files):
+    def open_current(
+        self,
+        view_idx: int,
+        dst_dir: QtCore.QDir,
+        src_dir: QtCore.QDir,
+        file_path: str,
+        all_files,
+    ) -> None:
         """The function is "public" only because it fixes focus issue."""
         self._dst_dir = dst_dir
         self._all_files[view_idx] = all_files

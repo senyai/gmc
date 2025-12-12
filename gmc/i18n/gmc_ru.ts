@@ -627,5 +627,16 @@ before closing?</source>
         <source>Save and switch to next frame after adding any object</source>
         <translation>Переключаться на следующий файл после добавления объекта</translation>
     </message>
+    <message>
+        <location filename="../views/filesystem_view.py" line="17"/>
+        <source>Total {} files
+(including
+{}
+…)</source>
+        <translation>Всего {} файлов
+(включая
+{}
+…)</translation>
+    </message>
 </context>
 </TS>

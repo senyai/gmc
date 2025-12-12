@@ -2,14 +2,13 @@
 from PyQt5 import QtCore, QtWidgets, QtGui
 from .mdi_area import MdiArea
 from .schemas import MarkupSchema, load_schema_cls, iter_schemas
-from .utils import get_icon, new_action
+from .utils import get_icon, new_action, tr
 from .help_label import HelpLabel
 from .settings import settings
 from .application import GMCArguments
 
 MB = QtWidgets.QMessageBox
 Qt = QtCore.Qt
-tr = lambda text: QtCore.QCoreApplication.translate("@default", text)
 
 
 class MainWindow(QtWidgets.QMainWindow):
@@ -177,6 +176,16 @@ class MainWindow(QtWidgets.QMainWindow):
         main_menu.addAction(
             QtWidgets.QAction(
                 self.style().standardIcon(
+                    QtWidgets.QStyle.SP_MessageBoxInformation
+                ),
+                tr("&About"),
+                self,
+                triggered=self._on_about,
+            )
+        )
+        main_menu.addAction(
+            QtWidgets.QAction(
+                self.style().standardIcon(
                     QtWidgets.QStyle.SP_TitleBarMenuButton
                 ),
                 tr("&About Qt"),
@@ -214,14 +223,15 @@ class MainWindow(QtWidgets.QMainWindow):
 
         create_setting_dialog(self)
 
-    def _on_about_qt(self):
-        import platform
+    def _on_about(self):
+        from .about import about_gmc
 
-        MB.aboutQt(
-            self,
-            f"{self.windowTitle()} @ python "
-            f"{platform.python_version()} : {platform.architecture()[0]}",
-        )
+        about_gmc(self)
+
+    def _on_about_qt(self):
+        from .about import about_qt
+
+        about_qt(self)
 
     def _schema_triggered(self, action: QtWidgets.QAction):
         if self._schema_cls is not None:

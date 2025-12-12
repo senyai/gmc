@@ -523,7 +523,7 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         dst_dir = cls._destination_widget.get_root_qdir()
         relative_path = cls._source_widget.get_root_qdir().relativeFilePath
         source_view = cls._source_widget.view()
-        image_paths = source_view.selected_files()
+        image_paths = source_view.all_selected_files()
         if len(image_paths) == 1:
             # user surely doesn't want to interpolate one single file,
             # so instead, list all paths

@@ -7,7 +7,6 @@ QDir = QtCore.QDir
 
 
 def _question_deletion(paths: list[str]) -> str:
-    print("TRANSLATION RESULT", tr("""Total files"""))
     n = len(paths)
     if n < 6:
         return "\n".join(paths)

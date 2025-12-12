@@ -1,3 +1,4 @@
+from __future__ import annotations
 from typing import NamedTuple, Sequence
 from PyQt5 import QtCore, QtWidgets
 from .filesystem_view import FilesystemView
@@ -23,7 +24,7 @@ class SingleFilesystemWidget(QtWidgets.QFrame):
         parent: QtWidgets.QWidget,
         title: FilesystemTitle,
         actions: list[QtWidgets.QAction],
-    ):
+    ) -> None:
         assert isinstance(title, FilesystemTitle), title
         super().__init__(
             parent,
@@ -45,7 +46,7 @@ class SingleFilesystemWidget(QtWidgets.QFrame):
 
         view.model().rootPathChanged.connect(self._root_changed)
 
-    def _root_changed(self):
+    def _root_changed(self) -> None:
         self._view.model().rootPathChanged.disconnect(self._root_changed)
         self._layout.takeAt(1).widget().setParent(None)
         self._layout.addWidget(self._view)

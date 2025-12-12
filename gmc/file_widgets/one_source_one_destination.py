@@ -1,16 +1,13 @@
 from __future__ import annotations
-from typing import Callable, Sequence
+from typing import Sequence
 from PyQt5 import QtCore, QtWidgets, QtGui
-from ..utils import separator, new_action
+from ..utils import separator, new_action, tr
 from ..views.filesystem_widget import SingleFilesystemWidget, FilesystemTitle
 from ..settings import settings
 from ..application import GMCArguments
 
 Qt = QtCore.Qt
 MB = QtWidgets.QMessageBox
-tr: Callable[[str], str] = lambda text: QtCore.QCoreApplication.translate(
-    "@default", text
-)
 
 
 class OneSourceOneDestination:
@@ -73,7 +70,7 @@ class OneSourceOneDestination:
 
             _on_open(selected_files(), new)
 
-        def _on_view_dst_file():
+        def _on_view_dst_file() -> None:
             for path in cls._destination_widget.view().selected_files():
                 f = QtCore.QFile(path)
                 if not f.open(f.ReadOnly | f.Text):
@@ -177,7 +174,7 @@ class OneSourceOneDestinationMarkupWindow(QtWidgets.QWidget):
         file_path: str,
         all_files: list[str],
         schema,
-    ):
+    ) -> None:
         """
         :param dst_dir: `QDir` root destination path
         :param src_dir: `QDir` root source path

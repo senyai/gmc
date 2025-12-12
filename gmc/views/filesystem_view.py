@@ -1,4 +1,5 @@
-from typing import Any, Iterable
+from __future__ import annotations
+from typing import Any, Iterable, TYPE_CHECKING
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action, tr
 
@@ -172,7 +173,7 @@ class FilesystemView(QtWidgets.QTreeView):
 
     @property
     def selected_files_relative(self) -> list[str]:
-        root_dir: QtCore.QDir = self.model().root_dir_qdir
+        root_dir = self.model().root_dir_qdir
         return [
             root_dir.relativeFilePath(info.filePath())
             for info in self._selected_info_map
@@ -213,12 +214,12 @@ class FilesystemView(QtWidgets.QTreeView):
         menu.exec_(event.globalPos())
 
     def set_path(self, path: str) -> None:
-        model: MinimalFileSystemModel = self.model()
+        model = self.model()
         index = model.setRootPath(path)
         self.setRootIndex(index)
 
     def set_name_filters(self, name_filters: Iterable[str]):
-        model: MinimalFileSystemModel = self.model()
+        model = self.model()
         model.setNameFilters(name_filters)
 
     def user_select_path(
@@ -233,6 +234,10 @@ class FilesystemView(QtWidgets.QTreeView):
         )
         if path:
             callback(self, path)
+
+    if TYPE_CHECKING:
+
+        def model(self) -> MinimalFileSystemModel: ...
 
 
 class MinimalFileSystemModel(QtWidgets.QFileSystemModel):

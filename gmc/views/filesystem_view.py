@@ -3,6 +3,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action, tr
 
 Qt = QtCore.Qt
+QDir = QtCore.QDir
 
 
 def _question_deletion(paths: list[str]) -> str:
@@ -127,11 +128,44 @@ class FilesystemView(QtWidgets.QTreeView):
                 action.setEnabled(all_file)
 
     def selected_files(self, *_args: Any) -> list[str]:
+        """
+        Called when user selects multiple files and performs "view" action,
+        for example
+        """
         return [
             info.filePath()
             for info in self._selected_info_map
             if info.isFile()
         ]
+
+    @classmethod
+    def _all_selected_files(
+        cls, finfos: Iterable[QtCore.QFileInfo], masks: list[str]
+    ):
+        for info in finfos:
+            if info.isFile():
+                yield info.filePath()
+            elif info.isDir():
+                qdir = QDir(info.filePath())
+                qdir.setFilter(QDir.Files | QDir.NoSymLinks | QDir.Readable)
+                qdir.setNameFilters(masks)
+                for fi in qdir.entryInfoList():
+                    yield fi.filePath()
+                qdir.setFilter(
+                    QDir.Dirs
+                    | QDir.NoDotAndDotDot
+                    | QDir.NoSymLinks
+                    | QDir.Readable
+                )
+                qdir.setNameFilters(())
+                yield from cls._all_selected_files(qdir.entryInfoList(), masks)
+
+    def all_selected_files(self):
+        """
+        Just like :func:`selected_files`, but selects files in selected folders
+        """
+        masks = self.model().nameFilters()
+        return list(self._all_selected_files(self._selected_info_map, masks))
 
     @property
     def _selected_info_map(self) -> Iterable[QtCore.QFileInfo]:

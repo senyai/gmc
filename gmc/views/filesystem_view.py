@@ -75,7 +75,7 @@ class FilesystemView(QtWidgets.QTreeView):
             self._on_default_os_action()
             event.ignore()
         else:
-            super(FilesystemView, self).keyPressEvent(event)
+            super().keyPressEvent(event)
 
     def _on_default_os_action(self) -> None:
         index = self.currentIndex()
@@ -114,7 +114,7 @@ class FilesystemView(QtWidgets.QTreeView):
         deselected: QtCore.QItemSelection,
     ):
         self._update_actions()
-        super(FilesystemView, self).selectionChanged(selected, deselected)
+        super().selectionChanged(selected, deselected)
 
     def _on_activated(self) -> None:
         default_action = self._actions[0]
@@ -271,7 +271,7 @@ class MinimalFileSystemModel(QtWidgets.QFileSystemModel):
     def setRootPath(self, path: str) -> QtCore.QModelIndex:
         """Overrode this method as default `RootPath` is '.'"""
         self._root_dir = QtCore.QDir(path)
-        return super(MinimalFileSystemModel, self).setRootPath(path)
+        return super().setRootPath(path)
 
     def data(self, index: QtCore.QModelIndex, role: int) -> Any:
         if (

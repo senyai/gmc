@@ -77,6 +77,17 @@ class FilesystemView(QtWidgets.QTreeView):
         else:
             super(FilesystemView, self).keyPressEvent(event)
 
+    def mouseDoubleClickEvent(self, event):
+        index = self.indexAt(event.pos())
+
+        if not index.isValid():
+            return event.ignore()
+
+        if not (index.model().flags(index) & Qt.ItemIsEnabled):
+            return event.ignore()
+
+        super().mouseDoubleClickEvent(event)
+
     def _on_default_os_action(self) -> None:
         index = self.currentIndex()
         if index.isValid():

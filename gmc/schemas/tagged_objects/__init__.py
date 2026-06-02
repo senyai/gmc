@@ -198,8 +198,6 @@ class CustomPoint(HasTags, MarkupPoint):
 
 @with_brush
 class CustomRectangle(HasTags, MarkupRect):
-    PEN = QtGui.QPen(Qt.GlobalColor.darkGreen, 0)
-    PEN_DASHED = QtGui.QPen(Qt.GlobalColor.green, 0, Qt.PenStyle.DashLine)
     from_json = classmethod(from_json_rect)
 
     def __init__(self, schema, rect: QtCore.QRectF | None = None, **kwargs):

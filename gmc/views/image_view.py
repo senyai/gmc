@@ -5,6 +5,7 @@ from PyQt5.QtCore import QPointF
 
 from ..graphics import chess
 from ..utils import new_action, get_icon, tr, clipboard
+from ..settings import settings
 
 Qt = QtCore.Qt
 
@@ -152,18 +153,15 @@ class ImageView(QtWidgets.QGraphicsView):
     _scene_padding_px = 20
 
     def __init__(self):
-        from ..settings import settings
-
         super().__init__(
             contextMenuPolicy=Qt.ActionsContextMenu,
-            backgroundBrush=chess(16, settings.bg_1, settings.bg_2),
             cacheMode=self.CacheBackground,
             viewportUpdateMode=self.FullViewportUpdate,
             transformationAnchor=self.AnchorUnderMouse,
             resizeAnchor=self.AnchorViewCenter,
             focusPolicy=Qt.WheelFocus,
-            font=settings.font_label,
         )  # type: ignore
+        self._update_settings()
         self._scene = MarkupScene(self)
         self.setScene(self._scene)
         self.addAction(
@@ -225,6 +223,13 @@ class ImageView(QtWidgets.QGraphicsView):
         self.redo_action.setIcon(get_icon("redo"))
 
         self.unset_all_events()
+        self._unregister = settings.register(self._update_settings)
+        self.destroyed.connect(lambda: settings.unregister(self._unregister))
+
+    def _update_settings(self):
+        self.setFont(settings.font_label)
+        self.setBackgroundBrush(chess(16, settings.bg_1, settings.bg_2))
+        self.update()
 
     def unset_all_events(self) -> None:
         self.set_mouse_press(None)

@@ -638,5 +638,25 @@ before closing?</source>
 {}
 …)</translation>
     </message>
+    <message>
+        <location filename="../main_window.py" line="176"/>
+        <source>&amp;About</source>
+        <translation>&amp;О программе</translation>
+    </message>
+    <message>
+        <location filename="../settings/dialog.py" line="112"/>
+        <source>Line</source>
+        <translation>Линия</translation>
+    </message>
+    <message>
+        <location filename="../settings/dialog.py" line="115"/>
+        <source>Line Selected</source>
+        <translation>Выделенная линия</translation>
+    </message>
+    <message>
+        <location filename="../settings/dialog.py" line="117"/>
+        <source>Line Width</source>
+        <translation>Толщина линии</translation>
+    </message>
 </context>
 </TS>

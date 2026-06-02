@@ -1,24 +1,38 @@
 from __future__ import annotations
-from typing import Any, ClassVar
+from typing import Any, ClassVar, TYPE_CHECKING
 from PyQt5 import QtGui, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView, QGraphicsSceneMouseEvent
+from ..settings import settings
+
+if TYPE_CHECKING:
+    from ..views.image_view import ImageView
 
 
 class MarkupObjectMeta:
     # default values
-    PEN = QtGui.QPen(Qt.GlobalColor.white, 0)
-    PEN_DASHED = QtGui.QPen(Qt.GlobalColor.red, 0, Qt.PenStyle.DashLine)
-    PEN_SELECTED = QtGui.QPen(Qt.GlobalColor.yellow, 0)
-    PEN_SELECTED_DASHED = QtGui.QPen(
-        Qt.GlobalColor.blue, 0, Qt.PenStyle.DashLine
-    )
+    PEN: ClassVar[QtGui.QPen]
+    PEN_DASHED: ClassVar[QtGui.QPen]
+    PEN_SELECTED: ClassVar[QtGui.QPen]
+    PEN_SELECTED_DASHED: ClassVar[QtGui.QPen]
+
     ACTION_KEYS: ClassVar[dict[Qt.Key, tuple[int, ...]]] = {}
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         assert not hasattr(self, "_edit_mode")
         self._edit_mode = False
         super().__init__(*args, *kwargs)
+
+    @classmethod
+    def on_settings_updated(cls):
+        cls.PEN = QtGui.QPen(settings.line_1, settings.line_w)
+        cls.PEN_DASHED = QtGui.QPen(
+            settings.line_2, settings.line_w, Qt.PenStyle.DashLine
+        )
+        cls.PEN_SELECTED = QtGui.QPen(settings.line_sel_1, settings.line_w)
+        cls.PEN_SELECTED_DASHED = QtGui.QPen(
+            settings.line_sel_2, settings.line_w, Qt.PenStyle.DashLine
+        )
 
     def mouseDoubleClickEvent(self, _event: QGraphicsSceneMouseEvent) -> None:
         if self._edit_mode:
@@ -118,4 +132,5 @@ class MarkupSelect:
         return True
 
 
-from ..views.image_view import ImageView
+MarkupObjectMeta.on_settings_updated()
+settings.register(MarkupObjectMeta.on_settings_updated)

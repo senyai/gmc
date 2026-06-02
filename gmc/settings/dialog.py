@@ -4,12 +4,18 @@ from gmc.settings import settings
 from ..utils import tr
 
 Qt = QtCore.Qt
+CD = QtWidgets.QColorDialog
 QColor = QtGui.QColor
 
 
 class ColorWidget(QtWidgets.QAbstractButton):
-    def __init__(self, color: QtGui.QColor) -> None:
+    def __init__(self, color: QtGui.QColor, with_alpha: bool = True) -> None:
         super().__init__(autoFillBackground=True, clicked=self._on_click)  # type: ignore
+        self._options = (
+            CD.ColorDialogOption.ShowAlphaChannel
+            if with_alpha
+            else CD.ColorDialogOptions()
+        )
         self.setValue(color)
 
     def sizeHint(self) -> QtCore.QSize:
@@ -33,7 +39,7 @@ class ColorWidget(QtWidgets.QAbstractButton):
         painter.drawRoundedRect(rc, 2.5, 2.5)
 
     def _on_click(self) -> None:
-        color = QtWidgets.QColorDialog.getColor(self.value(), self)
+        color = CD.getColor(self.value(), self, options=self._options)
         if color.isValid():
             self.setValue(color)
 
@@ -86,16 +92,30 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
     dialog = QtWidgets.QDialog(parent, windowTitle=f"GMC " + tr("Settings"))  # type: ignore
     form = QtWidgets.QFormLayout()
 
-    bg_1 = ColorWidget(settings.bg_1)
-    bg_2 = ColorWidget(settings.bg_2)
+    bg_1 = ColorWidget(settings.bg_1, with_alpha=False)
+    bg_2 = ColorWidget(settings.bg_2, with_alpha=False)
+    line_1 = ColorWidget(settings.line_1)
+    line_2 = ColorWidget(settings.line_2)
+    line_sel_1 = ColorWidget(settings.line_sel_1)
+    line_sel_2 = ColorWidget(settings.line_sel_2)
     click_ms = QtWidgets.QSpinBox(
         minimum=0, maximum=1000, value=settings.click_ms
     )
+    line_w = QtWidgets.QSpinBox(minimum=0, maximum=100, value=settings.line_w)
     label_font = tr("Label &font")
     font_label = FontWidget(label_font.replace("&", ""), settings.font_label)
 
     add_default(form, tr("Checker") + " &1", bg_1, "bg_1")
     add_default(form, tr("Checker") + " &2", bg_2, "bg_2")
+
+    add_default(form, tr("Line") + " &1", line_1, "line_1")
+    add_default(form, tr("Line") + " &2", line_2, "line_2")
+
+    add_default(form, tr("Line Selected") + " &1", line_sel_1, "line_sel_1")
+    add_default(form, tr("Line Selected") + " &2", line_sel_2, "line_sel_2")
+
+    add_default(form, tr("Line Width"), line_w, "line_w")
+
     add_default(form, label_font, font_label, "font_label")
     form.addWidget(
         QtWidgets.QLabel(
@@ -119,5 +139,11 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
     if dialog.exec_() == dialog.Accepted:
         settings.bg_1 = bg_1.value()
         settings.bg_2 = bg_2.value()
+        settings.line_1 = line_1.value()
+        settings.line_2 = line_2.value()
+        settings.line_sel_1 = line_sel_1.value()
+        settings.line_sel_2 = line_sel_2.value()
+        settings.line_w = line_w.value()
         settings.font_label = font_label.value()
         settings.click_ms = click_ms.value()
+        settings.update()

@@ -24,6 +24,7 @@ class Settings:
     line_2: QColor = QColor(Qt.GlobalColor.red)
     line_sel_1: QColor = QColor(Qt.GlobalColor.yellow)
     line_sel_2: QColor = QColor(Qt.GlobalColor.blue)
+    diamond: QColor = QColor(Qt.GlobalColor.magenta)
     font_label: QFont = default_font_label
     click_ms: int = 250
     line_w: int = 0
@@ -32,7 +33,7 @@ class Settings:
     def __init__(self) -> None:
         self._callbacks: set[Callable[[], None]] = set()
         # all values that are set here should also be set in `sync`
-        assert len(self.__annotations__) == 10, f"Programmer error"
+        assert len(self.__annotations__) == 11, f"Programmer error"
         value = self.value
         for attr in self.__annotations__:
             setattr(self, attr, value(attr, default=getattr(self, attr)))

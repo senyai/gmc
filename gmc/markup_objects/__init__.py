@@ -33,6 +33,10 @@ class MarkupObjectMeta:
         cls.PEN_SELECTED_DASHED = QtGui.QPen(
             settings.line_sel_2, settings.line_w, Qt.PenStyle.DashLine
         )
+        cls.PEN.setCosmetic(True)
+        cls.PEN_DASHED.setCosmetic(True)
+        cls.PEN_SELECTED.setCosmetic(True)
+        cls.PEN_SELECTED_DASHED.setCosmetic(True)
 
     def mouseDoubleClickEvent(self, _event: QGraphicsSceneMouseEvent) -> None:
         if self._edit_mode:

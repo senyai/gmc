@@ -578,11 +578,6 @@ before closing?</source>
         <translation>Время между нажатием и отпусканием с возможными движениями мыши, которые будут зарегистрированы как одиночный щелчок мыши</translation>
     </message>
     <message>
-        <location filename="../settings/dialog.py" line="108"/>
-        <source>Click Reaction &amp;time (ms)</source>
-        <translation>Время реакции &amp;щелчка (мс)</translation>
-    </message>
-    <message>
         <location filename="../mdi_area.py" line="239"/>
         <source>Drag side bar to make it visible</source>
         <translation>Потяниче мышкой для показа боковой панели</translation>
@@ -667,6 +662,11 @@ before closing?</source>
         <location filename="../settings/dialog.py" line="140"/>
         <source>Click Reaction &amp;time</source>
         <translation>Время реакции &amp;щелчка</translation>
+    </message>
+    <message>
+        <location filename="../settings/dialog.py" line="128"/>
+        <source>Diamond Color</source>
+        <translation>Цвет узла</translation>
     </message>
 </context>
 </TS>

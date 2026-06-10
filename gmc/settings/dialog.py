@@ -98,13 +98,14 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
     line_2 = ColorWidget(settings.line_2)
     line_sel_1 = ColorWidget(settings.line_sel_1)
     line_sel_2 = ColorWidget(settings.line_sel_2)
+    diamond = ColorWidget(settings.diamond)
     click_ms = QtWidgets.QSpinBox(
         minimum=0,
         maximum=1000,
         value=settings.click_ms,
         suffix="ms",
     )
-    zoom_w = QtWidgets.QSpinBox(
+    zoom = QtWidgets.QSpinBox(
         minimum=0,  # 0 is auto
         maximum=1000,
         value=settings.zoom,
@@ -119,15 +120,16 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
     add_default(form, tr("Checker") + " &1", bg_1, "bg_1")
     add_default(form, tr("Checker") + " &2", bg_2, "bg_2")
 
-    add_default(form, tr("Line") + " &1", line_1, "line_1")
-    add_default(form, tr("Line") + " &2", line_2, "line_2")
+    add_default(form, tr("Line") + " &3", line_1, "line_1")
+    add_default(form, tr("Line") + " &4", line_2, "line_2")
 
-    add_default(form, tr("Line Selected") + " &1", line_sel_1, "line_sel_1")
-    add_default(form, tr("Line Selected") + " &2", line_sel_2, "line_sel_2")
+    add_default(form, tr("Line Selected") + " &5", line_sel_1, "line_sel_1")
+    add_default(form, tr("Line Selected") + " &6", line_sel_2, "line_sel_2")
+    add_default(form, tr("Diamond Color") + " &7", diamond, "diamond")
 
     add_default(form, tr("Line Width"), line_w, "line_w")
 
-    add_default(form, tr("Default Zoom"), zoom_w, "zoom")
+    add_default(form, tr("Default Zoom"), zoom, "zoom")
     add_default(form, label_font, font_label, "font_label")
     form.addWidget(
         QtWidgets.QLabel(
@@ -155,9 +157,10 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
         settings.line_2 = line_2.value()
         settings.line_sel_1 = line_sel_1.value()
         settings.line_sel_2 = line_sel_2.value()
+        settings.diamond = diamond.value()
         settings.line_w = line_w.value()
         settings.font_label = font_label.value()
         settings.click_ms = click_ms.value()
-        settings.zoom = zoom_w.value()
+        settings.zoom = zoom.value()
         settings.sync()
         settings.update()

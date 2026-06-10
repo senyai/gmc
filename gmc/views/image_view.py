@@ -323,7 +323,7 @@ class ImageView(QtWidgets.QGraphicsView):
         force_auto_zoom = self._auto_zoom_act.isChecked()
         if force_auto_zoom:
             self._auto_zoom(True)
-        elif (zoom := settings.value("zoom", 0, int)) != 100:
+        elif (zoom := settings.zoom) != 100:
             if zoom == 0:
                 self._auto_zoom(True)
             else:

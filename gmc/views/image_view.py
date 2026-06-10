@@ -320,7 +320,14 @@ class ImageView(QtWidgets.QGraphicsView):
         self._scene.setSceneRect(
             -p, -p, pixmap.width() + p * 2, pixmap.height() + p * 2
         )
-        self._auto_zoom(self._auto_zoom_act.isChecked())
+        force_auto_zoom = self._auto_zoom_act.isChecked()
+        if force_auto_zoom:
+            self._auto_zoom(True)
+        elif (zoom := settings.value("zoom", 0, int)) != 100:
+            if zoom == 0:
+                self._auto_zoom(True)
+            else:
+                self._scale_view(zoom / 100.0)
         return item
 
     def get_zoom_actions(

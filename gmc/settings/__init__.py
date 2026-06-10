@@ -22,6 +22,7 @@ class Settings:
         "font_label": default_font_label,
         "click_ms": 250,
         "line_w": 0,
+        "zoom": 0,  # default zoom%, 0 is auto
         # 'schema': str,
     }
     __slots__ = tuple(_defaults) + ("_callbacks",)

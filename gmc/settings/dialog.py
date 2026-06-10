@@ -99,9 +99,20 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
     line_sel_1 = ColorWidget(settings.line_sel_1)
     line_sel_2 = ColorWidget(settings.line_sel_2)
     click_ms = QtWidgets.QSpinBox(
-        minimum=0, maximum=1000, value=settings.click_ms
+        minimum=0,
+        maximum=1000,
+        value=settings.click_ms,
+        suffix="ms",
     )
-    line_w = QtWidgets.QSpinBox(minimum=0, maximum=100, value=settings.line_w)
+    zoom_w = QtWidgets.QSpinBox(
+        minimum=0,  # 0 is auto
+        maximum=1000,
+        value=settings.zoom,
+        suffix="%",
+    )
+    line_w = QtWidgets.QSpinBox(
+        minimum=0, maximum=100, value=settings.line_w, suffix="px"
+    )
     label_font = tr("Label &font")
     font_label = FontWidget(label_font.replace("&", ""), settings.font_label)
 
@@ -116,6 +127,7 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
 
     add_default(form, tr("Line Width"), line_w, "line_w")
 
+    add_default(form, tr("Default Zoom"), zoom_w, "zoom")
     add_default(form, label_font, font_label, "font_label")
     form.addWidget(
         QtWidgets.QLabel(
@@ -125,7 +137,7 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
             wordWrap=True,
         )
     )
-    add_default(form, tr("Click Reaction &time (ms)"), click_ms, "click_ms")
+    add_default(form, tr("Click Reaction &time"), click_ms, "click_ms")
 
     Box = QtWidgets.QDialogButtonBox
     button_box = Box(Box.Ok | Box.Cancel, Qt.Orientation.Horizontal, dialog)
@@ -146,4 +158,6 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
         settings.line_w = line_w.value()
         settings.font_label = font_label.value()
         settings.click_ms = click_ms.value()
+        settings.zoom = zoom_w.value()
+        settings.sync()
         settings.update()

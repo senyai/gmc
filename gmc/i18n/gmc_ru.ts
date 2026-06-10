@@ -658,5 +658,15 @@ before closing?</source>
         <source>Line Width</source>
         <translation>Толщина линии</translation>
     </message>
+    <message>
+        <location filename="../settings/dialog.py" line="130"/>
+        <source>Default Zoom</source>
+        <translation>Масштаб по умолчанию</translation>
+    </message>
+    <message>
+        <location filename="../settings/dialog.py" line="140"/>
+        <source>Click Reaction &amp;time</source>
+        <translation>Время реакции &amp;щелчка</translation>
+    </message>
 </context>
 </TS>

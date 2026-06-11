@@ -654,11 +654,6 @@ before closing?</source>
         <translation>Толщина линии</translation>
     </message>
     <message>
-        <location filename="../settings/dialog.py" line="130"/>
-        <source>Default Zoom</source>
-        <translation>Масштаб по умолчанию</translation>
-    </message>
-    <message>
         <location filename="../settings/dialog.py" line="140"/>
         <source>Click Reaction &amp;time</source>
         <translation>Время реакции &amp;щелчка</translation>
@@ -667,6 +662,11 @@ before closing?</source>
         <location filename="../settings/dialog.py" line="128"/>
         <source>Diamond Color</source>
         <translation>Цвет узла</translation>
+    </message>
+    <message>
+        <location filename="../settings/dialog.py" line="132"/>
+        <source>Default &amp;Zoom</source>
+        <translation>&amp;Масштаб по умолчанию</translation>
     </message>
 </context>
 </TS>

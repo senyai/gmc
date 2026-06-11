@@ -437,17 +437,16 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         )
         show_items_icon = get_icon("eye_close")
         show_items_icon.addFile("gmc:eye_open.svg", state=show_items_icon.On)
-        toolbar.addAction(
-            new_action(
-                toolbar,
-                show_items_icon,
-                tr("Toggle Selected &Items Visibility"),
-                ("h",),
-                checkable=True,
-                toggled=self._toggle_visibility,
-                shortcutContext=Qt.WindowShortcut,
-            )
+        self._visibility_action = visibility_action = new_action(
+            toolbar,
+            show_items_icon,
+            tr("Toggle Selected &Items Visibility"),
+            ("h",),
+            checkable=True,
+            toggled=self._toggle_visibility,
+            shortcutContext=Qt.WindowShortcut,
         )
+        toolbar.addAction(visibility_action)
         toolbar.addSeparator()
         # default actions:
         self._default_action_cb = cb = QtWidgets.QComboBox()
@@ -667,11 +666,11 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
             UndoTagModification(items, add, remove)
         )
 
-    def _toggle_tag_visibility(self, state) -> None:
+    def _toggle_tag_visibility(self, state: bool) -> None:
         self.tags_hidden = state
         self._image_widget.scene().update()
 
-    def _toggle_visibility(self, state) -> None:
+    def _toggle_visibility(self, state: bool) -> None:
         scene = self._image_widget.scene()
         state = not state
         for item in scene.selectedItems() or scene.items():
@@ -807,7 +806,10 @@ class TaggedObjects(OneSourceOneDestination, MarkupSchema):
         self._image_widget.setFocus()
 
         self._update_properties([])
-        if item is not None:
+
+        if self._visibility_action.isChecked():
+            self._toggle_visibility(True)
+        elif item is not None:
             item.setSelected(True)
             self._on_selection_changed()
 

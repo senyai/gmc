@@ -83,6 +83,7 @@ class ImageWidget(QtWidgets.QWidget, Generic[T]):
             self._view.undo_action,
             self._view.redo_action,
             self._view.copy_action,
+            self._view.cut_action,
             self._view.paste_action,
         )
         for actions in (

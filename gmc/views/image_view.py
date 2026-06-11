@@ -192,6 +192,13 @@ class ImageView(QtWidgets.QGraphicsView):
             (KS.StandardKey.Copy,),
             triggered=self._copy,
         )
+        self.cut_action = new_action(
+            self,
+            "cut",
+            tr("Cut"),
+            (KS.StandardKey.Cut,),
+            triggered=self._cut,
+        )
         self.paste_action = new_action(
             self,
             "paste",
@@ -292,6 +299,10 @@ class ImageView(QtWidgets.QGraphicsView):
                 data["_class"] = item.__class__.__name__
                 data_list.append(data)
         clipboard.set_objects(data_list)
+
+    def _cut(self) -> None:
+        self._copy()
+        self._delete()
 
     def _paste(self) -> None:
         data_list = clipboard.get_objects() or []

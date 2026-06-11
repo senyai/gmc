@@ -668,5 +668,10 @@ before closing?</source>
         <source>Default &amp;Zoom</source>
         <translation>&amp;Масштаб по умолчанию</translation>
     </message>
+    <message>
+        <location filename="../views/image_view.py" line="195"/>
+        <source>Cut</source>
+        <translation>Вырезать</translation>
+    </message>
 </context>
 </TS>

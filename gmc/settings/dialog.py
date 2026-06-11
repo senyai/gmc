@@ -129,7 +129,7 @@ def create_setting_dialog(parent: QtWidgets.QWidget) -> None:
 
     add_default(form, tr("Line Width"), line_w, "line_w")
 
-    add_default(form, tr("Default Zoom"), zoom, "zoom")
+    add_default(form, tr("Default &Zoom"), zoom, "zoom")
     add_default(form, label_font, font_label, "font_label")
     form.addWidget(
         QtWidgets.QLabel(

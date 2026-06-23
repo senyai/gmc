@@ -34,7 +34,6 @@ class MarkupScene(QtWidgets.QGraphicsScene):
     # False: don't try to show cursor
     # None: cursor not on window
     # QPointF: draw cursor
-
     _cross_pos: QPointF | bool | None = False
     _cross_pen = QtGui.QPen(
         QtGui.QColor(255, 32, 32, 224), 0.0, Qt.PenStyle.CustomDashLine
@@ -323,6 +322,7 @@ class ImageView(QtWidgets.QGraphicsView):
     ) -> QtWidgets.QGraphicsPixmapItem:
         self.unset_all_events()
         self._scene.set_current_markup_object(None)
+        first_time = self._scene.sceneRect().isNull()
         self._scene.clear()
         item = QtWidgets.QGraphicsPixmapItem(pixmap)
         item.no_doubleclick = True
@@ -334,10 +334,14 @@ class ImageView(QtWidgets.QGraphicsView):
         force_auto_zoom = self._auto_zoom_act.isChecked()
         if force_auto_zoom:
             self._auto_zoom(True)
-        elif (zoom := settings.zoom) != 100:
+        elif first_time:
+            # only change zoom when user first time opens the view
+            # then keep it the same, so going forwards/backwards does not
+            # change the position
+            zoom = settings.zoom
             if zoom == 0:
                 self._auto_zoom(True)
-            else:
+            elif zoom != 100:
                 self._scale_view(zoom / 100.0)
         return item
 

@@ -20,12 +20,17 @@ dependencies = [
 [build-system]
 requires = [
   "setuptools",
-  "setuptools-scm",
   "wheel",
 ]
-build-backend = "setuptools.build_meta"
+backend-path = [""]
+build-backend = "build_backend"
 [tool.setuptools.packages.find]
-exclude = ["testdata", "doc"]
+where = ["."]
+include = ["gmc"]
+[tool.setuptools.package-data]
+gmc = ["resources/*.qm", "resources/*.svg"]
+[tool.setuptools.exclude-package-data]
+gmc = ["*.bat", "*.ts", "*.sh", "*.qrc"]
 [tool.black]
 line-length = 79
 [project.scripts]

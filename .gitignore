@@ -1,4 +1,5 @@
 *.pyc
+*.qm
 *.whl
 *.tar.gz
 /build

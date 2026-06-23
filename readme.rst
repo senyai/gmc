@@ -11,6 +11,6 @@ To start GMC:
   #. Optionally install extra libraries (`python -m pip install opencv-python pillow numpy`)
   #. Run `python -m gmc`
 
-For developers:
+To build GMC whl file:
 
-  1. Run `gmc/resources/build_rc.bat` to regenerate localization file
+  Run `python -m pip wheel . --no-deps`

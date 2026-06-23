@@ -13,8 +13,8 @@ jobs:
     name: Main pipeline
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      security-events: read
+      contents: write
+      security-events: write
     steps:
       - uses: actions/checkout@v4
       - uses: psf/black@25.1.0

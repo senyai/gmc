@@ -8,6 +8,8 @@ Qt = QtCore.Qt
 
 class MoveableDiamond(QtWidgets.QAbstractGraphicsShapeItem):
     _polygon: ClassVar[QtGui.QPolygonF]
+    _bounding_rect: ClassVar[QtCore.QRectF]
+    _shape = ClassVar[QtGui.QPainterPath]
     _pen: ClassVar[QtGui.QPen]
 
     _brush: ClassVar[QtGui.QBrush]
@@ -27,19 +29,30 @@ class MoveableDiamond(QtWidgets.QAbstractGraphicsShapeItem):
 
     @classmethod
     def on_settings_updated(cls):
-        size = (settings.line_w or 1) * 4.0
+        ls = settings.line_w or 1
+        size = ls * 4.0
         cls._polygon = QtGui.QPolygonF(
-            [
+            (
                 QtCore.QPointF(0, -size),
                 QtCore.QPointF(size, 0),
                 QtCore.QPointF(0, size),
                 QtCore.QPointF(-size, 0),
-            ]
+            )
         )
-        cls._pen = QtGui.QPen(settings.diamond, size / 2.0)
+        cls._pen = QtGui.QPen(settings.diamond, ls * 1.5)  # 1.5 looks nice
         cls._pen.setCosmetic(True)
+        cls._pen.setJoinStyle(Qt.PenJoinStyle.RoundJoin)
         cls._brush = QtGui.QBrush(QtGui.QColor(settings.line_sel_2))
-        # we hope that there are no active diamonds, so we leave it here
+        rc = cls._bounding_rect = cls._polygon.boundingRect().adjusted(
+            -ls, -ls, ls, ls
+        )
+
+        cls._shape = QtGui.QPainterPath()
+        cls._shape.moveTo(rc.x() + rc.width() * 0.5, rc.y())
+        cls._shape.lineTo(rc.right(), 0.0)
+        cls._shape.lineTo(rc.x() + rc.width() * 0.5, rc.bottom())
+        cls._shape.lineTo(rc.x(), 0.0)
+        cls._shape.closeSubpath()
 
     def __init__(
         self, parent: QtWidgets.QGraphicsItem, idx: int, pos: QtCore.QPointF
@@ -68,12 +81,10 @@ class MoveableDiamond(QtWidgets.QAbstractGraphicsShapeItem):
             painter.drawConvexPolygon(self._polygon)
 
     def boundingRect(self) -> QtCore.QRectF:
-        return QtCore.QRectF(-10, -10, 20, 20)
+        return self._bounding_rect
 
     def shape(self) -> QtGui.QPainterPath:
-        path = QtGui.QPainterPath()
-        path.addEllipse(-10, -10, 20, 20)
-        return path
+        return self._shape
 
     def delete(self) -> None:
         """

@@ -313,26 +313,39 @@ class UndoPolygonAddPoint(QtWidgets.QUndoCommand):
 
 
 class UndoPolygonPointMove(QtWidgets.QUndoCommand):
-    __slots__ = ("_markup_polygon", "_idx", "_point", "_timestamp")
+    __slots__ = ("_markup_polygon", "__points", "_timestamp")
+    _points: tuple[int, QPointF] | dict[int, QPointF]
 
     def __init__(
         self, markup_polygon: EditableMarkupPolygon, idx: int, point: QPointF
     ) -> None:
         self._markup_polygon = markup_polygon
-        self._idx = idx
-        self._point = point
+        self._points = (idx, point)
         self._timestamp = monotonic()
         super().__init__(tr("Point Movement"))
 
+    @property
+    def points(self) -> dict[int, QPointF]:
+        points = self._points
+        return {points[0]: points[1]} if isinstance(points, tuple) else points
+
+    @points.setter
+    def points(self, points: dict[int, QPointF]) -> None:
+        self._points = (
+            next(iter(points.items())) if len(points) == 1 else points
+        )
+
     def redo(self) -> None:
-        mp, idx = self._markup_polygon, self._idx
+        mp, points = self._markup_polygon, self.points
         diamonds = mp.childItems()
         if len(diamonds) == len(mp._polygon):
-            diamonds[idx].setPos(self._point)
-        self._point, mp._polygon[idx] = (
-            QPointF(mp._polygon[idx]),
-            self._point,
-        )
+            for idx, point in points.items():
+                diamonds[idx].setPos(point)
+        new_points: dict[int, QPointF] = {}
+        for idx, point in points.items():
+            new_points[idx] = QPointF(mp._polygon[idx])
+            mp._polygon[idx] = point
+        self._points = new_points
         mp.update()
 
     undo = redo
@@ -343,11 +356,13 @@ class UndoPolygonPointMove(QtWidgets.QUndoCommand):
     def mergeWith(self, other: QtWidgets.QUndoCommand | None) -> bool:
         if (
             isinstance(other, UndoPolygonPointMove)
-            and other._timestamp - self._timestamp < 0.15
-            and self._idx == other._idx
             and self._markup_polygon is other._markup_polygon
+            and other._timestamp - self._timestamp < 0.5
         ):
-            self._point = other._point
+            other_points = dict(other.points)
+            for idx, point in self.points.items():
+                other_points[idx] = QPointF(point)
+            self.points = other_points
             return True
         return False
 

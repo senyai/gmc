@@ -117,22 +117,21 @@ class MarkupSelect:
 
     @classmethod
     def _mouse_press(cls, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        assert event.button() == Qt.MouseButton.LeftButton
-        view.setDragMode(view.RubberBandDrag)
-        view.set_mouse_press(None)
-        view.set_mouse_release(cls._mouse_release)
+        if event.button() == Qt.MouseButton.LeftButton:
+            view.setDragMode(view.RubberBandDrag)
+            view.set_mouse_press(None)
+            view.set_mouse_release(cls._mouse_release)
         return False
 
     @classmethod
     def _mouse_release(cls, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        assert event.button() == Qt.MouseButton.LeftButton
+        if event.button() == Qt.MouseButton.LeftButton:
+            # weird trick to make sure that rubber band vanished
+            QGraphicsView.mouseReleaseEvent(view, event)
 
-        # weird trick to make sure that rubber band vanished
-        QGraphicsView.mouseReleaseEvent(view, event)
-
-        view.setDragMode(view.NoDrag)
-        view.set_mouse_release(None)
-        view.set_mouse_press(cls._mouse_press)
+            view.setDragMode(view.NoDrag)
+            view.set_mouse_release(None)
+            view.set_mouse_press(cls._mouse_press)
         return True
 
 

@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Iterable, TYPE_CHECKING
+from typing import Any, Iterable, TYPE_CHECKING, Iterator
 from PyQt5 import QtCore, QtGui, QtWidgets
 from ..utils import separator, new_action, tr
 
@@ -22,7 +22,7 @@ def _question_deletion(paths: list[str]) -> str:
 
 
 class FilesystemView(QtWidgets.QTreeView):
-    _valid_root: bool = False
+    on_user_changed_path = QtCore.pyqtSignal(str, str)
 
     def __init__(self, actions: Iterable[QtWidgets.QAction] | None = None):
         super().__init__(
@@ -69,7 +69,7 @@ class FilesystemView(QtWidgets.QTreeView):
 
     def keyPressEvent(self, event: QtGui.QKeyEvent) -> None:
         if (
-            event.key() in (Qt.Key_Enter, Qt.Key_Return)
+            event.key() in (Qt.Key.Key_Enter, Qt.Key.Key_Return)
             and event.modifiers() & Qt.AltModifier
         ):
             self._on_default_os_action()
@@ -105,7 +105,7 @@ class FilesystemView(QtWidgets.QTreeView):
                     )
                 ),
             )
-            if response == QtWidgets.QMessageBox.Yes:
+            if response == QtWidgets.QMessageBox.StandardButton.Yes:
                 for path in paths:
                     QtCore.QFile.moveToTrash(path)
 
@@ -148,7 +148,7 @@ class FilesystemView(QtWidgets.QTreeView):
     @classmethod
     def _all_selected_files(
         cls, finfos: Iterable[QtCore.QFileInfo], masks: list[str]
-    ):
+    ) -> Iterator[str]:
         for info in finfos:
             if info.isFile():
                 yield info.filePath()
@@ -167,7 +167,7 @@ class FilesystemView(QtWidgets.QTreeView):
                 qdir.setNameFilters(())
                 yield from cls._all_selected_files(qdir.entryInfoList(), masks)
 
-    def all_selected_files(self):
+    def all_selected_files(self) -> list[str]:
         """
         Just like :func:`selected_files`, but selects files in selected folders
         """
@@ -225,13 +225,14 @@ class FilesystemView(QtWidgets.QTreeView):
         index = model.setRootPath(path)
         self.setRootIndex(index)
 
-    def set_name_filters(self, name_filters: Iterable[str]):
+    def set_name_filters(self, name_filters: Iterable[str]) -> None:
         model = self.model()
         model.setNameFilters(name_filters)
 
-    def user_select_path(
-        self, title: str, callback=lambda view, path: view.set_path(path)
-    ):
+    def user_select_path(self, title: str) -> None:
+        """
+        Action to call when user activates "select directory" action
+        """
         path = QtWidgets.QFileDialog.getExistingDirectory(
             self,
             title,
@@ -240,7 +241,9 @@ class FilesystemView(QtWidgets.QTreeView):
             | QtWidgets.QFileDialog.DontResolveSymlinks,
         )
         if path:
-            callback(self, path)
+            old_path = self.model().root_dir_string
+            self.set_path(path)
+            self.on_user_changed_path.emit(path, old_path)
 
     if TYPE_CHECKING:
 

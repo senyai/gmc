@@ -127,6 +127,9 @@ class OneSourceOneDestination:
                 ),
             ],
         )
+        cls._source_widget.view().on_user_changed_path.connect(
+            cls._on_source_changed
+        )
         settings.load_state(splitter, cls.__name__ + "_splitter")
 
         src_path = extra_args.get("src_dir")
@@ -146,6 +149,16 @@ class OneSourceOneDestination:
         cls._destination_widget.view().set_name_filters(cls.MARKUP_FILTERS)
 
         return splitter
+
+    @classmethod
+    def _on_source_changed(cls, new_path: str, old_path: str) -> None:
+        dw = cls._destination_widget
+        if (
+            old_path
+            and old_path == dw.get_root_string()
+            or dw.get_root_qdir() is None
+        ):
+            dw.view().set_path(new_path)
 
     @classmethod
     def save_settings(cls, settings: QtCore.QSettings) -> None:

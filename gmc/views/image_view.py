@@ -406,6 +406,8 @@ class ImageView(QtWidgets.QGraphicsView):
             self.setInteractive(False)
             super().mousePressEvent(event)
         elif not self._current_mouse_press(event, self):
+            # yes, we send all https://doc.qt.io/qt-6/qt.html#MouseButton-enum
+            # to the _current_mouse_press users want custom buttons
             super().mousePressEvent(event)
 
     def mouseDoubleClickEvent(self, event: QtGui.QMouseEvent) -> None:

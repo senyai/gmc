@@ -28,8 +28,8 @@ class SingleFilesystemWidget(QtWidgets.QFrame):
         assert isinstance(title, FilesystemTitle), title
         super().__init__(
             parent,
-            frameShape=self.NoFrame,
-            frameShadow=self.Plain,
+            frameShape=self.Shape.NoFrame,
+            frameShadow=self.Shadow.Plain,
         )
 
         view = self._view = FilesystemView(actions)
@@ -54,7 +54,7 @@ class SingleFilesystemWidget(QtWidgets.QFrame):
     def view(self) -> FilesystemView:
         return self._view
 
-    def get_root_qdir(self) -> QtCore.QDir:
+    def get_root_qdir(self) -> QtCore.QDir | None:
         return self._view.model().root_dir_qdir
 
     def get_root_string(self) -> str:
@@ -82,10 +82,6 @@ class MultipleFilesystemWidget(QtWidgets.QFrame):
             for action in actions
         )
 
-        def callback(_view, path):
-            for view in views:
-                view.set_path(path)
-
         self._views = views = [
             FilesystemView(actions) for actions in actions_list
         ]
@@ -93,14 +89,16 @@ class MultipleFilesystemWidget(QtWidgets.QFrame):
         button = QtWidgets.QPushButton(
             self,
             flat=False,
-            clicked=(
-                lambda: views[0].user_select_path(
-                    title.select, callback=callback
-                )
-            ),
+            clicked=(lambda: views[0].user_select_path(title.select)),
             text=title.action + " …",
             icon=get_icon("folder"),
         )
+
+        def user_changed_path(path: str, _: str) -> None:
+            for view in views[1:]:
+                view.set_path(path)
+
+        views[0].on_user_changed_path.connect(user_changed_path)
 
         self._layout = QtWidgets.QVBoxLayout(self, spacing=0, margin=2)
         self._layout.addWidget(button)

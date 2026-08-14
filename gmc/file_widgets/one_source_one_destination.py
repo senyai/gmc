@@ -130,6 +130,9 @@ class OneSourceOneDestination:
         cls._source_widget.view().on_user_changed_path.connect(
             cls._on_source_changed
         )
+        cls._destination_widget.view().on_user_changed_path.connect(
+            cls._on_destination_changed
+        )
         settings.load_state(splitter, cls.__name__ + "_splitter")
 
         src_path = extra_args.get("src_dir")
@@ -159,19 +162,40 @@ class OneSourceOneDestination:
             or dw.get_root_qdir() is None
         ):
             dw.view().set_path(new_path)
+            cls._save_dst(settings.settings)
+
+        cls._save_src(settings.settings)
+        settings.settings.sync()
 
     @classmethod
-    def save_settings(cls, settings: QtCore.QSettings) -> None:
+    def _on_destination_changed(cls):
+        cls._save_dst(settings.settings)
+        settings.settings.sync()
+
+    @classmethod
+    def _save_src(cls, settings: QtCore.QSettings) -> None:
         settings.setValue(
             cls.__name__ + "_src_dir", cls._source_widget.get_root_string()
         )
+
+    @classmethod
+    def _save_dst(cls, settings: QtCore.QSettings) -> None:
         settings.setValue(
             cls.__name__ + "_dst_dir",
             cls._destination_widget.get_root_string(),
         )
+
+    @classmethod
+    def _save_splitter(cls, settings: QtCore.QSettings) -> None:
         settings.setValue(
             cls.__name__ + "_splitter", cls._splitter.saveState()
         )
+
+    @classmethod
+    def save_settings(cls, settings: QtCore.QSettings) -> None:
+        cls._save_src(settings)
+        cls._save_dst(settings)
+        cls._save_splitter(settings)
 
     @classmethod
     def set_selected(cls, file_path: str, markup_path: str) -> None:

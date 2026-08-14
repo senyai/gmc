@@ -11,7 +11,7 @@ tr = lambda text: QtCore.QCoreApplication.translate("@default", text)
 
 
 class ImageWidget(QtWidgets.QWidget, Generic[T]):
-    # on_paste is emmited when user pastes objects, copied from gmc
+    # on_paste is emitted when user pastes objects, copied from gmc
     on_paste = QtCore.pyqtSignal(list)
 
     def __init__(
@@ -25,7 +25,7 @@ class ImageWidget(QtWidgets.QWidget, Generic[T]):
         self._toolbar = self._create_toolbar()
         self._view = view_cls()
         layout = QtWidgets.QHBoxLayout(self, margin=0, spacing=0)
-        layout.addWidget(self._toolbar, 0, Qt.AlignTop)
+        layout.addWidget(self._toolbar, 0, Qt.AlignmentFlag.AlignTop)
         layout.addWidget(self._view)
 
     def add_user_action(

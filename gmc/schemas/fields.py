@@ -282,6 +282,7 @@ class FieldsSchema(OneSourceOneDestination, MarkupSchema):
                 )
             else:
                 print(f"invalid object type = `{the_type}`")
+                continue
             item = cls(self, *args, tags=obj.get("tags", ()))
             scene.addItem(item)
         for obj in self._original_markup[1].get("objects", ()):
@@ -302,6 +303,7 @@ class FieldsSchema(OneSourceOneDestination, MarkupSchema):
                 )
             else:
                 print(f"invalid object type = `{the_type}`")
+                continue
             item = cls(self, *args, tags=obj.get("tags", ()))
             scene.addItem(item)
 

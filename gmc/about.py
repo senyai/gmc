@@ -59,7 +59,7 @@ class AboutDialog(QDialog):
             )
         for text in (
             "Author: <big>Arseniy Terekhin</big> and the team",
-            "Copyright: 2015-2025",
+            "Copyright: 2015-2026",
         ):
             layout.addWidget(
                 QLabel(text, self),

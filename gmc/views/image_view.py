@@ -522,6 +522,19 @@ class ImageView(QtWidgets.QGraphicsView):
     def hide_cross_cursor(self):
         self.scene().hide_cross_cursor()
 
+    def pos_px(self, event: QtGui.QMouseEvent) -> QPointF:
+        """
+        Convenient way to get rounded Points from mouse event. For example,
+        to allow pixel snapping for point or rectangle tools.
+        """
+        pos = self.mapToScene(event.pos())
+        if (
+            QtGui.QGuiApplication.keyboardModifiers()
+            & Qt.KeyboardModifier.ControlModifier
+        ):
+            pos = QPointF(round(pos.x()), round(pos.y()))
+        return pos
+
     if TYPE_CHECKING:
 
         def scene(self) -> MarkupScene: ...

@@ -35,7 +35,7 @@ class Quadrangle(MarkupPolygon):
         self._press_timer = QtCore.QElapsedTimer()
         self._press_timer.start()
 
-        p = view.mapToScene(event.pos())
+        p = view.pos_px(event)
         self._polygon = QtGui.QPolygonF([p, p, p, p])
 
         Flag = QtWidgets.QGraphicsItem.GraphicsItemFlag
@@ -66,13 +66,13 @@ class Quadrangle(MarkupPolygon):
     def mouse_move_sequential(
         self, event: QtGui.QMouseEvent, view: ImageView
     ) -> bool:
-        self._polygon[-1] = view.mapToScene(event.pos())
+        self._polygon[-1] = view.pos_px(event)
         self.update()
         return True
 
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         p0 = self._polygon.at(0)
-        p2 = view.mapToScene(event.pos())
+        p2 = view.pos_px(event)
         if QtGui.QGuiApplication.keyboardModifiers() != Qt.ShiftModifier:
             p1 = QtCore.QPointF(p2.x(), p0.y())
             p3 = QtCore.QPointF(p0.x(), p2.y())

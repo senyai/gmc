@@ -16,7 +16,6 @@ import cv2
 import numpy as np
 import copy
 
-
 CONVERT = {  # channels, mintype
     QtGui.QImage.Format.Format_ARGB32: 4,
     QtGui.QImage.Format.Format_RGB32: 3,

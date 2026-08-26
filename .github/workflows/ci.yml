@@ -16,8 +16,8 @@ jobs:
       contents: write
       security-events: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: psf/black@25.1.0
+      - uses: actions/checkout@v7
+      - uses: psf/black@26.5.1
       - name: apt-get
         run: |
           sudo apt-get update -y

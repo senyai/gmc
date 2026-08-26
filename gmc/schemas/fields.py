@@ -101,22 +101,17 @@ class CustomRegion(CustomPath):
             self._schema._add_region_action.trigger()
 
 
-BROKEN_LINE_ICON = icon_from_data(
-    b"""\
+BROKEN_LINE_ICON = icon_from_data(b"""\
 <svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
 <g transform="translate(0 -1020.4)">
 <path d="m4.8537 1024.7 22.27.7174-3.2287 7.3763-17.925 8.5381 19.116 6.83"
-fill="none" stroke="#09640d" stroke-width="3"/></g></svg>"""
-)
-REGION_ICON = icon_from_data(
-    b"""\
+fill="none" stroke="#09640d" stroke-width="3"/></g></svg>""")
+REGION_ICON = icon_from_data(b"""\
 <svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
 <g transform="rotate(90 526.19 526.23)"><path d="m27.124 1025.4-2.1586
 22.654-10.904-1.5724-.47259-12.847-10.531-.023-.42544-8.341z" fill="#999"
-stroke="#09640d" stroke-width="3"/></g></svg>"""
-)
-SWAP_ICON = icon_from_data(
-    b"""\
+stroke="#09640d" stroke-width="3"/></g></svg>""")
+SWAP_ICON = icon_from_data(b"""\
 <svg version="1.1" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
 <g transform="matrix(.34 0 0 .33296 4.5092 -321.53)" stroke-width="2.9721">
 <path d="m4.8537 1024.7 22.27.7174-3.2287 7.3763-17.925 8.5381 19.116 6.83" fill="none" stroke="#09640d" stroke-width="8.9164"/>
@@ -125,8 +120,7 @@ SWAP_ICON = icon_from_data(
 <path d="m16.58 4.4023-10.73.039062 3.1504 1.7266c-1.0278.36595-1.9375.94202-2.6602 1.7695-1.3281 1.5209-2.0008 3.8127-1.8164 6.9297l1-.058594c-.17434-2.9465.45762-4.9429 1.5684-6.2148.54214-.62084 1.2085-1.0804 1.9785-1.3945l-1.6016 2.8711 9.1113-5.668z" fill-opacity=".75294" fill-rule="evenodd"/>
 <path d="m15.298 27.225 10.73-.03906-3.1504-1.7266c1.0278-.36596 1.9375-.94202 2.6602-1.7695 1.3281-1.5209 2.0008-3.8127 1.8164-6.9297l-1 .05859c.17434 2.9465-.45762 4.9429-1.5684 6.2148-.54214.62084-1.2085 1.0804-1.9785 1.3945l1.6016-2.8711z" fill-opacity=".75294" fill-rule="evenodd"/>
 </svg>
-"""
-)
+""")
 
 
 class FieldsSchema(OneSourceOneDestination, MarkupSchema):

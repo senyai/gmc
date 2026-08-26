@@ -147,7 +147,7 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
     def mouse_press(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
         self._press_timer = QtCore.QElapsedTimer()
         self._press_timer.start()
-        self._rect = QRectF(view.mapToScene(event.pos()), QSizeF(0, 0))
+        self._rect = QRectF(view.pos_px(event), QSizeF(0, 0))
         self.setFlag(self.ItemIsSelectable, False)
         self.setFlag(self.ItemIsMovable, False)
         view.set_mouse_press(None)
@@ -159,11 +159,12 @@ class MarkupRect(QtWidgets.QGraphicsItem, MarkupObjectMeta):
         return True  # if not 'return True', back objects will be selected
 
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
+        pos = view.pos_px(event)
         if QtGui.QGuiApplication.keyboardModifiers() != Qt.ShiftModifier:
-            self._rect.setBottomRight(view.mapToScene(event.pos()))
+            self._rect.setBottomRight(pos)
         else:
             rc = self._rect
-            rc.setBottomRight(view.mapToScene(event.pos()))
+            rc.setBottomRight(pos)
             w, h = rc.width(), rc.height()
             size = max(abs(w), abs(h))
             rc.setWidth(copysign(size, w))

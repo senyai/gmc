@@ -204,7 +204,7 @@ class EditableMarkupPolygon(MarkupPolygon):
         view.set_mouse_press(self.mouse_press)
 
     def mouse_press(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        pos: QPointF = view.mapToScene(event.pos())
+        pos = view.pos_px(event)
         scene = view.scene()
         if self._polygon.isEmpty():
             scene.addItem(self)
@@ -247,7 +247,7 @@ class EditableMarkupPolygon(MarkupPolygon):
         return True
 
     def mouse_move(self, event: QtGui.QMouseEvent, view: ImageView) -> bool:
-        pt = view.mapToScene(event.pos())
+        pt = view.pos_px(event)
         if QtGui.QGuiApplication.keyboardModifiers() == Qt.ShiftModifier:
             step_deg = 15
             a: QPointF = self._polygon[-2]

@@ -45,7 +45,7 @@ class MarkupLine(MarkupPolygon):
         view.set_cancel(self.cancel)
         view.set_mouse_move(self.mouse_move)
         view.set_mouse_release(self.mouse_release)
-        pos = view.mapToScene(event.pos())
+        pos = view.pos_px(event)
         self._polygon = QtGui.QPolygonF([pos, pos])
         self.setFlag(self.ItemIsSelectable, False)
         self.setFlag(self.ItemIsMovable, False)

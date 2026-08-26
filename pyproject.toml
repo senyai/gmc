@@ -33,6 +33,7 @@ gmc = ["resources/*.qm", "resources/*.svg", "resources/cursors/*.svg"]
 gmc = ["*.bat", "*.ts", "*.sh", "*.qrc"]
 [tool.black]
 line-length = 79
+target-version = ["py312"]
 [project.scripts]
 run-gmc = "gmc.application:main"
 [tool.setuptools.dynamic]

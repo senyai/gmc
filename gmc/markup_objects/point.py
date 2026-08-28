@@ -1,8 +1,8 @@
 from PyQt5 import QtGui, QtWidgets
 
+from typing import Callable, Any
 from ..views.image_view import ImageView
 from . import MarkupObjectMeta
-from typing import Callable
 from PyQt5.QtCore import Qt, QRectF, QPointF, QCoreApplication
 
 tr: Callable[[str], str] = lambda text: QCoreApplication.translate(
@@ -30,6 +30,16 @@ class MarkupPoint(QtWidgets.QGraphicsItem, MarkupObjectMeta):
             | self.ItemIsFocusable
             | self.ItemSendsGeometryChanges
         )
+
+    def itemChange(
+        self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
+    ) -> Any:
+        if change == self.ItemPositionChange and (
+            QtGui.QGuiApplication.keyboardModifiers()
+            & Qt.KeyboardModifier.ControlModifier
+        ):
+            return QPointF(round(value.x()), round(value.y()))
+        return value
 
     def attach(self, view: ImageView) -> None:
         view.setCursor(self.CURSOR)

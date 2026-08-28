@@ -68,6 +68,11 @@ class MoveableDiamond(QtWidgets.QAbstractGraphicsShapeItem):
     def itemChange(
         self, change: QtWidgets.QGraphicsItem.GraphicsItemChange, value: Any
     ) -> Any:
+        if change == self.ItemPositionChange and (
+            QtGui.QGuiApplication.keyboardModifiers()
+            & Qt.KeyboardModifier.ControlModifier
+        ):
+            return QtCore.QPointF(round(value.x()), round(value.y()))
         if change == self.ItemPositionHasChanged:
             self.parentItem().notify(self.idx, value)
         return value
